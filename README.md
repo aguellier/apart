@@ -19,6 +19,11 @@ The project is written for Python 3.4, with the following packages and versions:
 
 Sphinx 1.5.3 is used to generate the documentation, along with the ReadTheDocs theme (v. 0.2.4)
 
+# License
+
+This software is licensed under the [CeCILL license](http://www.cecill.info), created by the Inria, CNRS, and CEA French research institutes. It is inspired from and compatible with the GNU GPL license.
+
+Copyright (c) 2017 Université de Rennes 1
 
 # REPOSITORY IN CONSTRUCTION
 
