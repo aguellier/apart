@@ -1,6 +1,11 @@
 apart.core package
 ==================
 
+.. automodule:: apart.core
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Submodules
 ----------
 
@@ -52,6 +57,14 @@ apart.core.protocol_constants module
     :undoc-members:
     :show-inheritance:
 
+apart.core.simulation module
+----------------------------
+
+.. automodule:: apart.core.simulation
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 apart.core.tables module
 ------------------------
 
@@ -61,10 +74,3 @@ apart.core.tables module
     :show-inheritance:
 
 
-Module contents
----------------
-
-.. automodule:: apart.core
-    :members:
-    :undoc-members:
-    :show-inheritance:

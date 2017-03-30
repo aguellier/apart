@@ -54,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'APART'
-copyright = '2017, Antoine Guellier'
+copyright = '2017, University of Rennes 1 (author: Antoine Guellier)'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

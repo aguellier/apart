@@ -1,6 +1,11 @@
 common package
 ==============
 
+.. automodule:: common
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Submodules
 ----------
 
@@ -21,10 +26,3 @@ common.utilities module
     :show-inheritance:
 
 
-Module contents
----------------
-
-.. automodule:: common
-    :members:
-    :undoc-members:
-    :show-inheritance:

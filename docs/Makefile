@@ -177,7 +177,8 @@ pseudoxml:
 	@echo "Build finished. The pseudo-XML files are in $(BUILDDIR)/pseudoxml."
 
 api-doc:
-	sphinx-apidoc -o source ../src/
+	sphinx-apidoc --module-first -o source ../src/
 
 api-doc-force:
 	sphinx-apidoc --force -o source ../src/
+	sphinx-apidoc --force --module-first -o source ../src/

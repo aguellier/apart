@@ -1,12 +1,18 @@
 apart package
 =============
 
+.. automodule:: apart
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Subpackages
 -----------
 
 .. toctree::
 
     apart.core
+    apart.measures
 
 Submodules
 ----------
@@ -28,10 +34,3 @@ apart.simulation module
     :show-inheritance:
 
 
-Module contents
----------------
-
-.. automodule:: apart
-    :members:
-    :undoc-members:
-    :show-inheritance:
