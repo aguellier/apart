@@ -6,11 +6,11 @@
 
 
 '''
-This package contains our protocol implementation.
+This package contains the protocol implementation.
 
 The :mod:`~apart.crypto` module provides functions for manipulating Elgamal
 ciphertexts, while the :mod:`~apart.simulation` module provides functions to
 easily run network simulations.
 
-The :pack:`~apart.core` sub-package contains the actual implementation of the protocol. 
+The :mod:`apart.core` sub-package contains the actual implementation of the protocol. 
 '''
