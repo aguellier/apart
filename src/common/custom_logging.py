@@ -1,3 +1,10 @@
+# Author: Antoine Guellier
+# Copyright (c) 2017 Université de Rennes 1
+# License: CeCILL. The full license text is available at:
+#  - http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html
+
+
+
 '''
 Simple adapter to the :mod:`logging` python module. 
 

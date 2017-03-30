@@ -1,3 +1,9 @@
+# Author: Antoine Guellier
+# Copyright (c) 2017 Université de Rennes 1
+# License: CeCILL. The full license text is available at:
+#  - http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html
+
+
 """
 This module models the routing tables used by nodes.
 
@@ -187,12 +193,16 @@ class SqliteRoutingTable(object, metaclass=__MetaRoutingTable):
             del type(self).__routing_tables_db_conn[self._network_uid]
     
     @classmethod
-    def sqlite_db_cursor(cls, network_uid):
+    def sqlite_db_cursor(cls, network_uid=None):
         """:obj:`sqlite3.Cursor`: the sqlite3 cursor for the database. 
         
         Used for measure and debug purposes to access the routing tables
         directly, and make more efficient sql queries
         """ 
+        if network_uid is None:
+            print(cls.__routing_tables_db_conn)
+            network_uid = list(cls.__routing_tables_db_conn.keys())[-1]
+            
         if cls.__routing_tables_db_conn[network_uid] is not None:
             return cls.__routing_tables_db_conn[network_uid].cursor()
         else:

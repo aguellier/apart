@@ -1,3 +1,9 @@
+# Author: Antoine Guellier
+# Copyright (c) 2017 Université de Rennes 1
+# License: CeCILL. The full license text is available at:
+#  - http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html
+
+
 '''
 This module contains material to manage the traffic counters of the controlled traffic rates mechanism of the protocol.
 '''
