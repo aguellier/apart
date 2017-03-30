@@ -35,20 +35,27 @@ class RtPolicyReason(Enum):
     '''Reasons to accept or refuse a route proposal.
     
     Refusal reasons **must** begin with *REFUSE_*, while accept reasons **must**
-    begin with "*CCEPT_*.
+    begin with *ACCEPT_*.
     '''
     REFUSE_ITSELF = 0
+    """Route refused because the route is towards the node itself"""
     REFUSE_ENC_DEC = 1
+    """Route refused according the the *encrypted decision* process"""
     REFUSE_REACCEPT = 2
+    """Route refused by random choice, and because the node already knows at least one route towards the end-receiver"""
     REFUSE_TOO_MANY_ROUTES_NO_REPLACEMENT = 3
+    """Route refused because the node already knows enough route towards the related end-receiver, and no replacement is performed."""
 #     REFUSE_TOO_MANY_ROUTES = "Too many routes towards pseudo"
 #     REFUSE_NO_REPLACEMENT = "Enough routes towards pseudo AND no replacement"
 #     REFUSE_RANDOM = "Random choice: refuse"
     
     
     ACCEPT_FIRST_KNOWN_ROUTE = 4
+    """Route accepted because the route is the first that the node lears towars the given end-receiver."""
     ACCEPT_REACCEPT_NO_REPLACEMENT = 5
+    """Route accepted by random choice, with no replacement of an old entry."""
     ACCEPT_REACCEPT_REPLACEMENT = 6
+    """Route accepted by random choice, with replacement of an old entry."""
 #     ACCEPT_REPLACEMENT = "Enough routes towards pseudo BUT replacement"
 #     ACCEPT_RANDOM = "Random choice: accept"
     

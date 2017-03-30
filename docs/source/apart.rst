@@ -12,7 +12,6 @@ Subpackages
 .. toctree::
 
     apart.core
-    apart.measures
 
 Submodules
 ----------

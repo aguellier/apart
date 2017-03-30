@@ -253,7 +253,7 @@ class MsgPoolError(RuntimeError):
 
 # Misc. very basic unit tests
 
-def test_removal():
+def __test_removal():
     neighbor = 1
     pool = NeighborMsgPool(2, 0.8, 0, 1)
     
@@ -298,7 +298,7 @@ def test_removal():
                 print("Error 2 !")
  
     
-def test_bias():
+def __test_bias():
     neighbors = [1,2,3]
     pools = NeighborMsgPoolSet(2, 0.8, 0, neighbors)
     

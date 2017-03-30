@@ -204,6 +204,9 @@ class Node(object):
         This function does not make the difference between the topology
         dissemination phase, and the oriented communication phase. It is just
         the core running function.
+        
+        Yields:
+            :obj:`simpy.events.Timeout`: simpy timeout events, one for each batching round (SimPy advances in the simulation by advancing in generators). 
         """
         
         if self._must_self_propose:
@@ -1699,6 +1702,11 @@ class Node(object):
         self._propose_route(rt_entry, cprop, cone, chopcount, cwhoisontheroute, except_neighbor=pending_rt_prop['proposer'])
             
     def _delayed_relay_rt_prop(self, rt_entry, pending_rt_prop, delay):
+        """Delays the relaying of a route proposal.
+                
+        Yields:
+            :obj:`simpy.events.Timeout`: a simpy timeout event
+        """
         # Wait for the delay to pass
         yield self._env.timeout(delay)
 

@@ -6,13 +6,16 @@
 Welcome to ProtocolSimPy's documentation!
 =========================================
 
+DONNER DES INFOS SUR COMMENT FAIRE TOURNER LE CODE ("GETTING STARTED")
+
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
 
    apart
    common
+   measures
 
 Indices and tables
 ==================

@@ -477,17 +477,17 @@ class RoutingTable(SqliteRoutingTable):
     
     This table features rows that describe routes that a given node knows. Each
     entry in the table exhibits the following fields:
-        * ROWID (int): the (unique) identifier of the table entry
-        * NODE (int): used internally, to differentiate which SQL table entry belongs to which node 
-        * PSEUDO (int): pseudonym of the end-receiver of the route 
-        * CONE (:obj:`~apart.crypto.Ctxt`): encryption of one used to encrypt/re-encrypt messages on the route
-        * NEXT_NODE (int): index of the next node on the route (can be considered as the next hop's IP address) 
-        * NEXT_CID (int): circuit identifier of the next hop 
-        * REPROPOSED (bool): whether the node relayed this route to its neighbor. Used in the route proposal policy.  
-        * IN_USE (bool): True if the node uses this route as end-sender, False if it uses it only as relay. 
-        * TIMESTAMP (int): time at which the routing table entry was created 
-        * ACTUAL_RCVR (int): index of the end-receiver of the route. used only for debug and statistics purposes. 
-        * ACTUAL_LENGTH (int): number of hops between the node and the end-receiver of the route. Used only for debug and statistics purposes
+    * ROWID (int): the (unique) identifier of the table entry
+    * NODE (int): used internally, to differentiate which SQL table entry belongs to which node 
+    * PSEUDO (int): pseudonym of the end-receiver of the route 
+    * CONE (:obj:`~apart.crypto.Ctxt`): encryption of one used to encrypt/re-encrypt messages on the route
+    * NEXT_NODE (int): index of the next node on the route (can be considered as the next hop's IP address) 
+    * NEXT_CID (int): circuit identifier of the next hop 
+    * REPROPOSED (bool): whether the node relayed this route to its neighbor. Used in the route proposal policy.  
+    * IN_USE (bool): True if the node uses this route as end-sender, False if it uses it only as relay. 
+    * TIMESTAMP (int): time at which the routing table entry was created 
+    * ACTUAL_RCVR (int): index of the end-receiver of the route. used only for debug and statistics purposes. 
+    * ACTUAL_LENGTH (int): number of hops between the node and the end-receiver of the route. Used only for debug and statistics purposes
         
     Each of these fields can be accessed by :obj:`.RoutingTable.FIELD`.
     """

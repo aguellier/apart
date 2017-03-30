@@ -37,7 +37,7 @@ from apart.core.node import Node
 from apart.core.tables import SqliteRoutingTable, RoutingTable as RT, PrevRoutingTable as PRT
 import collections as c
 import matplotlib.pyplot as plt
-from measures.measures_common.network_statistics import NetworkStats
+from measures.network_statistics import NetworkStats
 import networkx as nx
 
 
@@ -45,6 +45,8 @@ class Network(object):
 
     
     __next_network_uid = 1
+    # A counter to keep track of network unique identifiers. Used for managing
+    # the weird routing table implementation (see apart.core.tables)
 
     def __init__(self, net_manager, simpy_env, sim_params, net_params):
         """The network which nodes are part of.
@@ -347,6 +349,7 @@ class NetworkManager(object):
         """Class modeling a network manager.
     
         The network manager is responsible for:
+        
             * Creating and managing a :obj:`.Network` instance
             * Checking the termination of the topology dissemination and oriented communication phases
             * Managing the (uniqueness of) the cid, rcid, and ocomid
@@ -378,7 +381,7 @@ class NetworkManager(object):
         """Simulation parameters"""
         
         self._net_stats = NetworkStats(self, self._net_params.nb_nodes, self._sim_params)
-        """The :obj:`~apart.core.network.NetworkStats` instance where statistics on the network run (e.g. number of rt props, etc.)"""
+        """The :obj:`~measure.network_statistics.NetworkStats` instance where statistics on the network run (e.g. number of rt props, etc.)"""
         
         self._net = Network(self, self._env, sim_params, net_params)
         """The network this class instance manages"""
@@ -416,7 +419,7 @@ class NetworkManager(object):
     
     @property
     def net_stats(self):
-        """:obj:`~measures.network_stats.NetworkStats`: The network statistics instance"""
+        """:obj:`~measures.network_statistics.NetworkStats`: The network statistics instance"""
         return self._net_stats
     
     @property
@@ -548,17 +551,36 @@ class NetworkManager(object):
                 
             
     def get_next_cid(self, n1, n2):
-        """Returns a new cid for use between node n1 and node n2, a cid never used by this pair"""
+        """Get the next circuit identifier between nodes `n1` and `n2`
+        
+        Args:
+            n1 (int): index of the first node
+            n2 (int): index of the second node
+        
+        Returns:
+            int: a new cid for use between node n1 and node n2, a cid never used by this pair"""
         self._cids[(n1,n2)] += 1
         return self._cids[(n1,n2)]
     
     def get_next_rcid(self, n1, n2):
-        """Returns a new rcid for use between node n1 and node n2, a rcid never used by this pair"""
+        """Get the next reverse circuit identifier between nodes `n1` and `n2`
+        
+        Args:
+            n1 (int): index of the first node
+            n2 (int): index of the second node
+        
+        Returns:
+            int: a new rcid for use between node n1 and node n2, a rcid never used by this pair
+        """
         self._rcids[(n1,n2)] += 1
         return self._rcids[(n1,n2)]
     
     def get_next_ocomid(self):
-        """Returns a network-wide unique oriented communication identifier"""
+        """Get the next oriented communication identifier 
+        
+        Returns:
+            int: a network-wide unique oriented communication identifier
+        """
         self._ocomids += 1
         return self._ocomids
     
@@ -573,28 +595,45 @@ class NetworkParams(object):
         """
         
         self.nb_nodes = 7
-        """Number of nodes in the network"""
+        """int: Number of nodes in the network.
+
+        Default: 7.
+        """
         
         self.corruption_ratio = 0.3
-        """The percentage of corrupted nodes in the network"""
+        """float between 0 and 1: The percentage of corrupted nodes in the network.
+
+        Default: 0.3.
+        """
         
         # How long should a node "wait" before sending a message. This parameters
         # basically models the time it takes for a node to forge and send a message
         # Assuming a message takes 1024 bits = 1 Mb, and assuming a the nodes send data at a bit rate of 50 Mbps, a message takes 20 ms to send
         self.communication_latency = 20  # in milliseconds.
-        """Latency of message delivery in the network (simulated with SimPy)"""
+        """int: Latency of message delivery in the network (simulated with SimPy).
+
+        Default: 20.
+        """
         
         # The security parameter for crypto
         self.secparam = 128
-        """The cryptographic security parameter of the network"""
+        """int: The cryptographic security parameter of the network. Typically, 80, 128, or 256.
+
+        Default: 128.
+        """
         
         self.topology_graph = None
-        """The topology graph for the simulation. If left to None, one is randombly generated"""
+        """:obj:`networkx.Graph`: The topology graph for the simulation. If left to None, one is randomly generated.
+
+        Default: None.
+        """
         
         # Maximum length of a route (nodes refuse the route proposition for routes
         # longer than this)
         self.rtprop_policy_max_hop_count = None
-        """Route proposal policy: Maximum length of a route. 
+        """int: Route proposal policy, maximum length of a route. 
+        
+        Default: None. 
         
         If set to 0 or None, this parameter is automatically set to the 
         smallest integer so that any node is ensured to obtain a route 
@@ -605,20 +644,29 @@ class NetworkParams(object):
         # example, if this value is 5, and some node already have 5 routes towards
         # destination D, upon receiving a route prop towards D, it will refuse it
         self.rtprop_policy_max_routes = 3
-        """Route proposal policy: maximum number of routes per receiver"""
+        """int: Route proposal policy, maximum number of routes per receiver.
+
+        Default: 3.
+        """
     
         # When a node gets a route proposal for a destination it already knows, it
         # has a probability to refuse it straight away (independently from the other
         # decision elements such as routing loops, route length, etc). The proba.
         # below gives is the proba. of NOT refusing straight away
-        self.rtprop_policy_p_reaccept = 0.7
-        """Route proposal policy: probability of accepting a second route towards an already known receiver"""
+        self.rtprop_policy_p_reaccept = 0.5
+        """float between 0 and 1: Route proposal policy, probability of accepting a second route towards an already known receiver.
+
+        Default: 0.5.
+        """
         
         # When a node already has enough routes towards a receiver, but receives one
         # more, it has a chance of replacing one of its already known route with the
         # new one
-        self.rtprop_policy_p_replace = 0.7
-        """Route proposal policy: Probability to "replace" a known route with a newly learned one"""
+        self.rtprop_policy_p_replace = 0.25
+        """float between 0 and 1: Route proposal policy, probability to "replace" a known route with a newly learned one.
+
+        Default: 0.25.
+        """
             
         # When a node re-discovers a destination (i.e. obtains a second or more
         # route towards a given destination already known beforehand), this node has
@@ -626,28 +674,46 @@ class NetworkParams(object):
         # computed from the value below, put to the power of the number of routes
         # already proposed by the node (towards the concerned destination).
 #         self.rtprop_policy_p_reprop = 0.1
-        """Route proposal policy: probability of re-proposing a route"""
+        #"""Route proposal policy: probability of re-proposing a route"""
     
         # Parameters of the pool-based message re-ordering mechanism
         self.batching_t_interval = 1*60*1000 # 1 minute in milliseconds
-        """Message re-ordering: batching interval"""
-        self.batching_nmin = 2
-        """Message re-ordering: minimum of message that must always be in pools"""
-        self.batching_f = 0.8
-        """Message re-ordering: maximum fraction of pools that can be sent in one round"""
+        """int: message re-ordering, batching interval, in milliseconds (i.e. in SimPy simulation time).
+
+        Default: 1 minute.
+        """
+        self.batching_nmin = 5
+        """int: Message re-ordering, minimum of message that must always be in pools.
+
+        Default: 5.
+        """
+        self.batching_f = 0.5
+        """float between 0 and 1: Message re-ordering, maximum fraction of pools that can be sent in one round.
+
+        Default: 0.5.
+        """
         
         # Parameters of the dummy message and traffic rates policy
         self.dummypol_fdum = 0.8
-        """Dummy messages and Controlled Traffic rates: fraction of neighbors pools in which to insert a dummy at each round"""
-        self.dummypol_deltar = 2
-        """Dummy messages and Controlled Traffic rates: number of rounds on which the controlled traffic rate equation is relaxed"""
+        """float between 0 and 1: Dummy messages and Controlled Traffic rates, fraction of neighbors pools in which to insert a dummy at each round.
+
+        Default: 0.8.
+        """
+        self.dummypol_deltar = 8
+        """int: Dummy messages and Controlled Traffic rates, number of rounds on which the controlled traffic rate equation is relaxed.
+
+        Default: 8.
+        """
         
         self.update_params(**kwargs)
         
     def update_params(self, **kwargs):
         """Updates the parameters after instanciation of the object.
         
-        Accepts keyword arguments, corresponding to the network parameters"""
+        Accepts keyword arguments, corresponding to the network parameters. Only
+        keyword arguments that match a valid attribute of the class are taken
+        into accounts. Others are simply ignored silently.
+        """
         # Above are the default argument values. If kwargs is not empty,
         # override these values
         for attr_name, attr_value in kwargs.items():

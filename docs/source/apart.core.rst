@@ -57,14 +57,6 @@ apart.core.protocol_constants module
     :undoc-members:
     :show-inheritance:
 
-apart.core.simulation module
-----------------------------
-
-.. automodule:: apart.core.simulation
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 apart.core.tables module
 ------------------------
 

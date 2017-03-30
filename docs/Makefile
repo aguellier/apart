@@ -180,5 +180,4 @@ api-doc:
 	sphinx-apidoc --module-first -o source ../src/
 
 api-doc-force:
-	sphinx-apidoc --force -o source ../src/
 	sphinx-apidoc --force --module-first -o source ../src/
