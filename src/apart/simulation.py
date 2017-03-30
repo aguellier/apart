@@ -29,7 +29,15 @@ class SimulationParams(object):
         """Accepts keyword arguments, corresponding to the simulation parameters"""
         
         self.logging_level = logging.INFO
-        """The logging level of events in the network"""
+        """The logging level of events in the network. 
+        
+        The ``INFO`` level basically gives information on the beginning and end
+        of the two main phases of the simulation: topology dissemination and
+        oriented communications. The ``DEBUG`` level gives information on the routes
+        proposed (and accepted/refused), and on oriented communication messages
+        sent. Further levels ``DEBUG2`` and ``DEBUG3`` give more detailed
+        information are extremely verbose.
+        """
         
         # Debug feature
         self.print_nodes_tables = False
@@ -159,34 +167,50 @@ class SimulationParams(object):
 
 
 def run_simulation(sim_params=None, net_params=None, **kwargs):
-    """Runs the network simulation, and returns the network class instance in its final state
+    """Runs the network simulation, and returns the :obj:`~apart.core.network.NetworkManager` instance, describing the network in its final state.
     
-    This function launches the simulation, waits for it to end, and returns the
-    :obj:`~apart.core.network.NetworkManager` instance at the end of the simulation.
+    This function creates a :obj:`~apart.core.network.NetworkManager` instance,
+    calls :meth:`~apart.core.network.NetworkManager.start` on it, and waits for
+    the simulation to end. During the simulation, and depending on the loggin
+    level parameter (:attr:`.SimulationParams.logging_level`), outputs various
+    information on the events happening in the network.
+    
     
     Unless they are specified in argument, simulation and network parameters are
     the default defined values in the classes :class:`.SimulationParams` and
-    :class:`~apart.core.network.Networkparams`
+    :class:`~apart.core.network.Networkparams`. There are two ways to provide
+    custom arguments: by providing custom :class:`.SimulationParams` and
+    :class:`~apart.core.network.Networkparams` instances, or by providing the
+    parameters in keyword arguments. However, instances have precedence over
+    keyword arguments. For instance, if a `sim_params` argument is provided,
+    keyword arguments containing simulation parameters are ignored.
     
     Args:
-        sim_params (str): specifies specific parameters for the simulation.
-        net_params (str): specifies specific parameters for the network.
-        **kwargs (dict): specifies simulation or network parameters. 
-                These parameters will override the ones given in the two first arguments.
+        sim_params (:obj:`.SimulationParams`, default): specifies specific parameters 
+            for the simulation, within a custom :obj:`.SimulationParams` instance.
+            (Default: None)
+        net_params (:obj:`~apart.core.network.Networkparams`): specifies specific 
+            parameters for the network, within a custom :obj:`~apart.core.network.Networkparams` 
+            instance. (Default: None)
+        **kwargs (dict): specifies simulation or network parameters indistinctly. 
+            If the `sim_params` parameter is `None`, the simulation parameters are generated as 
+            `SimulationParams(**kwargs)`. Likewise for the `net_params` argument.
    
     
     Returns:
-        :class:`~apart.core.network.NetworkManager`: the network manager instance at the end of the network run
+        :obj:`~apart.core.network.NetworkManager`: The network manager instance at the end of the network run. 
+        Note that this object contains in particular a :attr:`~apart.core.network.NetworkManager.net_stats` 
+        attribute, which contains valuable information on the simulated network run.
     """
 
     # If they were not passed in argument, get the parameters of the
     # simulation, and the sim_stats structures
-    if sim_params is not None:
+    if sim_params is not None and isinstance(sim_params, SimulationParams):
         sim_params = sim_params
     else:
         sim_params = SimulationParams(**kwargs)
     
-    if net_params is not None:
+    if net_params is not None and isinstance(net_params, NetworkParams):
         net_params = net_params
     else:
         net_params = NetworkParams(**kwargs)

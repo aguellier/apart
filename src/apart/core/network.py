@@ -351,6 +351,14 @@ class NetworkManager(object):
             * Checking the termination of the topology dissemination and oriented communication phases
             * Managing the (uniqueness of) the cid, rcid, and ocomid
             * Gathering the statistics on the network
+        
+        Note that after a simulation of the network,
+        :func:`~apart.simulation.run_simulation` returns an instance of this
+        class. That is, it returns the network manager, containing the network
+        in its final state, and the attribute :attr:`.net_params`. The latter is
+        particularly useful to extract information on the network and the
+        protocol (such as the total number of routes proposed, or the latency of
+        communications).
             
         Args:
             sim_params (:obj:`~simulation.simulation.SimulationParams`): set of 
