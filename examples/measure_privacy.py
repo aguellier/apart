@@ -81,6 +81,7 @@ if not os.path.exists(_DEFAULT_SAVING_FOLDER):
     os.makedirs(_DEFAULT_SAVING_FOLDER, mode=0o775)
 
 def measure_privacy(save_results_to=None, save_network_states=True, restrict_to_params=None, overwrite_existing=False, force_recomputation=False, **measure_params):
+    """Calls :func:`measures.common_measures.generic_measure` after some pre-processing."""
     
     if save_results_to is None:
         save_results_to = os.path.join(_DEFAULT_SAVING_FOLDER, MEASURE_TITLE)
@@ -113,15 +114,6 @@ def measure_privacy(save_results_to=None, save_network_states=True, restrict_to_
                            overwrite_existing=overwrite_existing,
                            force_recomputation=force_recomputation)
 
-def recompute_measure_privacy(from_measures_folder, save_results_to=None, overwrite_existing=False):
-    if save_results_to is None:
-        save_results_to = os.path.join(_DEFAULT_SAVING_FOLDER, MEASURE_TITLE)
-        
-    return recompute_generic_measure(from_measures_folder, MEASURE_TITLE, 
-                                     save_results_to=save_results_to, 
-                                     metrics_computer_callback=compute_metrics_one_network_run,
-                                     overwrite_existing=overwrite_existing)
-
 def get_sim_params():
     sim_params = SimulationParams()
     sim_params.logging_level = logging.WARNING  # Display only Warnings or errors
@@ -152,10 +144,12 @@ def get_sim_params():
     sim_params.log_ocom_routes = True
     
     return sim_params
+
 def compute_metrics_one_network_run(aggregated_metrics, net_mngr):
     """Callback function for this measure module.
     
-    Computes the statistics on the network state at the end of a run, and aggregates the statistics over several network runs.
+    Computes the statistics on the network state at the end of a run, and
+    aggregates the statistics over several network runs.
     
     Arguments:
         aggregated_metrics

@@ -96,6 +96,7 @@ if not os.path.exists(_DEFAULT_SAVING_FOLDER):
 
 
 def measure_general_efficiency(save_results_to=None, save_network_states=True, restrict_to_params=None, overwrite_existing=False, force_recomputation=False, **measure_params):
+    """Calls :func:`measures.common_measures.generic_measure` after some pre-processing."""
     
     if save_results_to is None:
         save_results_to = os.path.join(_DEFAULT_SAVING_FOLDER, MEASURE_TITLE)
@@ -170,7 +171,8 @@ def get_sim_params():
 def compute_metrics_one_network_run(aggregated_metrics, net_mngr):
     """Callback function for this measure module.
     
-    Computes the statistics on the network state at the end of a run, and aggregates the statistics over several network runs.
+    Computes the statistics on the network state at the end of a run, and
+    aggregates the statistics over several network runs.
     
     Arguments:
         aggregated_metrics

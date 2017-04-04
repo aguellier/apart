@@ -106,6 +106,7 @@ if not os.path.exists(_DEFAULT_SAVING_FOLDER):
     os.makedirs(_DEFAULT_SAVING_FOLDER, mode=0o775)
 
 def measure_route_prop_mechanism(save_results_to=None, save_network_states=True, restrict_to_params=None, overwrite_existing=False, force_recomputation=False, **measure_params):
+    """Calls :func:`measures.common_measures.generic_measure` after some pre-processing."""
     if save_results_to is None:
         save_results_to = os.path.join(_DEFAULT_SAVING_FOLDER, MEASURE_TITLE)
         
@@ -171,7 +172,8 @@ def get_sim_params():
 def compute_metrics_one_network_run(aggregated_metrics, net_mngr):
     """Callback function for this measure module.
     
-    Computes the statistics on the network state at the end of a run, and aggregates the statistics over several network runs.
+    Computes the statistics on the network state at the end of a run, and
+    aggregates the statistics over several network runs.
     
     Arguments:
         aggregated_metrics
@@ -349,7 +351,6 @@ def plot_LATENCY_RT_PROPS(experiments_results, x_param=None, restrict_to_other_p
     plot_simple_metric(experiments_results, MEASURE_PARAMS, y_stat=y_stat, x_param=x_param, several_curves=['mean', 'min', 'max'], restrict_to_other_params=restrict_to_other_params, save_to=save_to, overwrite_existing=overwrite_existing)
 
 
-# @plotfunc(MEASURE_PARAMS)
 def plot_HIST_ACCEPT_REFUSE_ROUTES(experiments_results, x_param=None, restrict_to_other_params={}, save_to=None, overwrite_existing=False):
     if save_to is not None:
         save_to = os.path.join(save_to, 'hist_accept_refuse_routes/')
@@ -357,7 +358,6 @@ def plot_HIST_ACCEPT_REFUSE_ROUTES(experiments_results, x_param=None, restrict_t
      
     plot_histogram(experiments_results, MEASURE_PARAMS, y_stat=y_stat, label_rotation=90, xticks=[r.name for r in sorted(RtPolicyReason)], print_yerr=True, restrict_to_other_params=restrict_to_other_params, save_to=save_to, overwrite_existing=overwrite_existing)
      
-# @plotfunc(MEASURE_PARAMS)
 def plot_HIST_ROUTES_LENGTH(experiments_results, x_param=None, restrict_to_other_params={}, save_to=None, overwrite_existing=False):
     if save_to is not None:
         save_to = os.path.join(save_to, 'hist_routes_lengths/')

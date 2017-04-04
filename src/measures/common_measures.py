@@ -8,6 +8,13 @@
 This module provides helper function to make simulations, experimentations and
 measures. It in particular provides the function :func:`.generic_measure`, which
 allows to run many network runs, and gather statistics on them.
+
+
+.. seealso::
+    See the examples measure modules that make use of the
+    :func:`measures.common_measures.generic_measure` function. These may be
+    found in the the `examples/` folder, or in the *Example* topic of the
+    documentation.
 '''
 from collections import defaultdict, OrderedDict
 import copy
@@ -334,106 +341,6 @@ def generic_measure(measure_title, save_results_to, net_params_combinations, met
     merge_measures_outputs(save_results_to, sim_outputs_file_names, new_file_name=measure_title+".pickle", sort_key=lambda x: x['measure_params']['nb_nodes'], overwrite_existing=True)
         
     logger.info("Measures done.")
-# 
-# def recompute_generic_measure(from_measures_folder, measure_title, save_results_to, metrics_computer_callback, overwrite_existing=False):
-#     logger = _get_logger()
-#     
-#     # The networ states folder is relative to the measure folder, normally
-#     net_states_folder = os.path.join(from_measures_folder, _NET_STATES_REL_FOLDER)
-#     
-#     logger.info("Starting re-computation of {} using network states in folder {} ".format(measure_title, net_states_folder))
-#     
-#     logger.info("Finding files.. \n")
-#     
-#     # Find files with specified prefix
-#     net_states_files = defaultdict(lambda: {})
-#     net_states_files_mtime = defaultdict(lambda: defaultdict(lambda: 0))
-#     for file in os.listdir(os.path.abspath(net_states_folder)):
-#         match_obj = re.match(matchstring_net_states_file_name(measure_title), file)
-#         if match_obj:
-#             file_path = os.path.abspath(os.path.join(net_states_folder, file))
-#             combination_number = match_obj.group(1)
-#             iteration_number = match_obj.group(2) 
-#             # Trick to select the most recent "net state" binary file
-#             file_mtime = os.stat(file_path).st_mtime
-#             if file_mtime > net_states_files_mtime[combination_number][iteration_number]:
-# #                 with open(file_path, 'rb') as f:
-#                 net_states_files[combination_number][iteration_number] = file_path
-#                 net_states_files_mtime[combination_number][iteration_number] = file_mtime
-#     
-#     # Find the existing measure results files 
-#     existing_measures_results_files = {}
-#     existing_measure_results_files_mtime = defaultdict(lambda: 0)
-#     for file in os.listdir(os.path.abspath(from_measures_folder)):
-#         file_path = os.path.abspath(os.path.join(from_measures_folder, file))
-#         if not os.path.isfile(file_path):
-#             continue
-#         match_obj = re.match(matchstring_results_file_name(measure_title), file)
-#         if match_obj:
-#             file_path = os.path.abspath(os.path.join(from_measures_folder, file))
-#             combination_number = match_obj.group(1)
-#             # Trick to select the most recent "net state" binary file
-#             file_mtime = os.stat(file_path).st_mtime
-#             if file_mtime > existing_measure_results_files_mtime[combination_number]:
-# #                 with open(file_path, 'rb') as f:
-#                 existing_measures_results_files[combination_number] = file_path
-#                 existing_measure_results_files_mtime[combination_number] = file_mtime
-#     
-#     
-#     # With the collected network states, perform the computations again
-#     sim_outputs_file_names = []
-#     ordered_net_states_files = OrderedDict(sorted(net_states_files.items(), key=lambda x: int(x[0])))
-# 
-#     
-#     for combination_counter, iterations_net_states in ordered_net_states_files.items():
-#         logger.info("Re-computing combination #{}/{}".format(combination_counter, len(ordered_net_states_files)))
-#         this_combination_nb_iters = len(iterations_net_states)
-#         
-#         iterations_net_states = OrderedDict(sorted(iterations_net_states.items(), key=lambda x: int(x[0])))
-#         
-#         # From existing measures, get all that we do not have: the parameter 
-#         # combination, the simulation parameters, and the network parameters
-#         with open(existing_measures_results_files[combination_counter], 'rb') as f:
-#             this_param_combination_results = pickle.load(f)
-# #             this_param_combination_results.update({'results': {'overall': {}, 'by_ite': []}})
-#         
-#         # debug
-#         this_param_combination_results['measure_params']['nb_iters'] = this_combination_nb_iters
-# #         print(this_param_combination_results['measure_params']['nb_iters'])
-# #         continue
-#         
-#         if False:
-#             aggregated_results = None
-#             for i, this_iteration_net_manager_file, in iterations_net_states.items():
-#                 
-#                 # Load the net manager state
-#                 with open(this_iteration_net_manager_file, 'rb') as f:
-#                     this_iteration_net_manager = pickle.load(f)
-#                 
-#                 aggregated_results, this_iteration_results = metrics_computer_callback(aggregated_results, this_iteration_net_manager)
-#                  
-#                 # Re-save the network state, only if the read folder is different than the read one
-#                 if os.path.abspath(from_measures_folder) != os.path.abspath(save_results_to):
-#                     file_name = format_net_states_file_name(measure_title, combination_counter, i)
-#                     save_network_state(this_iteration_net_manager, file_name=file_name, folder=os.path.join(save_results_to, _NET_STATES_REL_FOLDER))
-#                  
-#                 this_param_combination_results['results']['by_ite'].append(this_iteration_results)
-#                  
-#             this_param_combination_results['results']['overall'] = aggregated_results
-# 
-#         # Write results of all iteration of this parameters combination to the disk
-#         logger.info("Re-writing results of parameters combination #{} of measure '{}' to disk on {}...".format(combination_counter, measure_title, time.asctime()))
-#         file_name = format_results_file_name(measure_title, combination_counter, this_combination_nb_iters) 
-#         save_measures_results(this_param_combination_results, folder=save_results_to, file_name=file_name, overwrite_existing=overwrite_existing)
-#         logger.info("")
-#         sim_outputs_file_names.append(file_name)
-#         
-#     # Merge all intermediary files into one big pickle file
-#     logger.info("Merging all results of measures on {}".format(time.asctime()))
-#     merge_measures_outputs(save_results_to, sim_outputs_file_names, new_file_name=measure_title+".pickle", sort_key=lambda x: x['measure_params']['nb_nodes'], overwrite_existing=overwrite_existing)
-#         
-#     logger.info("Measures done.")
-
 
 
 

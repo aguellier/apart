@@ -13,6 +13,10 @@ The :class:`~apart.core.node.Node` class that it defines represents the core of
 the protocol implementation. It models all the behavior of the nodes (mainly
 message sending and receiving).
 
+Most of the code is however defined in protected or private functions. These are
+also documented (but not included in this documentation by default). See the
+source code of class :class:`.Node` for more information.
+
 This module also defines the :exc:`.ProtocolError` exception.
 """
 from _collections import defaultdict
