@@ -1,28 +1,15 @@
-common package
-==============
+=============================
+``common`` --- Helper Modules
+=============================
 
 .. automodule:: common
     :members:
     :undoc-members:
     :show-inheritance:
 
-Submodules
-----------
+**Submodules**
 
-common.custom_logging module
-----------------------------
-
-.. automodule:: common.custom_logging
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-common.utilities module
------------------------
-
-.. automodule:: common.utilities
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+.. toctree::
+        common.utilities
+        common.custom_logging
 

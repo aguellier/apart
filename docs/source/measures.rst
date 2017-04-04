@@ -1,52 +1,17 @@
-measures package
-================
+=================================================
+``measures`` --- Benchmark & Simulation Framework
+=================================================
 
 .. automodule:: measures
     :members:
     :undoc-members:
     :show-inheritance:
 
-Submodules
-----------
+**Submodules**
 
-measures.advanced_stats_helper module
--------------------------------------
-
-.. automodule:: measures.advanced_stats_helper
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-measures.common_measures module
--------------------------------
-
-.. automodule:: measures.common_measures
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-measures.file_handling module
------------------------------
-
-.. automodule:: measures.file_handling
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-measures.network_statistics module
-----------------------------------
-
-.. automodule:: measures.network_statistics
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-measures.plotting module
-------------------------
-
-.. automodule:: measures.plotting
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
+.. toctree::
+        measures.network_statistics
+        measures.advanced_stats_helper
+        measures.common_measures
+        measures.file_handling
+        measures.plotting

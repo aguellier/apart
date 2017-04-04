@@ -1,26 +1,7 @@
-.. ProtocolSimPy documentation master file, created by
-   sphinx-quickstart on Thu Jan 26 13:44:15 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. _overview:
 
-Welcome to ProtocolSimPy's documentation!
-=========================================
+This is the documentation corresponding to the GitHub repository that can be found at the following address `<https://github.com/aguellier/apart>`__ . This page is a copy of the ``README`` file in this repository.
 
-DONNER DES INFOS SUR COMMENT FAIRE TOURNER LE CODE ("GETTING STARTED")
-
-Contents:
-
-.. toctree::
-   :maxdepth: 4
-
-   apart
-   common
-   measures
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+.. include:: ../../README.rst
+   
+        

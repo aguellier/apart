@@ -15,6 +15,7 @@
 
 import sys
 import os
+from recommonmark.parser import CommonMarkParser
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -22,6 +23,7 @@ import os
 #sys.path.insert(0, os.path.abspath('.'))
 
 sys.path.insert(0, os.path.abspath(os.path.join('..', '..', 'src')))
+sys.path.insert(0, os.path.abspath(os.path.join('..', '..', 'examples')))
 
 # -- General configuration ------------------------------------------------
 
@@ -33,6 +35,7 @@ sys.path.insert(0, os.path.abspath(os.path.join('..', '..', 'src')))
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    #'sphinx.ext.autosummary',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon'
@@ -43,14 +46,21 @@ napoleon_google_docstring = True
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
+# Added according to http://stackoverflow.com/questions/2471804/using-sphinx-with-markdown-instead-of-rst/2487862#2487862
+# Used to support the inclusion of README.md in the documentation
+source_parsers = {
+            '.md': CommonMarkParser,
+            }
+
 # The suffix of source filenames.
-source_suffix = '.rst'
+source_suffix = ['.rst', '.md']
+
 
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = 'contents'
 
 # General information about the project.
 project = 'APART'
@@ -142,7 +152,7 @@ html_static_path = ['_static']
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
 # directly to the root of the documentation.
-#html_extra_path = []
+#html_extra_path = ['globaltoc.html', 'relations.html', 'sourcelink.html', 'searchbox.html']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.

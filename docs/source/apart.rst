@@ -1,35 +1,20 @@
-apart package
-=============
+====================================
+``apart`` -- Protocol Implementation
+====================================
 
 .. automodule:: apart
     :members:
     :undoc-members:
     :show-inheritance:
 
-Subpackages
------------
+
+**Submodules**
 
 .. toctree::
+        apart.crypto
+        apart.simulation
+        
+**Subpackages**
 
-    apart.core
-
-Submodules
-----------
-
-apart.crypto module
--------------------
-
-.. automodule:: apart.crypto
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-apart.simulation module
------------------------
-
-.. automodule:: apart.simulation
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
+.. toctree::
+        apart.core
