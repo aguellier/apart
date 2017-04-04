@@ -14,25 +14,24 @@ This thesis was funded by the University of Rennes 1.
 Description
 -----------
 
-The protocol is meant to provide ironclad privacy in Internet
-communications. It is meant to be run as a peer-to-peer Internet
-overlay, providing privacy to individuals around the world. The design
-is in particular inspired from `Tor <https://torproject.org/>`__, and
-builds on the scientific literature about *mixnets*. It however provides
-much stronger privacy guarantees. In particular, the protocol functions
-on a *homogeneous network*, in which all nodes simultaneously act as
-client, and as relay servers for other nodes. This allows each node to
-conceal its own traffic in the traffic it relays for other peers.
+The protocol is aimed at providing ironclad privacy in Internet communications.
+It is meant to be run as a peer-to-peer Internet overlay, providing privacy to
+individuals around the world. The design is in particular inspired from `Tor
+<https://torproject.org/>`__, and builds on the scientific literature about
+*mixnets*. It however provides stronger privacy guarantees then existing works.
+In particular, the protocol functions on a *homogeneous network*, in which all
+nodes simultaneously act as client, and as relay servers for other nodes. This
+allows each node to conceal its own traffic in the traffic it relays for other
+users.
 
-This repository only contains a basic, insecure implementation, for
-purposes of measuring the privacy and performances that can be expected
-from the protocol. More accurately, it is a *simulation* of the protocol
-that is implemented, using the
-`Simpy <http://simpy.readthedocs.io/en/latest/>`__ discrete-event
-simulator. The code also uses the
-`Networkx <http://networkx.readthedocs.io/en/stable/>`__ library to
-generate and manipulate the network graph, and
-`matplotlib.pyplot <http://matplotlib.org/>`__ to draw various graphs.
+This repository only contains a basic, insecure implementation of this
+protocol, for purposes of measuring the privacy and performances that can be
+expected from the protocol. More accurately, it is a *simulation* of the
+protocol that is implemented, using the `SimPy
+<http://simpy.readthedocs.io/en/latest/>`__ discrete-event simulator. The code
+also uses the `Networkx <http://networkx.readthedocs.io/en/stable/>`__ library
+to generate and manipulate the network graph, and `matplotlib.pyplot
+<http://matplotlib.org/>`__ to draw various graphs.
 
 Getting Started: Running Simulations
 ------------------------------------
@@ -62,7 +61,7 @@ over many runs and over many possible network topologies of the latency
 in communications. The ``measures`` package further provides ways to
 draw graphs from the results.
 
-The ``examples`` folder includes several modules that make use of the
+The ``examples/`` folder includes several modules that make use of the
 benchmark package ``measures``: 
 
 * ``measure_general_efficiency``, allowing in particular to measure 
@@ -82,6 +81,8 @@ modules)
 
 Documentation
 -------------
+
+The documentation is available online at https://aguellier.github.io/apart.
 
 The sources of the documentation are located in ``docs/``. Documentation
 is generated using Sphinx (v. 1.5.3), and the ReadTheDocs theme (v.
