@@ -1,0 +1,347 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>measures.advanced_stats_helper – Helper Class for Computing Statistics &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="APART  documentation" href="index.html"/>
+        <link rel="up" title="measures — Benchmark &amp; Simulation Framework" href="measures.html"/>
+        <link rel="next" title="measures.common_measures — Generic Measure Framework" href="measures.common_measures.html"/>
+        <link rel="prev" title="measures.network_statistics — Hook Class into Network Simulations" href="measures.network_statistics.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">APART</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="packages.html">Packages</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.html"><code class="docutils literal"><span class="pre">common</span></code> &#8212; Helper Modules</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="measures.html"><code class="docutils literal"><span class="pre">measures</span></code> &#8212; Benchmark &amp; Simulation Framework</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="measures.network_statistics.html"><code class="docutils literal"><span class="pre">measures.network_statistics</span></code> &#8212; <em>Hook</em> Class into Network Simulations</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><code class="docutils literal"><span class="pre">measures.advanced_stats_helper</span></code> &#8211; Helper Class for Computing Statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="measures.common_measures.html"><code class="docutils literal"><span class="pre">measures.common_measures</span></code> &#8212; Generic Measure Framework</a></li>
+<li class="toctree-l3"><a class="reference internal" href="measures.file_handling.html"><code class="docutils literal"><span class="pre">measures.file_handling</span></code> &#8212; Saving/Loading Measure Results from Disk</a></li>
+<li class="toctree-l3"><a class="reference internal" href="measures.plotting.html"><code class="docutils literal"><span class="pre">measures.plotting</span></code> &#8212; Plotting Results into Graphs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="packages.html">Packages</a> &raquo;</li>
+        
+          <li><a href="measures.html"><code class="docutils literal"><span class="pre">measures</span></code> &#8212; Benchmark &amp; Simulation Framework</a> &raquo;</li>
+        
+      <li><code class="docutils literal"><span class="pre">measures.advanced_stats_helper</span></code> &#8211; Helper Class for Computing Statistics</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/measures.advanced_stats_helper.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-measures.advanced_stats_helper">
+<span id="measures-advanced-stats-helper-helper-class-for-computing-statistics"></span><h1><code class="docutils literal"><span class="pre">measures.advanced_stats_helper</span></code> &#8211; Helper Class for Computing Statistics<a class="headerlink" href="#module-measures.advanced_stats_helper" title="Permalink to this headline">¶</a></h1>
+<p>This module provides a common basis for computing <em>advanced</em> statistics on the network.</p>
+<p>From a network state after a run, this class provides easy means of computing
+common metrics that are likely to be uses by many measure module. E.g. get the
+average route length from the node&#8217;s routing table.</p>
+<dl class="class">
+<dt id="measures.advanced_stats_helper.AdvancedNetworkStatsHelper">
+<em class="property">class </em><code class="descclassname">measures.advanced_stats_helper.</code><code class="descname">AdvancedNetworkStatsHelper</code><a class="reference internal" href="_modules/measures/advanced_stats_helper.html#AdvancedNetworkStatsHelper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.advanced_stats_helper.AdvancedNetworkStatsHelper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Helper class to compute advanced stats, given the <a class="reference internal" href="apart.core.network.html#apart.core.network.NetworkManager" title="apart.core.network.NetworkManager"><code class="xref py py-obj docutils literal"><span class="pre">NetworkManager</span></code></a> instance of a network run.</p>
+<p>The class implements a form of singleton, but one singleton is created per
+network manager instance provided</p>
+<dl class="class">
+<dt id="measures.advanced_stats_helper.AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton">
+<em class="property">class </em><code class="descname">AdvancedNetworkStatsHelperSingleton</code><span class="sig-paren">(</span><em>net_manager</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/advanced_stats_helper.html#AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.advanced_stats_helper.AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>The singleton class, containing the actual code.</p>
+<p>Given a network manager instance, for a network which run is over,
+initilises the class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>net_manager</strong> (<a class="reference internal" href="apart.core.network.html#apart.core.network.NetworkManager" title="apart.core.network.NetworkManager"><code class="xref py py-obj docutils literal"><span class="pre">NetworkManager</span></code></a>) &#8211; the network manager instance after the network run.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="measures.advanced_stats_helper.AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.histogram_routes_length">
+<code class="descname">histogram_routes_length</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/advanced_stats_helper.html#AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.histogram_routes_length"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.advanced_stats_helper.AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.histogram_routes_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>dict: Histogram of the routes length at the end of the network run.</p>
+<p>The dict is indexed by values of routes length, and its values are
+the number of routes of such length.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="measures.advanced_stats_helper.AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.routes_length_vs_shortest_path">
+<code class="descname">routes_length_vs_shortest_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/advanced_stats_helper.html#AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.routes_length_vs_shortest_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.advanced_stats_helper.AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.routes_length_vs_shortest_path" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="measures.network_statistics.html#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a>: Ratio of the routes length over their corresponding shortest paths</p>
+<p>This property computes the ratio <cite>length(rt)/length(sp)</cite> for each
+route <cite>rt</cite> existing in the networt, where <cite>sp</cite> is the shortest path
+corresponding to <cite>rt</cite>, <em>i.e.</em> the shortest path in the network graph
+that goes from the end-sender of the route to its end receiver. What
+is returned is
+<a class="reference internal" href="measures.network_statistics.html#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a>
+built from these ratios.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.advanced_stats_helper.AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.complete_routes_descriptions">
+<code class="descname">complete_routes_descriptions</code><a class="headerlink" href="#measures.advanced_stats_helper.AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.complete_routes_descriptions" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> &#8211; Returns the description of all routes between all pairs of nodes.</p>
+<p>Returns a dict, indexed by (end-sender, end-receiver), which values
+are lists of lists. That is, d[s,r] = l, and each element of l is a
+list l&#8217; such that (l&#8217;[0] = index of end-sender, indexes of relay
+nodes (and indirection nodes), l&#8217;[-1] = index of end-receiver)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.advanced_stats_helper.AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.nb_neighbors">
+<code class="descname">nb_neighbors</code><a class="headerlink" href="#measures.advanced_stats_helper.AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.nb_neighbors" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="measures.network_statistics.html#measures.network_statistics.RegularStat" title="measures.network_statistics.RegularStat"><code class="xref py py-obj docutils literal"><span class="pre">RegularStat</span></code></a> &#8211; The number of neighbors a node has.</p>
+<p>This property gives the average, minimum, and maximum number of
+neighbors that any node in the network has (along with a standard deviation).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.advanced_stats_helper.AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.nb_routes_btw_pairs">
+<code class="descname">nb_routes_btw_pairs</code><a class="headerlink" href="#measures.advanced_stats_helper.AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.nb_routes_btw_pairs" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="measures.network_statistics.html#measures.network_statistics.RegularStat" title="measures.network_statistics.RegularStat"><code class="xref py py-obj docutils literal"><span class="pre">RegularStat</span></code></a> &#8211; The number of routes between each pairs of nodes at the end of the network run.</p>
+<p>This property gives the average, minimum, and maximum number of
+routes between each pair of node (along with a standard deviation).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.advanced_stats_helper.AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.nb_rt_props">
+<code class="descname">nb_rt_props</code><a class="headerlink" href="#measures.advanced_stats_helper.AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.nb_rt_props" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> &#8211; The total number of routes proposal at the end of the network run.</p>
+<p>This property gives a dict which values are
+<a class="reference internal" href="measures.network_statistics.html#measures.network_statistics.RegularStat" title="measures.network_statistics.RegularStat"><code class="xref py py-obj docutils literal"><span class="pre">RegularStat</span></code></a>
+instances. It is indexed by <cite>&#8216;received&#8217;</cite>, <cite>&#8216;accepted&#8217;</cite>, and
+<cite>&#8216;refused&#8217;</cite>, respectively giving the number of received route
+proposal, the number of accepted ones, and the number of refused
+ones.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.advanced_stats_helper.AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.routes_length">
+<code class="descname">routes_length</code><a class="headerlink" href="#measures.advanced_stats_helper.AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.routes_length" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>list</em> &#8211; The length of all routes at the end of the network run.</p>
+<p>This property is a list of dict, each dict containing keys
+<cite>&#8216;sender&#8217;</cite>, <cite>&#8216;receiver&#8217;</cite>, and <cite>&#8216;length&#8217;</cite>. Each element of the list
+represents one route.</p>
+</dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="measures.common_measures.html" class="btn btn-neutral float-right" title="measures.common_measures — Generic Measure Framework" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="measures.network_statistics.html" class="btn btn-neutral" title="measures.network_statistics — Hook Class into Network Simulations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

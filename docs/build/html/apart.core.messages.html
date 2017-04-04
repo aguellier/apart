@@ -1,0 +1,555 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>apart.core.messages — Network Messages &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="APART  documentation" href="index.html"/>
+        <link rel="up" title="apart.core — Protocol’s Core Components" href="apart.core.html"/>
+        <link rel="next" title="apart.core.pools — Message Pools and Batching" href="apart.core.pools.html"/>
+        <link rel="prev" title="apart.core.tables — Routing Tables" href="apart.core.tables.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">APART</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="packages.html">Packages</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="apart.crypto.html"><code class="docutils literal"><span class="pre">apart.crypto</span></code> &#8212; Cryptography</a></li>
+<li class="toctree-l3"><a class="reference internal" href="apart.simulation.html"><code class="docutils literal"><span class="pre">apart.simulation</span></code> &#8212; Running simulations</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="apart.core.html"><code class="docutils literal"><span class="pre">apart.core</span></code> &#8212; Protocol&#8217;s Core Components</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="apart.core.network.html"><code class="docutils literal"><span class="pre">apart.core.network</span></code> &#8212; Network and Network Manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.node.html"><code class="docutils literal"><span class="pre">apart.core.node</span></code> &#8212; Node Code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.tables.html"><code class="docutils literal"><span class="pre">apart.core.tables</span></code> &#8212; Routing Tables</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="docutils literal"><span class="pre">apart.core.messages</span></code> &#8212; Network Messages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.pools.html"><code class="docutils literal"><span class="pre">apart.core.pools</span></code> &#8212; Message Pools and Batching</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.controlled_traffic_rates.html"><code class="docutils literal"><span class="pre">apart.core.controlled_traffic_rates</span></code> &#8212;- Controlled traffic rates mechanism</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.protocol_constants.html"><code class="docutils literal"><span class="pre">apart.core.protocol_constants</span></code> &#8212; Misc. Constants</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html"><code class="docutils literal"><span class="pre">common</span></code> &#8212; Helper Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="measures.html"><code class="docutils literal"><span class="pre">measures</span></code> &#8212; Benchmark &amp; Simulation Framework</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="packages.html">Packages</a> &raquo;</li>
+        
+          <li><a href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a> &raquo;</li>
+        
+          <li><a href="apart.core.html"><code class="docutils literal"><span class="pre">apart.core</span></code> &#8212; Protocol&#8217;s Core Components</a> &raquo;</li>
+        
+      <li><code class="docutils literal"><span class="pre">apart.core.messages</span></code> &#8212; Network Messages</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/apart.core.messages.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-apart.core.messages">
+<span id="apart-core-messages-network-messages"></span><h1><code class="docutils literal"><span class="pre">apart.core.messages</span></code> &#8212; Network Messages<a class="headerlink" href="#module-apart.core.messages" title="Permalink to this headline">¶</a></h1>
+<p>This module provides classes to manage messages exchanged by nodes in the protocol.</p>
+<p>The main class is <a class="reference internal" href="#apart.core.messages.LinkMsg" title="apart.core.messages.LinkMsg"><code class="xref py py-class docutils literal"><span class="pre">LinkMsg</span></code></a>, which models a link message. The enum
+classes <a class="reference internal" href="#apart.core.messages.MsgFlag" title="apart.core.messages.MsgFlag"><code class="xref py py-class docutils literal"><span class="pre">MsgFlag</span></code></a> and <a class="reference internal" href="#apart.core.messages.MsgInnerFlag" title="apart.core.messages.MsgInnerFlag"><code class="xref py py-class docutils literal"><span class="pre">MsgInnerFlag</span></code></a> respectively provides
+constant coding the types of link and end-to-end messages.</p>
+<dl class="exception">
+<dt id="apart.core.messages.EndToEndDummyError">
+<em class="property">exception </em><code class="descclassname">apart.core.messages.</code><code class="descname">EndToEndDummyError</code><a class="reference internal" href="_modules/apart/core/messages.html#EndToEndDummyError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.messages.EndToEndDummyError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
+<p>Raised when a node is not able to produce an end-to-end dummy</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="apart.core.messages.LinkMsg">
+<em class="property">class </em><code class="descclassname">apart.core.messages.</code><code class="descname">LinkMsg</code><span class="sig-paren">(</span><em>sent_by</em>, <em>sent_to</em>, <em>c1</em>, <em>c2</em>, <em>flag</em>, <em>cid=None</em>, <em>rcid=None</em>, <em>seq_index=None</em>, <em>additional_info={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/messages.html#LinkMsg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.messages.LinkMsg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>This is the main class of this module. It basically
+contains a header (an instance of <a class="reference internal" href="#apart.core.messages.LinkMsgHeader" title="apart.core.messages.LinkMsgHeader"><code class="xref py py-class docutils literal"><span class="pre">LinkMsgHeader</span></code></a>), two
+ciphertexts  <code class="docutils literal"><span class="pre">c1</span></code> and <code class="docutils literal"><span class="pre">c2</span></code>, the identities of the link-sender and
+the link-receiver, plus additional info for debugging and computing
+statistics.</p>
+<dl class="staticmethod">
+<dt id="apart.core.messages.LinkMsg.create_dummy">
+<em class="property">static </em><code class="descname">create_dummy</code><span class="sig-paren">(</span><em>sent_by</em>, <em>sent_to</em>, <em>link_key=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/messages.html#LinkMsg.create_dummy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.messages.LinkMsg.create_dummy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience function providing a shortcut to create a link dummy message.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sent_by</strong> (<em>int</em>) &#8211; index of the link-sender node</li>
+<li><strong>sent_to</strong> (<em>int</em>) &#8211; index of the link-receiver node</li>
+<li><strong>link_key</strong> (<em>any</em><em>, </em><em>optional</em>) &#8211; not used in this implementation</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a dummy link message (with a <em>dummy</em> flag in its header)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#apart.core.messages.LinkMsg" title="apart.core.messages.LinkMsg"><code class="xref py py-obj docutils literal"><span class="pre">LinkMsg</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.LinkMsg.additional_info">
+<code class="descname">additional_info</code><a class="headerlink" href="#apart.core.messages.LinkMsg.additional_info" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict str-&gt;any</em> &#8211; Adidtional information transported along with the message. For debug and measures purposes</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.LinkMsg.c1">
+<code class="descname">c1</code><a class="headerlink" href="#apart.core.messages.LinkMsg.c1" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="apart.crypto.html#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a> &#8211; the first Elgamal ciphertext of the message</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.LinkMsg.c2">
+<code class="descname">c2</code><a class="headerlink" href="#apart.core.messages.LinkMsg.c2" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="apart.crypto.html#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a> &#8211; the second Elgamal ciphertext of the message</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.LinkMsg.cid">
+<code class="descname">cid</code><a class="headerlink" href="#apart.core.messages.LinkMsg.cid" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; the cid value contained in  the message header (see <a class="reference internal" href="#apart.core.messages.LinkMsgHeader.cid" title="apart.core.messages.LinkMsgHeader.cid"><code class="xref py py-attr docutils literal"><span class="pre">LinkMsgHeader.cid</span></code></a>)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.LinkMsg.flag">
+<code class="descname">flag</code><a class="headerlink" href="#apart.core.messages.LinkMsg.flag" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#apart.core.messages.MsgFlag" title="apart.core.messages.MsgFlag"><code class="xref py py-obj docutils literal"><span class="pre">MsgFlag</span></code></a> &#8211; the flag contained in  the message header (see <a class="reference internal" href="#apart.core.messages.LinkMsgHeader.flag" title="apart.core.messages.LinkMsgHeader.flag"><code class="xref py py-attr docutils literal"><span class="pre">LinkMsgHeader.flag</span></code></a>)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.LinkMsg.header">
+<code class="descname">header</code><a class="headerlink" href="#apart.core.messages.LinkMsg.header" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#apart.core.messages.LinkMsgHeader" title="apart.core.messages.LinkMsgHeader"><code class="xref py py-obj docutils literal"><span class="pre">LinkMsgHeader</span></code></a> &#8211; the full message header</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.LinkMsg.rcid">
+<code class="descname">rcid</code><a class="headerlink" href="#apart.core.messages.LinkMsg.rcid" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; the rcid contained in the message header (see <a class="reference internal" href="#apart.core.messages.LinkMsgHeader.rcid" title="apart.core.messages.LinkMsgHeader.rcid"><code class="xref py py-attr docutils literal"><span class="pre">LinkMsgHeader.rcid</span></code></a>)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.LinkMsg.sent_by">
+<code class="descname">sent_by</code><a class="headerlink" href="#apart.core.messages.LinkMsg.sent_by" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; the index of the link-sender node</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.LinkMsg.sent_to">
+<code class="descname">sent_to</code><a class="headerlink" href="#apart.core.messages.LinkMsg.sent_to" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; the index of the link-receiver node</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.LinkMsg.seq_index">
+<code class="descname">seq_index</code><a class="headerlink" href="#apart.core.messages.LinkMsg.seq_index" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; the sequence index contained in the message header  (see <a class="reference internal" href="#apart.core.messages.LinkMsgHeader.seq_index" title="apart.core.messages.LinkMsgHeader.seq_index"><code class="xref py py-attr docutils literal"><span class="pre">LinkMsgHeader.seq_index</span></code></a>)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="apart.core.messages.LinkMsgHeader">
+<em class="property">class </em><code class="descclassname">apart.core.messages.</code><code class="descname">LinkMsgHeader</code><span class="sig-paren">(</span><em>flag</em>, <em>cid=None</em>, <em>rcid=None</em>, <em>seq_index=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/messages.html#LinkMsgHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.messages.LinkMsgHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A link message header, containing at least a flag (type), and possibly, a cid, a rcid, and a sequence index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>flag</strong> (<a class="reference internal" href="#apart.core.messages.MsgFlag" title="apart.core.messages.MsgFlag"><code class="xref py py-obj docutils literal"><span class="pre">MsgFlag</span></code></a>) &#8211; the flag of the message, specifying its type</li>
+<li><strong>cid</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; the circuit identifier value cid (Default: None)</li>
+<li><strong>rcid</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; the reverse circuit identifier value rcid (Default: None)</li>
+<li><strong>seq_index</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; the sequence index of the message, used in route proposals (Default: None)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="apart.core.messages.LinkMsgHeader.cid">
+<code class="descname">cid</code><a class="headerlink" href="#apart.core.messages.LinkMsgHeader.cid" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; the circuit identifier.</p>
+<p>This value can be None, for messages with flag <a class="reference internal" href="#apart.core.messages.MsgFlag.DUMMY" title="apart.core.messages.MsgFlag.DUMMY"><code class="xref py py-attr docutils literal"><span class="pre">MsgFlag.DUMMY</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.LinkMsgHeader.flag">
+<code class="descname">flag</code><a class="headerlink" href="#apart.core.messages.LinkMsgHeader.flag" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#apart.core.messages.MsgFlag" title="apart.core.messages.MsgFlag"><code class="xref py py-obj docutils literal"><span class="pre">MsgFlag</span></code></a> &#8211; the flag specifying the type of the message</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.LinkMsgHeader.rcid">
+<code class="descname">rcid</code><a class="headerlink" href="#apart.core.messages.LinkMsgHeader.rcid" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; the reverse circuit identifier.</p>
+<p>The only type of messages that should have a reverse circuit identifier
+are those with flags <a class="reference internal" href="#apart.core.messages.MsgFlag.RTPROP_RELAY_FWD" title="apart.core.messages.MsgFlag.RTPROP_RELAY_FWD"><code class="xref py py-attr docutils literal"><span class="pre">MsgFlag.RTPROP_RELAY_FWD</span></code></a> and
+<a class="reference internal" href="#apart.core.messages.MsgFlag.RTPROP_RELAY_BWD" title="apart.core.messages.MsgFlag.RTPROP_RELAY_BWD"><code class="xref py py-attr docutils literal"><span class="pre">MsgFlag.RTPROP_RELAY_BWD</span></code></a>. For other messages, this value is None.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.LinkMsgHeader.seq_index">
+<code class="descname">seq_index</code><a class="headerlink" href="#apart.core.messages.LinkMsgHeader.seq_index" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; the sequence index of the message.</p>
+<p>Sequence indexesUsed are used to differentiate the first and second
+message in a route proposal. Indeed, every step of the route proposals
+require two messages. Having this sequence index makes it easier to
+differentiate them.&lt;</p>
+<p>The only type of messages that should have a sequence index
+are those relating to route proposals. For other messages, this value is None.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="apart.core.messages.MsgFlag">
+<em class="property">class </em><code class="descclassname">apart.core.messages.</code><code class="descname">MsgFlag</code><a class="reference internal" href="_modules/apart/core/messages.html#MsgFlag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.messages.MsgFlag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">enum.IntEnum</span></code></p>
+<p>An enumeration class giving the types of link messages in the network</p>
+<dl class="attribute">
+<dt id="apart.core.messages.MsgFlag.DUMMY">
+<code class="descname">DUMMY</code><em class="property"> = 7</em><a class="headerlink" href="#apart.core.messages.MsgFlag.DUMMY" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dummy link message</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.MsgFlag.PAYLOAD">
+<code class="descname">PAYLOAD</code><em class="property"> = 6</em><a class="headerlink" href="#apart.core.messages.MsgFlag.PAYLOAD" title="Permalink to this definition">¶</a></dt>
+<dd><p>A regular payload message</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.MsgFlag.RTPROP">
+<code class="descname">RTPROP</code><em class="property"> = 1</em><a class="headerlink" href="#apart.core.messages.MsgFlag.RTPROP" title="Permalink to this definition">¶</a></dt>
+<dd><p>The first message in a route proposition</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.MsgFlag.RTPROP_ANSWER">
+<code class="descname">RTPROP_ANSWER</code><em class="property"> = 2</em><a class="headerlink" href="#apart.core.messages.MsgFlag.RTPROP_ANSWER" title="Permalink to this definition">¶</a></dt>
+<dd><p>Message sent by the proposee after receiving the <a class="reference internal" href="#apart.core.messages.MsgFlag.RTPROP" title="apart.core.messages.MsgFlag.RTPROP"><code class="xref py py-attr docutils literal"><span class="pre">RTPROP</span></code></a> and <code class="xref py py-attr docutils literal"><span class="pre">RTPROP_INFO</span></code> messages</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.MsgFlag.RTPROP_FINAL">
+<code class="descname">RTPROP_FINAL</code><em class="property"> = 3</em><a class="headerlink" href="#apart.core.messages.MsgFlag.RTPROP_FINAL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Message sent by the proposer, that terminates the route proposal</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.MsgFlag.RTPROP_RELAY_BWD">
+<code class="descname">RTPROP_RELAY_BWD</code><em class="property"> = 5</em><a class="headerlink" href="#apart.core.messages.MsgFlag.RTPROP_RELAY_BWD" title="Permalink to this definition">¶</a></dt>
+<dd><p>The message to relay from receiver back to proposer in a relayed proposal</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.MsgFlag.RTPROP_RELAY_FWD">
+<code class="descname">RTPROP_RELAY_FWD</code><em class="property"> = 4</em><a class="headerlink" href="#apart.core.messages.MsgFlag.RTPROP_RELAY_FWD" title="Permalink to this definition">¶</a></dt>
+<dd><p>The message to relay from proposer to receiver in a relayed proposal</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="apart.core.messages.MsgInnerFlag">
+<em class="property">class </em><code class="descclassname">apart.core.messages.</code><code class="descname">MsgInnerFlag</code><a class="reference internal" href="_modules/apart/core/messages.html#MsgInnerFlag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.messages.MsgInnerFlag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">enum.IntEnum</span></code></p>
+<p>An enumeration class giving the different flags an encapsulated message can have.</p>
+<p>These flags usually go into the first ciphertext of the link messages), and
+are in particular used to signal end-to-end dummy messages and oriented
+communication messages</p>
+<dl class="attribute">
+<dt id="apart.core.messages.MsgInnerFlag.DUMMY">
+<code class="descname">DUMMY</code><em class="property"> = 1</em><a class="headerlink" href="#apart.core.messages.MsgInnerFlag.DUMMY" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dummy en-to-end message</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.MsgInnerFlag.OCOM_CLOSE">
+<code class="descname">OCOM_CLOSE</code><em class="property"> = 4</em><a class="headerlink" href="#apart.core.messages.MsgInnerFlag.OCOM_CLOSE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates to the helper the closing of the session</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.MsgInnerFlag.OCOM_INIT">
+<code class="descname">OCOM_INIT</code><em class="property"> = 2</em><a class="headerlink" href="#apart.core.messages.MsgInnerFlag.OCOM_INIT" title="Permalink to this definition">¶</a></dt>
+<dd><p>A message part of the oriented communication initialization, exchanged between sender and helper</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.MsgInnerFlag.OCOM_RCV">
+<code class="descname">OCOM_RCV</code><em class="property"> = 3</em><a class="headerlink" href="#apart.core.messages.MsgInnerFlag.OCOM_RCV" title="Permalink to this definition">¶</a></dt>
+<dd><p>A message part of an oriented communication, for the end-receiver</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="apart.core.messages.MsgInnerHeader">
+<em class="property">class </em><code class="descclassname">apart.core.messages.</code><code class="descname">MsgInnerHeader</code><span class="sig-paren">(</span><em>flag</em>, <em>ocomid=None</em>, <em>seq_index=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/messages.html#MsgInnerHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.messages.MsgInnerHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Inner header of a message of type <a class="reference internal" href="#apart.core.messages.MsgFlag.PAYLOAD" title="apart.core.messages.MsgFlag.PAYLOAD"><code class="xref py py-attr docutils literal"><span class="pre">MsgFlag.PAYLOAD</span></code></a>.</p>
+<p>An inner header contains data regarding the management of  oriented
+communications and their initializations, and regarding end-to-end dummy
+messages</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>flag</strong> (<a class="reference internal" href="#apart.core.messages.MsgInnerFlag" title="apart.core.messages.MsgInnerFlag"><code class="xref py py-obj docutils literal"><span class="pre">MsgInnerFlag</span></code></a>) &#8211; the inner flag, specifying whether the message is an end-to-end dummy,
+or one pertaining to an oriented communication</li>
+<li><strong>ocomid</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; the oriented communication identifier (Default: None)</li>
+<li><strong>seq_index</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; the sequence index of messages in an oriented communication (Default: None)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="apart.core.messages.MsgInnerHeader.flag">
+<code class="descname">flag</code><a class="headerlink" href="#apart.core.messages.MsgInnerHeader.flag" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#apart.core.messages.MsgInnerFlag" title="apart.core.messages.MsgInnerFlag"><code class="xref py py-obj docutils literal"><span class="pre">MsgInnerFlag</span></code></a> &#8211; the inner flag.</p>
+<p>This flag specifies whether the message is an end-to-end dummy, or one
+pertaining to an oriented communication. In th elatter case, it also
+specifies which message it is as part of the initialisation of the communication.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.MsgInnerHeader.ocomid">
+<code class="descname">ocomid</code><a class="headerlink" href="#apart.core.messages.MsgInnerHeader.ocomid" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; the oriented communication identifier.</p>
+<p>Present in all payload and rtproprelay messages of oriented communications.</p>
+<p>This value is None for end-to-end dummy messages (with inner flag <a class="reference internal" href="#apart.core.messages.MsgInnerFlag.DUMMY" title="apart.core.messages.MsgInnerFlag.DUMMY"><code class="xref py py-attr docutils literal"><span class="pre">MsgInnerFlag.DUMMY</span></code></a>).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.messages.MsgInnerHeader.seq_index">
+<code class="descname">seq_index</code><a class="headerlink" href="#apart.core.messages.MsgInnerHeader.seq_index" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; the sequence index of messages in an oriented communication</p>
+<p>This allows the actors of an oriented communication to know which
+message contains which information. Without this sequence index, the
+end-sender and indirectio nnode would not be able to run the oriented
+communicatio ninitlaisation properly.</p>
+<p>This value is None for end-to-end dummy messages (with inner flag <a class="reference internal" href="#apart.core.messages.MsgInnerFlag.DUMMY" title="apart.core.messages.MsgInnerFlag.DUMMY"><code class="xref py py-attr docutils literal"><span class="pre">MsgInnerFlag.DUMMY</span></code></a>).</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="apart.core.pools.html" class="btn btn-neutral float-right" title="apart.core.pools — Message Pools and Batching" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="apart.core.tables.html" class="btn btn-neutral" title="apart.core.tables — Routing Tables" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

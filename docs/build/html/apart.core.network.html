@@ -1,0 +1,785 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>apart.core.network — Network and Network Manager &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="APART  documentation" href="index.html"/>
+        <link rel="up" title="apart.core — Protocol’s Core Components" href="apart.core.html"/>
+        <link rel="next" title="apart.core.node — Node Code" href="apart.core.node.html"/>
+        <link rel="prev" title="apart.core — Protocol’s Core Components" href="apart.core.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">APART</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="packages.html">Packages</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="apart.crypto.html"><code class="docutils literal"><span class="pre">apart.crypto</span></code> &#8212; Cryptography</a></li>
+<li class="toctree-l3"><a class="reference internal" href="apart.simulation.html"><code class="docutils literal"><span class="pre">apart.simulation</span></code> &#8212; Running simulations</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="apart.core.html"><code class="docutils literal"><span class="pre">apart.core</span></code> &#8212; Protocol&#8217;s Core Components</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="docutils literal"><span class="pre">apart.core.network</span></code> &#8212; Network and Network Manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.node.html"><code class="docutils literal"><span class="pre">apart.core.node</span></code> &#8212; Node Code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.tables.html"><code class="docutils literal"><span class="pre">apart.core.tables</span></code> &#8212; Routing Tables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.messages.html"><code class="docutils literal"><span class="pre">apart.core.messages</span></code> &#8212; Network Messages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.pools.html"><code class="docutils literal"><span class="pre">apart.core.pools</span></code> &#8212; Message Pools and Batching</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.controlled_traffic_rates.html"><code class="docutils literal"><span class="pre">apart.core.controlled_traffic_rates</span></code> &#8212;- Controlled traffic rates mechanism</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.protocol_constants.html"><code class="docutils literal"><span class="pre">apart.core.protocol_constants</span></code> &#8212; Misc. Constants</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html"><code class="docutils literal"><span class="pre">common</span></code> &#8212; Helper Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="measures.html"><code class="docutils literal"><span class="pre">measures</span></code> &#8212; Benchmark &amp; Simulation Framework</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="packages.html">Packages</a> &raquo;</li>
+        
+          <li><a href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a> &raquo;</li>
+        
+          <li><a href="apart.core.html"><code class="docutils literal"><span class="pre">apart.core</span></code> &#8212; Protocol&#8217;s Core Components</a> &raquo;</li>
+        
+      <li><code class="docutils literal"><span class="pre">apart.core.network</span></code> &#8212; Network and Network Manager</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/apart.core.network.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-apart.core.network">
+<span id="apart-core-network-network-and-network-manager"></span><h1><code class="docutils literal"><span class="pre">apart.core.network</span></code> &#8212; Network and Network Manager<a class="headerlink" href="#module-apart.core.network" title="Permalink to this headline">¶</a></h1>
+<p>This module contains classes managing the network.</p>
+<p>The class <a class="reference internal" href="#apart.core.network.Network" title="apart.core.network.Network"><code class="xref py py-class docutils literal"><span class="pre">Network</span></code></a> represents a network, and class
+<a class="reference internal" href="#apart.core.network.NetworkManager" title="apart.core.network.NetworkManager"><code class="xref py py-class docutils literal"><span class="pre">NetworkManager</span></code></a> the manager of the network.The
+manager is responsible for triggering the different <em>phases</em> of the network
+(coded in <a class="reference internal" href="#apart.core.network.NetPhase" title="apart.core.network.NetPhase"><code class="xref py py-class docutils literal"><span class="pre">NetPhase</span></code></a>), and starting the nodes
+processes. The network itself contains the topology graph and the list of nodes
+that compose the network.</p>
+<p>This module does not contain code properly relatin to the protocol. All the code
+of the protocol, and the behavior of nodes, is coded in module
+<a class="reference internal" href="apart.core.node.html#module-apart.core.node" title="apart.core.node"><code class="xref py py-mod docutils literal"><span class="pre">node</span></code></a>.</p>
+<p>This module also defines the <a class="reference internal" href="#apart.core.network.SimulationException" title="apart.core.network.SimulationException"><code class="xref py py-exc docutils literal"><span class="pre">SimulationException</span></code></a> exception.</p>
+<dl class="exception">
+<dt id="apart.core.network.SimulationException">
+<em class="property">exception </em><code class="descclassname">apart.core.network.</code><code class="descname">SimulationException</code><a class="reference internal" href="_modules/apart/core/network.html#SimulationException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.network.SimulationException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
+<p>Raised when an error occurs due to the handling SimPy simulation, or during the lifetime of the network</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="apart.core.network.NetPhase">
+<em class="property">class </em><code class="descclassname">apart.core.network.</code><code class="descname">NetPhase</code><a class="reference internal" href="_modules/apart/core/network.html#NetPhase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.network.NetPhase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">enum.IntEnum</span></code></p>
+<p>Constants coding the different phases of the network</p>
+<dl class="attribute">
+<dt id="apart.core.network.NetPhase.INIT">
+<code class="descname">INIT</code><em class="property"> = 0</em><a class="headerlink" href="#apart.core.network.NetPhase.INIT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetPhase.OCOM">
+<code class="descname">OCOM</code><em class="property"> = 3</em><a class="headerlink" href="#apart.core.network.NetPhase.OCOM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetPhase.OCOM_FINISHED">
+<code class="descname">OCOM_FINISHED</code><em class="property"> = 4</em><a class="headerlink" href="#apart.core.network.NetPhase.OCOM_FINISHED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetPhase.TOPO_DISS">
+<code class="descname">TOPO_DISS</code><em class="property"> = 1</em><a class="headerlink" href="#apart.core.network.NetPhase.TOPO_DISS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetPhase.TOPO_DISS_FINISHED">
+<code class="descname">TOPO_DISS_FINISHED</code><em class="property"> = 2</em><a class="headerlink" href="#apart.core.network.NetPhase.TOPO_DISS_FINISHED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="apart.core.network.Network">
+<em class="property">class </em><code class="descclassname">apart.core.network.</code><code class="descname">Network</code><span class="sig-paren">(</span><em>net_manager</em>, <em>simpy_env</em>, <em>sim_params</em>, <em>net_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/network.html#Network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.network.Network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>The network which nodes are part of.</p>
+<dl class="docutils">
+<dt>This class is repsonsible for:</dt>
+<dd><ul class="first last simple">
+<li>Managing the set of nodes</li>
+<li>Creating and managing the topology graph</li>
+</ul>
+</dd>
+</dl>
+<p>The constructor creates the topology graph, creates the nodes
+(<a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-obj docutils literal"><span class="pre">Node</span></code></a> objects), generates a subset of
+corrupted nodes,</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>net_manager</strong> (<code class="xref py py-obj docutils literal"><span class="pre">NetworManager</span></code>) &#8211; the manager of
+the network</li>
+<li><strong>simpy_env</strong> (<code class="xref py py-obj docutils literal"><span class="pre">simpy.Environment</span></code>) &#8211; the simpy environment</li>
+<li><strong>sim_params</strong> (<code class="xref py py-obj docutils literal"><span class="pre">SimulationParams</span></code>) &#8211; set of
+parameters for the simulation</li>
+<li><strong>net_params</strong> (<a class="reference internal" href="#apart.core.network.NetworkParams" title="apart.core.network.NetworkParams"><code class="xref py py-obj docutils literal"><span class="pre">NetworkParams</span></code></a>) &#8211; set of
+parameters for the network (nb nodes, etc.)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="apart.core.network.Network.draw_routes">
+<code class="descname">draw_routes</code><span class="sig-paren">(</span><em>*args</em>, <em>blocking=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/network.html#Network.draw_routes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.network.Network.draw_routes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw the routes between one or several pairs of nodes</p>
+<p>For each sender-receiver pair in argument, the function will draw all
+the routes that the sender knows towards the receiver.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>args</strong> (<em>list of 2-tuple</em>) &#8211; a list of 2-tuple, each specifying a source and a destination</li>
+<li><strong>blocking</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; whether or not the python program
+should be stopped until the gtk window is closed, or
+should continue to run in the background</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.network.Network.draw_topology_graph">
+<code class="descname">draw_topology_graph</code><span class="sig-paren">(</span><em>blocking=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/network.html#Network.draw_topology_graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.network.Network.draw_topology_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw the topology graph of the network</p>
+<p>Creates a new gtk window, and displays the graph in it. This function
+can be called in a <em>blocking</em> fashion or not, in which case the program
+(and the network simulation) are stopped while the gtk window is open.2</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>blocking</strong> (<em>*</em>) &#8211; whether or not the python program
+should be stopped until the gtk window is closed, or
+should continue to run in the background</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="apart.core.network.Network.gen_corruption_states">
+<em class="property">static </em><code class="descname">gen_corruption_states</code><span class="sig-paren">(</span><em>nb_nodes</em>, <em>corruption_ratio</em>, <em>topology_graph</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/network.html#Network.gen_corruption_states"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.network.Network.gen_corruption_states" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a random set of corrupted nodes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nb_nodes</strong> (<em>int</em>) &#8211; total number of nodes in the network</li>
+<li><strong>corruption_ratio</strong> (<em>float</em>) &#8211; float between 0 and 1, representing
+the percent of corrupted nodes in the network</li>
+<li><strong>topology_graph</strong> (<code class="xref py py-obj docutils literal"><span class="pre">networkx.Graph</span></code>) &#8211; the topology graph of the
+network</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="apart.core.network.Network.gen_topology_graph">
+<em class="property">static </em><code class="descname">gen_topology_graph</code><span class="sig-paren">(</span><em>nb_nodes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/network.html#Network.gen_topology_graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.network.Network.gen_topology_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a random (but fully connected) physical graph of the appropriate number of nodes.</p>
+<p>Uses the networkx graph library.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a topology graph (random connected graph)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal"><span class="pre">networkx.Graph</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.Network.batching_round">
+<code class="descname">batching_round</code><a class="headerlink" href="#apart.core.network.Network.batching_round" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; Returns the current network batching round</p>
+<p>In a real-world network, each node would  manage its own batching
+counter. Although all nodes have the same batching interval, skewing in
+their clocks imply that different nodes can be in different rounds (all
+nodes are not perfectly in sync). This function returns the maximum
+batching round over all nodes.</p>
+<p>Note that in this &#8220;implementation&#8221; with SimPy, all node clocks are
+perfectly in sync, and thus all nodes are exactly in the same batching round.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.Network.corrupted_nodes">
+<code class="descname">corrupted_nodes</code><a class="headerlink" href="#apart.core.network.Network.corrupted_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of <a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-obj docutils literal"><span class="pre">Node</span></code></a> &#8211; The set of corrupted nodes</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.Network.nb_nodes">
+<code class="descname">nb_nodes</code><a class="headerlink" href="#apart.core.network.Network.nb_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; Number of nodes in the networks</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.Network.network_uid">
+<code class="descname">network_uid</code><a class="headerlink" href="#apart.core.network.Network.network_uid" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; The network unique id</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.Network.nodes">
+<code class="descname">nodes</code><a class="headerlink" href="#apart.core.network.Network.nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of <a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-obj docutils literal"><span class="pre">Node</span></code></a> &#8211; The list of nodes in the network. The list is passed by reference, but should not be modified. Nodes inside the list can be modified.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.Network.params">
+<code class="descname">params</code><a class="headerlink" href="#apart.core.network.Network.params" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#apart.core.network.NetworkParams" title="apart.core.network.NetworkParams"><code class="xref py py-obj docutils literal"><span class="pre">apart.core.network.NetworkParams</span></code></a> &#8211; The network parameters</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.Network.routing_tables_sqlite_db_cursor">
+<code class="descname">routing_tables_sqlite_db_cursor</code><a class="headerlink" href="#apart.core.network.Network.routing_tables_sqlite_db_cursor" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">sqlite3.Cursor</span></code> &#8211; The sqlite3 database cursor internally used by the node&#8217;s routing table implementations</p>
+<p>For statistics computing, and inspection of routing tables after the run
+of the network, it is sometimes useful to directly access the sqlite3 cursor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.Network.timestamp">
+<code class="descname">timestamp</code><a class="headerlink" href="#apart.core.network.Network.timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; Returns the SimPy simulation time, rounded to the next integer</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.Network.topology_graph">
+<code class="descname">topology_graph</code><a class="headerlink" href="#apart.core.network.Network.topology_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">networkx.Graph</span></code> &#8211; The network&#8217;s underlying topology graph</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="apart.core.network.NetworkManager">
+<em class="property">class </em><code class="descclassname">apart.core.network.</code><code class="descname">NetworkManager</code><span class="sig-paren">(</span><em>sim_params</em>, <em>net_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/network.html#NetworkManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.network.NetworkManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class modeling a network manager.</p>
+<p>The network manager is responsible for:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Creating and managing a <a class="reference internal" href="#apart.core.network.Network" title="apart.core.network.Network"><code class="xref py py-obj docutils literal"><span class="pre">Network</span></code></a> instance</li>
+<li>Checking the termination of the topology dissemination and oriented communication phases</li>
+<li>Managing the (uniqueness of) the cid, rcid, and ocomid</li>
+<li>Gathering the statistics on the network</li>
+</ul>
+</div></blockquote>
+<p>Note that after a simulation of the network,
+<a class="reference internal" href="apart.simulation.html#apart.simulation.run_simulation" title="apart.simulation.run_simulation"><code class="xref py py-func docutils literal"><span class="pre">run_simulation()</span></code></a> returns an instance of this
+class. That is, it returns the network manager, containing the network
+in its final state, and the attribute <code class="xref py py-attr docutils literal"><span class="pre">net_params</span></code>. The latter is
+particularly useful to extract information on the network and the
+protocol (such as the total number of routes proposed, or the latency of
+communications).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sim_params</strong> (<code class="xref py py-obj docutils literal"><span class="pre">SimulationParams</span></code>) &#8211; set of
+parameters for the simulation</li>
+<li><strong>net_params</strong> (<a class="reference internal" href="#apart.core.network.NetworkParams" title="apart.core.network.NetworkParams"><code class="xref py py-obj docutils literal"><span class="pre">NetworkParams</span></code></a>) &#8211; set of
+parameters for the network (nb nodes, etc.)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="apart.core.network.NetworkManager.check_network_idleness">
+<code class="descname">check_network_idleness</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/network.html#NetworkManager.check_network_idleness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.network.NetworkManager.check_network_idleness" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check of all nodes in the network are idle, and takes the adequate course of  actions.</p>
+<p>The network becomes idle a first time at the end of topology
+dissemination. At this point, if the simulation asks to perform the
+oriented communication phase, the network manager moves to this phase,
+and notifies the nodes. Otherwise, it stops all nodes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.network.NetworkManager.get_next_cid">
+<code class="descname">get_next_cid</code><span class="sig-paren">(</span><em>n1</em>, <em>n2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/network.html#NetworkManager.get_next_cid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.network.NetworkManager.get_next_cid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the next circuit identifier between nodes <cite>n1</cite> and <cite>n2</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>n1</strong> (<em>int</em>) &#8211; index of the first node</li>
+<li><strong>n2</strong> (<em>int</em>) &#8211; index of the second node</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a new cid for use between node n1 and node n2, a cid never used by this pair</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.network.NetworkManager.get_next_ocomid">
+<code class="descname">get_next_ocomid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/network.html#NetworkManager.get_next_ocomid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.network.NetworkManager.get_next_ocomid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the next oriented communication identifier</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a network-wide unique oriented communication identifier</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.network.NetworkManager.get_next_rcid">
+<code class="descname">get_next_rcid</code><span class="sig-paren">(</span><em>n1</em>, <em>n2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/network.html#NetworkManager.get_next_rcid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.network.NetworkManager.get_next_rcid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the next reverse circuit identifier between nodes <cite>n1</cite> and <cite>n2</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>n1</strong> (<em>int</em>) &#8211; index of the first node</li>
+<li><strong>n2</strong> (<em>int</em>) &#8211; index of the second node</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a new rcid for use between node n1 and node n2, a rcid never used by this pair</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.network.NetworkManager.start">
+<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/network.html#NetworkManager.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.network.NetworkManager.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starts the network. Calls <a class="reference internal" href="#apart.core.network.NetworkManager.start_topology_dissemination" title="apart.core.network.NetworkManager.start_topology_dissemination"><code class="xref py py-meth docutils literal"><span class="pre">start_topology_dissemination()</span></code></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.network.NetworkManager.start_oriented_communication_phase">
+<code class="descname">start_oriented_communication_phase</code><span class="sig-paren">(</span><em>ocom_sessions_per_node=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/network.html#NetworkManager.start_oriented_communication_phase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.network.NetworkManager.start_oriented_communication_phase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the oriented communication phase in the network.</p>
+<p>Using the <cite>ocom_session_per_node</cite> argument if one is provided, or the
+<code class="xref py py-attr docutils literal"><span class="pre">oriented_communication_sessions</span></code>
+attribute of the simulation parameters, provides each node with a set of
+sessions to run as end-sender.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="#apart.core.network.SimulationException" title="apart.core.network.SimulationException"><code class="xref py py-exc docutils literal"><span class="pre">SimulationException</span></code></a> &#8211; if the oriented communication parameter is not well formed</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.network.NetworkManager.start_topology_dissemination">
+<code class="descname">start_topology_dissemination</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/network.html#NetworkManager.start_topology_dissemination"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.network.NetworkManager.start_topology_dissemination" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starts the network.</p>
+<p>Basically registers the nodes as SimPy processes, and starts the SimPy
+environment</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="#apart.core.network.SimulationException" title="apart.core.network.SimulationException"><code class="xref py py-exc docutils literal"><span class="pre">SimulationException</span></code></a> &#8211; if the network is not in its initiation phase, e.g. if the topology dissemination already took place</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetworkManager.is_running">
+<code class="descname">is_running</code><a class="headerlink" href="#apart.core.network.NetworkManager.is_running" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; True is the network is running (in the sense of SimPy)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetworkManager.net_stats">
+<code class="descname">net_stats</code><a class="headerlink" href="#apart.core.network.NetworkManager.net_stats" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="measures.network_statistics.html#measures.network_statistics.NetworkStats" title="measures.network_statistics.NetworkStats"><code class="xref py py-obj docutils literal"><span class="pre">NetworkStats</span></code></a> &#8211; The network statistics instance</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetworkManager.network">
+<code class="descname">network</code><a class="headerlink" href="#apart.core.network.NetworkManager.network" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#apart.core.network.Network" title="apart.core.network.Network"><code class="xref py py-obj docutils literal"><span class="pre">Network</span></code></a> &#8211; The network instance</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetworkManager.network_phase">
+<code class="descname">network_phase</code><a class="headerlink" href="#apart.core.network.NetworkManager.network_phase" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#apart.core.network.NetPhase" title="apart.core.network.NetPhase"><code class="xref py py-obj docutils literal"><span class="pre">NetPhase</span></code></a> &#8211; The current phase the network is in</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetworkManager.sim_params">
+<code class="descname">sim_params</code><a class="headerlink" href="#apart.core.network.NetworkManager.sim_params" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">SimulationParams</span></code> &#8211; The simulation parameters</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="apart.core.network.NetworkParams">
+<em class="property">class </em><code class="descclassname">apart.core.network.</code><code class="descname">NetworkParams</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/network.html#NetworkParams"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.network.NetworkParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class grouping all the parameters of the network</p>
+<p>Accepts keyword arguments, corresponding to the network parameters, to
+replace the default values</p>
+<dl class="method">
+<dt id="apart.core.network.NetworkParams.update_params">
+<code class="descname">update_params</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/network.html#NetworkParams.update_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.network.NetworkParams.update_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the parameters after instanciation of the object.</p>
+<p>Accepts keyword arguments, corresponding to the network parameters. Only
+keyword arguments that match a valid attribute of the class are taken
+into accounts. Others are simply ignored silently.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetworkParams.batching_f">
+<code class="descname">batching_f</code><em class="property"> = None</em><a class="headerlink" href="#apart.core.network.NetworkParams.batching_f" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float between 0 and 1</em> &#8211; Message re-ordering, maximum fraction of pools that can be sent in one round.</p>
+<p>Default: 0.5.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetworkParams.batching_nmin">
+<code class="descname">batching_nmin</code><em class="property"> = None</em><a class="headerlink" href="#apart.core.network.NetworkParams.batching_nmin" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; Message re-ordering, minimum of message that must always be in pools.</p>
+<p>Default: 5.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetworkParams.batching_t_interval">
+<code class="descname">batching_t_interval</code><em class="property"> = None</em><a class="headerlink" href="#apart.core.network.NetworkParams.batching_t_interval" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; message re-ordering, batching interval, in milliseconds (i.e. in SimPy simulation time).</p>
+<p>Default: 1 minute.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetworkParams.communication_latency">
+<code class="descname">communication_latency</code><em class="property"> = None</em><a class="headerlink" href="#apart.core.network.NetworkParams.communication_latency" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; Latency of message delivery in the network (simulated with SimPy).</p>
+<p>Default: 20.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetworkParams.corruption_ratio">
+<code class="descname">corruption_ratio</code><em class="property"> = None</em><a class="headerlink" href="#apart.core.network.NetworkParams.corruption_ratio" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float between 0 and 1</em> &#8211; The percentage of corrupted nodes in the network.</p>
+<p>Default: 0.3.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetworkParams.dummypol_deltar">
+<code class="descname">dummypol_deltar</code><em class="property"> = None</em><a class="headerlink" href="#apart.core.network.NetworkParams.dummypol_deltar" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; Dummy messages and Controlled Traffic rates, number of rounds on which the controlled traffic rate equation is relaxed.</p>
+<p>Default: 8.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetworkParams.dummypol_fdum">
+<code class="descname">dummypol_fdum</code><em class="property"> = None</em><a class="headerlink" href="#apart.core.network.NetworkParams.dummypol_fdum" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float between 0 and 1</em> &#8211; Dummy messages and Controlled Traffic rates, fraction of neighbors pools in which to insert a dummy at each round.</p>
+<p>Default: 0.8.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetworkParams.nb_nodes">
+<code class="descname">nb_nodes</code><em class="property"> = None</em><a class="headerlink" href="#apart.core.network.NetworkParams.nb_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; Number of nodes in the network.</p>
+<p>Default: 7.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetworkParams.rtprop_policy_max_hop_count">
+<code class="descname">rtprop_policy_max_hop_count</code><em class="property"> = None</em><a class="headerlink" href="#apart.core.network.NetworkParams.rtprop_policy_max_hop_count" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; Route proposal policy, maximum length of a route.</p>
+<p>Default: None.</p>
+<p>If set to 0 or None, this parameter is automatically set to the
+smallest integer so that any node is ensured to obtain a route
+towards any other (i.e. the longest shortest path in the topo graph)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetworkParams.rtprop_policy_max_routes">
+<code class="descname">rtprop_policy_max_routes</code><em class="property"> = None</em><a class="headerlink" href="#apart.core.network.NetworkParams.rtprop_policy_max_routes" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; Route proposal policy, maximum number of routes per receiver.</p>
+<p>Default: 3.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetworkParams.rtprop_policy_p_reaccept">
+<code class="descname">rtprop_policy_p_reaccept</code><em class="property"> = None</em><a class="headerlink" href="#apart.core.network.NetworkParams.rtprop_policy_p_reaccept" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float between 0 and 1</em> &#8211; Route proposal policy, probability of accepting a second route towards an already known receiver.</p>
+<p>Default: 0.5.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetworkParams.rtprop_policy_p_replace">
+<code class="descname">rtprop_policy_p_replace</code><em class="property"> = None</em><a class="headerlink" href="#apart.core.network.NetworkParams.rtprop_policy_p_replace" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float between 0 and 1</em> &#8211; Route proposal policy, probability to &#8220;replace&#8221; a known route with a newly learned one.</p>
+<p>Default: 0.25.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetworkParams.secparam">
+<code class="descname">secparam</code><em class="property"> = None</em><a class="headerlink" href="#apart.core.network.NetworkParams.secparam" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; The cryptographic security parameter of the network. Typically, 80, 128, or 256.</p>
+<p>Default: 128.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.network.NetworkParams.topology_graph">
+<code class="descname">topology_graph</code><em class="property"> = None</em><a class="headerlink" href="#apart.core.network.NetworkParams.topology_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">networkx.Graph</span></code> &#8211; The topology graph for the simulation. If left to None, one is randomly generated.</p>
+<p>Default: None.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="apart.core.node.html" class="btn btn-neutral float-right" title="apart.core.node — Node Code" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="apart.core.html" class="btn btn-neutral" title="apart.core — Protocol’s Core Components" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

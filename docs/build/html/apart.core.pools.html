@@ -1,0 +1,480 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>apart.core.pools — Message Pools and Batching &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="APART  documentation" href="index.html"/>
+        <link rel="up" title="apart.core — Protocol’s Core Components" href="apart.core.html"/>
+        <link rel="next" title="apart.core.controlled_traffic_rates —- Controlled traffic rates mechanism" href="apart.core.controlled_traffic_rates.html"/>
+        <link rel="prev" title="apart.core.messages — Network Messages" href="apart.core.messages.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">APART</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="packages.html">Packages</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="apart.crypto.html"><code class="docutils literal"><span class="pre">apart.crypto</span></code> &#8212; Cryptography</a></li>
+<li class="toctree-l3"><a class="reference internal" href="apart.simulation.html"><code class="docutils literal"><span class="pre">apart.simulation</span></code> &#8212; Running simulations</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="apart.core.html"><code class="docutils literal"><span class="pre">apart.core</span></code> &#8212; Protocol&#8217;s Core Components</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="apart.core.network.html"><code class="docutils literal"><span class="pre">apart.core.network</span></code> &#8212; Network and Network Manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.node.html"><code class="docutils literal"><span class="pre">apart.core.node</span></code> &#8212; Node Code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.tables.html"><code class="docutils literal"><span class="pre">apart.core.tables</span></code> &#8212; Routing Tables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.messages.html"><code class="docutils literal"><span class="pre">apart.core.messages</span></code> &#8212; Network Messages</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="docutils literal"><span class="pre">apart.core.pools</span></code> &#8212; Message Pools and Batching</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.controlled_traffic_rates.html"><code class="docutils literal"><span class="pre">apart.core.controlled_traffic_rates</span></code> &#8212;- Controlled traffic rates mechanism</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.protocol_constants.html"><code class="docutils literal"><span class="pre">apart.core.protocol_constants</span></code> &#8212; Misc. Constants</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html"><code class="docutils literal"><span class="pre">common</span></code> &#8212; Helper Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="measures.html"><code class="docutils literal"><span class="pre">measures</span></code> &#8212; Benchmark &amp; Simulation Framework</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="packages.html">Packages</a> &raquo;</li>
+        
+          <li><a href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a> &raquo;</li>
+        
+          <li><a href="apart.core.html"><code class="docutils literal"><span class="pre">apart.core</span></code> &#8212; Protocol&#8217;s Core Components</a> &raquo;</li>
+        
+      <li><code class="docutils literal"><span class="pre">apart.core.pools</span></code> &#8212; Message Pools and Batching</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/apart.core.pools.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-apart.core.pools">
+<span id="apart-core-pools-message-pools-and-batching"></span><h1><code class="docutils literal"><span class="pre">apart.core.pools</span></code> &#8212; Message Pools and Batching<a class="headerlink" href="#module-apart.core.pools" title="Permalink to this headline">¶</a></h1>
+<p>This module gathers the components for the management of pools.</p>
+<p>It defines a class <a class="reference internal" href="#apart.core.pools.NeighborMsgPool" title="apart.core.pools.NeighborMsgPool"><code class="xref py py-class docutils literal"><span class="pre">NeighborMsgPool</span></code></a> which models on message pool, and a
+class  <a class="reference internal" href="#apart.core.pools.NeighborMsgPoolSet" title="apart.core.pools.NeighborMsgPoolSet"><code class="xref py py-class docutils literal"><span class="pre">NeighborMsgPoolSet</span></code></a> modeling a set of pools containing one
+<a class="reference internal" href="#apart.core.pools.NeighborMsgPool" title="apart.core.pools.NeighborMsgPool"><code class="xref py py-obj docutils literal"><span class="pre">NeighborMsgPool</span></code></a> instance for each neighbor.</p>
+<dl class="exception">
+<dt id="apart.core.pools.MsgPoolError">
+<em class="property">exception </em><code class="descclassname">apart.core.pools.</code><code class="descname">MsgPoolError</code><a class="reference internal" href="_modules/apart/core/pools.html#MsgPoolError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.pools.MsgPoolError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">RuntimeError</span></code></p>
+<p>Raised when a bad request for sampling messages in pools is issued.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="apart.core.pools.NeighborMsgPool">
+<em class="property">class </em><code class="descclassname">apart.core.pools.</code><code class="descname">NeighborMsgPool</code><span class="sig-paren">(</span><em>n_min</em>, <em>f</em>, <em>node</em>, <em>neighbor</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/pools.html#NeighborMsgPool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.pools.NeighborMsgPool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>This class represents one message pool, following the design of our variant of <em>cottrell mix</em>. It is paramterd by a value nmin and f.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>n_min</strong> (<em>int</em>) &#8211; the parameter nmin of the pool</li>
+<li><strong>f</strong> (<em>float</em>) &#8211; the paramter f of the pool (between 0 and 1)</li>
+<li><strong>node</strong> (<a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-obj docutils literal"><span class="pre">Node</span></code></a>) &#8211; the node to which this pool belongs to</li>
+<li><strong>neighbor</strong> (<em>int</em>) &#8211; the index (in the network) of the neighbor of <code class="docutils literal"><span class="pre">node</span></code> to which this pool relates.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="apart.core.pools.NeighborMsgPool.add_dummy_msg">
+<code class="descname">add_dummy_msg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/pools.html#NeighborMsgPool.add_dummy_msg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.pools.NeighborMsgPool.add_dummy_msg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a dummy message in the pool.</p>
+<p>Function provided for convenience</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.pools.NeighborMsgPool.add_msg">
+<code class="descname">add_msg</code><span class="sig-paren">(</span><em>m</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/pools.html#NeighborMsgPool.add_msg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.pools.NeighborMsgPool.add_msg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a message in the pool</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>m</strong> (<a class="reference internal" href="apart.core.messages.html#apart.core.messages.LinkMsg" title="apart.core.messages.LinkMsg"><code class="xref py py-obj docutils literal"><span class="pre">LinkMsg</span></code></a>) &#8211; the message to add</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.pools.NeighborMsgPool.add_msgs">
+<code class="descname">add_msgs</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/pools.html#NeighborMsgPool.add_msgs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.pools.NeighborMsgPool.add_msgs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add several messages to the pool</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong></strong><strong>(</strong><strong>list of obj</strong> (<em>*args</em>) &#8211; <cite>~apart.core.messages.LinkMsg</cite>): the messages to add in the pool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.pools.NeighborMsgPool.remove_batch">
+<code class="descname">remove_batch</code><span class="sig-paren">(</span><em>batch</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/pools.html#NeighborMsgPool.remove_batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.pools.NeighborMsgPool.remove_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a set of messages from the pool</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>batch</strong> (dict of string-&gt;list <a class="reference internal" href="apart.core.messages.html#apart.core.messages.LinkMsg" title="apart.core.messages.LinkMsg"><code class="xref py py-obj docutils literal"><span class="pre">LinkMsg</span></code></a>) &#8211; a
+dict with two keys (&#8216;reals&#8217; and &#8216;dummies&#8217;), each respectively
+containing a list of real and dummy messages</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.pools.NeighborMsgPool.sample_batch">
+<code class="descname">sample_batch</code><span class="sig-paren">(</span><em>k</em>, <em>sampling_bias=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/pools.html#NeighborMsgPool.sample_batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.pools.NeighborMsgPool.sample_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Randomly sample messages from the pool</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>k</strong> (<em>int</em>) &#8211; the number of messages to sample</li>
+<li><strong>sampling_bias</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; a float between 0 and 1, biasing the sampling towards real messages as it gets closer to 1 (Default: 0.0)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>a</dt>
+<dd><p class="first last">dict with two keys (&#8216;reals&#8217; and &#8216;dummies&#8217;), each respectively
+containing a list of real and dummy messages</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">dict of string-&gt;list <a class="reference internal" href="apart.core.messages.html#apart.core.messages.LinkMsg" title="apart.core.messages.LinkMsg"><code class="xref py py-obj docutils literal"><span class="pre">LinkMsg</span></code></a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#apart.core.pools.MsgPoolError" title="apart.core.pools.MsgPoolError"><code class="xref py py-exc docutils literal"><span class="pre">MsgPoolError</span></code></a> &#8211; if <code class="docutils literal"><span class="pre">k</span></code> is greater than <a class="reference internal" href="#apart.core.pools.NeighborMsgPool.n_available" title="apart.core.pools.NeighborMsgPool.n_available"><code class="xref py py-attr docutils literal"><span class="pre">n_available</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.pools.NeighborMsgPool.n">
+<code class="descname">n</code><a class="headerlink" href="#apart.core.pools.NeighborMsgPool.n" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; The number of messages (dummy and reals counted together) currently in the pool</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.pools.NeighborMsgPool.n_available">
+<code class="descname">n_available</code><a class="headerlink" href="#apart.core.pools.NeighborMsgPool.n_available" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; The number of <em>available</em> messages that can be taken out of the pool</p>
+<p>That is : min(<a class="reference internal" href="#apart.core.pools.NeighborMsgPool.n" title="apart.core.pools.NeighborMsgPool.n"><code class="xref py py-attr docutils literal"><span class="pre">n</span></code></a> - nmin, f * <a class="reference internal" href="#apart.core.pools.NeighborMsgPool.n" title="apart.core.pools.NeighborMsgPool.n"><code class="xref py py-attr docutils literal"><span class="pre">n</span></code></a>)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.pools.NeighborMsgPool.n_dummy">
+<code class="descname">n_dummy</code><a class="headerlink" href="#apart.core.pools.NeighborMsgPool.n_dummy" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; The number of dummy messages currently in the pool</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.pools.NeighborMsgPool.n_real">
+<code class="descname">n_real</code><a class="headerlink" href="#apart.core.pools.NeighborMsgPool.n_real" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; The number of real messages currently in the pool</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="apart.core.pools.NeighborMsgPoolSet">
+<em class="property">class </em><code class="descclassname">apart.core.pools.</code><code class="descname">NeighborMsgPoolSet</code><span class="sig-paren">(</span><em>n_min</em>, <em>f</em>, <em>node</em>, <em>neighbors</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/pools.html#NeighborMsgPoolSet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.pools.NeighborMsgPoolSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class abstracting the set of pools (one per neighbor) managed by any given node.</p>
+<p>An instance of this class contains as many instances of
+<a class="reference internal" href="#apart.core.pools.NeighborMsgPool" title="apart.core.pools.NeighborMsgPool"><code class="xref py py-class docutils literal"><span class="pre">NeighborMsgPool</span></code></a> as there node <code class="docutils literal"><span class="pre">node</span></code> has neighbors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>n_min</strong> (<em>int</em>) &#8211; the parameter nmin of the pool</li>
+<li><strong>f</strong> (<em>float</em>) &#8211; the paramter f of the pool (between 0 and 1)</li>
+<li><strong>node</strong> (<a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-obj docutils literal"><span class="pre">Node</span></code></a>) &#8211; the node to which this pool belongs to</li>
+<li><strong>neighbors</strong> (<em>list int</em>) &#8211; the indexes (in the network) of all neighbors of <code class="docutils literal"><span class="pre">node</span></code></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="apart.core.pools.NeighborMsgPoolSet.remove_batches">
+<code class="descname">remove_batches</code><span class="sig-paren">(</span><em>batches</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/pools.html#NeighborMsgPoolSet.remove_batches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.pools.NeighborMsgPoolSet.remove_batches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove messages from the pools</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>batches</strong> (dict of dict of string-&gt;list <a class="reference internal" href="apart.core.messages.html#apart.core.messages.LinkMsg" title="apart.core.messages.LinkMsg"><code class="xref py py-obj docutils literal"><span class="pre">LinkMsg</span></code></a>) &#8211; a
+dict indexed by neighbors, with as values
+dict with two keys (&#8216;reals&#8217; and &#8216;dummies&#8217;), each respectively
+containing a list of real and dummy messages</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.pools.NeighborMsgPoolSet.sample_neighbor_batches">
+<code class="descname">sample_neighbor_batches</code><span class="sig-paren">(</span><em>sampling_bias=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/pools.html#NeighborMsgPoolSet.sample_neighbor_batches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.pools.NeighborMsgPoolSet.sample_neighbor_batches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Randomly sample a set of batches, one from each neighbor pool</p>
+<p>The number of messages sampled is automatically set to the maximum
+possible, i.e. to <a class="reference internal" href="#apart.core.pools.NeighborMsgPoolSet.n_available" title="apart.core.pools.NeighborMsgPoolSet.n_available"><code class="xref py py-attr docutils literal"><span class="pre">n_available</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sampling_bias</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; a float between 0 and 1, biasing the sampling towards real messages as it gets closer to 1 (Default: 0.0)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>a</dt>
+<dd>dict indexed by neighbors, with as values
+dict with two keys (&#8216;reals&#8217; and &#8216;dummies&#8217;), each respectively
+containing a list of real and dummy messages</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict of dict of string-&gt;list <a class="reference internal" href="apart.core.messages.html#apart.core.messages.LinkMsg" title="apart.core.messages.LinkMsg"><code class="xref py py-obj docutils literal"><span class="pre">LinkMsg</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.pools.NeighborMsgPoolSet.n_available">
+<code class="descname">n_available</code><a class="headerlink" href="#apart.core.pools.NeighborMsgPoolSet.n_available" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; The overall number of available messages in the pool set.</p>
+<p>Defined as the mininum of the value
+<a class="reference internal" href="#apart.core.pools.NeighborMsgPool.n_available" title="apart.core.pools.NeighborMsgPool.n_available"><code class="xref py py-attr docutils literal"><span class="pre">n_available</span></code></a> over all <a class="reference internal" href="#apart.core.pools.NeighborMsgPool" title="apart.core.pools.NeighborMsgPool"><code class="xref py py-obj docutils literal"><span class="pre">NeighborMsgPool</span></code></a>
+instances.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.pools.NeighborMsgPoolSet.n_real">
+<code class="descname">n_real</code><a class="headerlink" href="#apart.core.pools.NeighborMsgPoolSet.n_real" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; The total number of real messages in the collection of pools</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="apart.core.controlled_traffic_rates.html" class="btn btn-neutral float-right" title="apart.core.controlled_traffic_rates —- Controlled traffic rates mechanism" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="apart.core.messages.html" class="btn btn-neutral" title="apart.core.messages — Network Messages" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

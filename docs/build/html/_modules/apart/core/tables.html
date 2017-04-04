@@ -1,0 +1,851 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>apart.core.tables &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="APART  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">APART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../packages.html">Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>apart.core.tables</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for apart.core.tables</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Author: Antoine Guellier</span>
+<span class="c1"># Copyright (c) 2017 Université de Rennes 1</span>
+<span class="c1"># License: CeCILL. The full license text is available at:</span>
+<span class="c1">#  - http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module models the routing tables used by nodes.</span>
+
+<span class="sd">It provides an abstract base class, :class:`.SqliteRoutingTable`, and two</span>
+<span class="sd">concrete classes: :class:`.RoutingTable` and :class:`.PrevRoutingTable`.</span>
+<span class="sd">These two table together form the routing table of the node.</span>
+
+<span class="sd">This module also defines the :exc:`RoutingTableError` exception.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">sqlite3</span> <span class="k">import</span> <span class="n">connect</span>
+<span class="kn">import</span> <span class="nn">sqlite3</span>
+
+<span class="kn">from</span> <span class="nn">apart.crypto</span> <span class="k">import</span> <span class="n">Ctxt</span>
+
+
+
+
+<span class="c1"># The implementatio nof the routing table is quite complex. It is based on an</span>
+<span class="c1"># in-memory sqlite3 database. There is one table for the RoutingTable, and one</span>
+<span class="c1"># for the PrevRoutingTable.</span>
+
+<span class="c1"># A crucial point to understand is that **all nodes in the network share the</span>
+<span class="c1"># same sqlite3 database, and the same sql table**. Hence, we resort to a lot of</span>
+<span class="c1"># *static* variables and methods, and even to metaclasses</span>
+
+<span class="c1"># We also wanted to allow an access to table fields by diong e.g.</span>
+<span class="c1"># RoutingTable.PSEUDO. This resulted in quite a mess: the fields are coded in a</span>
+<span class="c1"># list of strings, and stored in a static attribute (of RoutingTable for</span>
+<span class="c1"># instance), and the metaclass __MetaRoutingTable overrides the __new__ function</span>
+<span class="c1"># of RoutingTable, to augment the class with other static attributes, and an</span>
+<span class="c1"># overriden __getattr__ function in __MetaRoutingTable that intercepts calls</span>
+<span class="c1"># such as RoutinTable.PSEUDO and answers adequately. Note that, RoutingTable</span>
+<span class="c1"># never has a PSEUDO static member.</span>
+
+<span class="c1"># On top of that, we wanted to be able to serialise (pickle) the routing tables,</span>
+<span class="c1"># and thus, we had to find a way to extract and re-write the database from and</span>
+<span class="c1"># to memory without loosing anything.</span>
+
+
+
+<span class="k">class</span> <span class="nc">__MetaRoutingTable</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">attributes</span><span class="p">):</span>
+            <span class="c1"># Here, we override the __new__ function of nodes of type</span>
+            <span class="c1"># &quot;__MetaRoutingTable&quot;. In this overriden __new__, we check that:</span>
+            <span class="c1"># the class defines static _fields and _table_name attributes, and</span>
+            <span class="c1"># that certain key fields are present in _fields.</span>
+            
+             
+            <span class="n">cls_declared_new</span> <span class="o">=</span> <span class="n">attributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;__new__&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">def</span> <span class="nf">cls___new__</span><span class="p">(</span><span class="n">cls2</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                <span class="n">missing_static_attributes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="s2">&quot;_fields&quot;</span><span class="p">,</span> <span class="s2">&quot;_table_name&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">cls2</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">missing_static_attributes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Can&#39;t instantiate abstract class </span><span class="si">{}</span><span class="s2"> without static attributes </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">missing_static_attributes</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cls2</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;_fields&#39;</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Can&#39;t instantiate abstract class </span><span class="si">{}</span><span class="s2"> with static attributes _fields = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">cls2</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;_fields&#39;</span><span class="p">]))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cls2</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;_table_name&#39;</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Can&#39;t instantiate abstract class </span><span class="si">{}</span><span class="s2"> with static attributes _table_name = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">cls2</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;_table_name&#39;</span><span class="p">]))</span>
+                <span class="k">if</span> <span class="n">cls2</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;_fields&#39;</span><span class="p">][:</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="p">[</span><span class="s1">&#39;ROWID&#39;</span><span class="p">,</span> <span class="s1">&#39;NODE&#39;</span><span class="p">]:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Can&#39;t instantiate class </span><span class="si">{}</span><span class="s2">: it does not exhibit &#39;rowid&#39; and &#39;node&#39; as its two first fields&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+                
+                <span class="k">if</span> <span class="n">cls_declared_new</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">cls_declared_new</span><span class="p">(</span><span class="n">cls2</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">cls2</span><span class="p">)</span>
+            
+            <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;__new__&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cls___new__</span> 
+            
+            
+            <span class="c1"># In a second time, when we create the a class of type</span>
+            <span class="c1"># __MetaRoutingTable, we augment the class with other static</span>
+            <span class="c1"># members. Namely, it processes the field list, and produces</span>
+            <span class="c1"># derivatives of this list. This is done once and for all here.</span>
+            <span class="k">if</span> <span class="s2">&quot;_fields&quot;</span> <span class="ow">in</span> <span class="n">attributes</span> <span class="ow">and</span> <span class="s2">&quot;_table_name&quot;</span> <span class="ow">in</span> <span class="n">attributes</span> \
+            <span class="ow">and</span> <span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;_fields&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;_table_name&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;_prefixed_fields&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;_table_name&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">f</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;_fields&#39;</span><span class="p">]]</span>
+                <span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;_fields_to_prefixed_fields&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;_fields&#39;</span><span class="p">],</span> <span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;_prefixed_fields&#39;</span><span class="p">]))</span>
+                                      
+            <span class="k">return</span> <span class="nb">type</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">attributes</span><span class="p">)</span>
+
+
+        <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="c1"># When accessing e.g. RoutingTable.PSEUDO, this function is called.</span>
+            <span class="c1"># If arg[0] is a valid field of the routing table (stored in the</span>
+            <span class="c1"># static attribute &quot;_fields_to_prefixed_fields&quot; of the table), this</span>
+            <span class="c1"># function returns the string representing the SQl string associated</span>
+            <span class="c1"># to this field.</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields_to_prefixed_fields</span><span class="p">[</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            
+            <span class="k">return</span> <span class="nb">type</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+ 
+        <span class="nd">@property</span>
+        <span class="k">def</span> <span class="nf">table_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;str: the name of the table&quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_table_name</span>
+          
+        <span class="nd">@property</span>
+        <span class="k">def</span> <span class="nf">fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;list of str: the list of fields of the table&quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prefixed_fields</span>
+
+        
+
+
+<div class="viewcode-block" id="SqliteRoutingTable"><a class="viewcode-back" href="../../../apart.core.tables.html#apart.core.tables.SqliteRoutingTable">[docs]</a><span class="k">class</span> <span class="nc">SqliteRoutingTable</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">__MetaRoutingTable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for routing tables.</span>
+<span class="sd">        </span>
+<span class="sd">    Manages the tables in an in-memory sqlite3 database. Creates one table</span>
+<span class="sd">    per type of routing table, but all nodes use the same sql database and</span>
+<span class="sd">    tables.</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># The three following functions are there to manage the instances of routing</span>
+    <span class="c1"># tables. It is actally quite complex, notably if several networks are run</span>
+    <span class="c1"># in the same python execution. Indeed, there can only be one in-memory sql</span>
+    <span class="c1"># database in the version of sqlite3 that we use...</span>
+    <span class="n">__routing_tables_db_conn</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">__nb_instances</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">__is_table_initialised</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="c1"># Static memebers that **must** be redefined in derived classes</span>
+    <span class="n">_fields</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">_table_name</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">network_uid</span><span class="p">):</span>
+        <span class="c1"># Here, a lot of ugly hacks are done to ensure the good functioning of</span>
+        <span class="c1"># our tables implementation in the case of multiple network runs in-</span>
+        <span class="c1"># sequence (in the same python execution).</span>
+        
+        
+        <span class="k">if</span> <span class="n">network_uid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__routing_tables_db_conn</span><span class="p">:</span> 
+            <span class="c1"># If the network is new (according to its uid), then create the in-</span>
+            <span class="c1"># memory sqlite2 db for that particular network run IMPORTANT :</span>
+            <span class="c1"># there can not be several network runs in parallel in the same</span>
+            <span class="c1"># python execution, because the version of sqlite3 used allows only one in-memory db </span>
+            <span class="n">sqlite3</span><span class="o">.</span><span class="n">register_adapter</span><span class="p">(</span><span class="n">Ctxt</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> 
+            <span class="n">sqlite3</span><span class="o">.</span><span class="n">register_converter</span><span class="p">(</span><span class="s2">&quot;CTXT&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">eval</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+            <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__routing_tables_db_conn</span><span class="p">[</span><span class="n">network_uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">connect</span><span class="p">(</span><span class="s1">&#39;:memory:&#39;</span><span class="p">,</span> <span class="n">detect_types</span><span class="o">=</span><span class="n">sqlite3</span><span class="o">.</span><span class="n">PARSE_DECLTYPES</span><span class="p">)</span>
+            
+            <span class="c1"># Set the row factory</span>
+            <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__routing_tables_db_conn</span><span class="p">[</span><span class="n">network_uid</span><span class="p">]</span><span class="o">.</span><span class="n">row_factory</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Row</span>
+        
+        <span class="k">if</span> <span class="n">network_uid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__is_table_initialised</span><span class="p">:</span>
+            <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__is_table_initialised</span><span class="p">[</span><span class="n">network_uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">False</span><span class="p">)</span>
+        
+        <span class="c1"># Then, if the network is new or not, for each new instance of</span>
+        <span class="c1"># RoutingTable or PrevRoutingTable (or any derived clases from</span>
+        <span class="c1"># SqliteRoutingTable), keep track of the number of instances. (this will</span>
+        <span class="c1"># be used in __del__)</span>
+        <span class="k">if</span> <span class="n">network_uid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__nb_instances</span><span class="p">:</span> 
+            <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__nb_instances</span><span class="p">[</span><span class="n">network_uid</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__nb_instances</span><span class="p">[</span><span class="n">network_uid</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            
+        
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_network_uid</span> <span class="o">=</span> <span class="n">network_uid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_node</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_db</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__routing_tables_db_conn</span><span class="p">[</span><span class="n">network_uid</span><span class="p">]</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        
+        <span class="c1"># If this is the first instantiation on that particular subclass of</span>
+        <span class="c1"># SqliteRoutingTable in that particular network run, initialise the</span>
+        <span class="c1"># table (i.e. create the SQl table)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__is_table_initialised</span><span class="p">[</span><span class="n">network_uid</span><span class="p">][</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)]:</span>
+
+            <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_init_table</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__routing_tables_db_conn</span><span class="p">[</span><span class="n">network_uid</span><span class="p">]</span><span class="o">.</span><span class="n">cursor</span><span class="p">())</span>
+            <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__is_table_initialised</span><span class="p">[</span><span class="n">network_uid</span><span class="p">][</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">True</span>
+
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># For each instance of subclass of SqliteRoutingTable deleted, decrease</span>
+        <span class="c1"># the counter of instances for that subclass.</span>
+        <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__nb_instances</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_network_uid</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+        
+        <span class="c1"># When the counter reaches zero, close and delete the sqlite3 database</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__nb_instances</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_network_uid</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__routing_tables_db_conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_network_uid</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__routing_tables_db_conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_network_uid</span><span class="p">]</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">del</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__nb_instances</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_network_uid</span><span class="p">]</span>
+            <span class="k">del</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__routing_tables_db_conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_network_uid</span><span class="p">]</span>
+    
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="SqliteRoutingTable.sqlite_db_cursor"><a class="viewcode-back" href="../../../apart.core.tables.html#apart.core.tables.SqliteRoutingTable.sqlite_db_cursor">[docs]</a>    <span class="k">def</span> <span class="nf">sqlite_db_cursor</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">network_uid</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;:obj:`sqlite3.Cursor`: the sqlite3 cursor for the database. </span>
+<span class="sd">        </span>
+<span class="sd">        Used for measure and debug purposes to access the routing tables</span>
+<span class="sd">        directly, and make more efficient sql queries</span>
+<span class="sd">        &quot;&quot;&quot;</span> 
+        <span class="k">if</span> <span class="n">network_uid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__routing_tables_db_conn</span><span class="p">)</span>
+            <span class="n">network_uid</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__routing_tables_db_conn</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__routing_tables_db_conn</span><span class="p">[</span><span class="n">network_uid</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__routing_tables_db_conn</span><span class="p">[</span><span class="n">network_uid</span><span class="p">]</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="SqliteRoutingTable.insert_entry"><a class="viewcode-back" href="../../../apart.core.tables.html#apart.core.tables.SqliteRoutingTable.insert_entry">[docs]</a>    <span class="k">def</span> <span class="nf">insert_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Insert a routing table entry</span>
+<span class="sd">        </span>
+<span class="sd">        The arguments of this function depend on the concrete routing table that</span>
+<span class="sd">        on which this function is called. This function checks that the</span>
+<span class="sd">        ``**kwargs`` in argument specifies all the fields of the said routing</span>
+<span class="sd">        table (in accordance with the static :attr:`_fields` member of the class</span>
+<span class="sd">        that defines the routing table, see :class:`.RoutingTable` and</span>
+<span class="sd">        :class:`.PrevRoutingTable` for a description of those fields)).</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            **kwargs (dict str-&gt;any): the dict specifying the entry to insert. </span>
+<span class="sd">                This dict is indexed by the fields of the routing table, and</span>
+<span class="sd">                **must** specify a value for all of them.</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            int: the (unique) id of the new entry</span>
+<span class="sd">        </span>
+<span class="sd">        Raises:</span>
+<span class="sd">            RoutingTableError: if the entry specified in input does not</span>
+<span class="sd">                match the fields of the considered table</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">insert_entries</span><span class="p">([</span><span class="n">kwargs</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="o">.</span><span class="n">lastrowid</span></div>
+    
+<div class="viewcode-block" id="SqliteRoutingTable.insert_entries"><a class="viewcode-back" href="../../../apart.core.tables.html#apart.core.tables.SqliteRoutingTable.insert_entries">[docs]</a>    <span class="k">def</span> <span class="nf">insert_entries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entries</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Insert several routing table entries.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            entries (list of dict str-&gt;any): a list of dict adequate for input to :meth:`.insert_entry`</span>
+<span class="sd">            </span>
+<span class="sd">        Raises:</span>
+<span class="sd">            RoutingTableError: if at least one of the entries specified in argument does not</span>
+<span class="sd">                match the fields of the considered table</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">table_name</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">table_name</span>
+        <span class="n">table_fields</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">entries</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> 
+        
+        <span class="n">values</span> <span class="o">=</span> <span class="p">[]</span> 
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span> 
+                <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_node</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">table_fields</span><span class="p">:</span> <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="n">f</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+                <span class="n">missing_fields</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">table_fields</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="k">if</span> <span class="n">missing_fields</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">RoutingTableError</span><span class="p">(</span><span class="s2">&quot;Impossible to insert entry in table </span><span class="si">{}</span><span class="s2">. The following fields are missing: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">missing_fields</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">e</span>
+            
+        <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;INSERT INTO &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot; VALUES &quot;</span><span class="o">+</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;(&quot;</span><span class="o">+</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;?&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">table_fields</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span><span class="o">+</span><span class="s2">&quot;)&quot;</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">entries</span><span class="p">)))</span>
+<span class="c1">#         print(query, values)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="SqliteRoutingTable.lookup"><a class="viewcode-back" href="../../../apart.core.tables.html#apart.core.tables.SqliteRoutingTable.lookup">[docs]</a>    <span class="k">def</span> <span class="nf">lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraints_bindings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Lookup one or several routing table entries</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            fields (list of string, optional): the table fields that must </span>
+<span class="sd">                be returned by the lookup (Default: None)</span>
+<span class="sd">            </span>
+<span class="sd">            constraints (string or dict, optional): the constraints of the lookup. Can</span>
+<span class="sd">                either be a string containing text suitable for a WHERE SQL</span>
+<span class="sd">                clause, with &#39;?&#39; in place of values; either a dict that maps a</span>
+<span class="sd">                field to a value. In the latter case, the WHERE clause is</span>
+<span class="sd">                constructed as a conjunction of the constrain on each field in</span>
+<span class="sd">                the dict. (Default: None)</span>
+<span class="sd">                </span>
+<span class="sd">            consraints_bindings (list of any): if ``constraints`` is provided as</span>
+<span class="sd">                a string (a SQL-like WHERE clause), then the values in this</span>
+<span class="sd">                argument are used as bindings for the &#39;?&#39; place holders in ``constraints``</span>
+<span class="sd">            </span>
+<span class="sd">            order_by (list of str): list of fields, specifying the order in</span>
+<span class="sd">            which results should be provided</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            (list of :obj:`sqlite3.Row`): the list of routing table entries</span>
+<span class="sd">            returned according to the constraints of the lookup</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">table_name</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">table_name</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;_rowid&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">fields</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">fields</span>
+        <span class="n">fields_str</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">+</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+        <span class="n">fields_str</span> <span class="o">=</span> <span class="n">fields_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;_rowid&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;.rowid AS &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;_rowid&quot;</span><span class="p">)</span>
+        
+        
+        <span class="n">where_str</span> <span class="o">=</span> <span class="s2">&quot; WHERE &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;_node=?&quot;</span>
+        <span class="n">bindings</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_node</span><span class="p">]</span>
+        <span class="n">where_str_rest</span><span class="p">,</span> <span class="n">bindings_rest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constraints_to_where_statement</span><span class="p">(</span><span class="n">constraints</span><span class="p">,</span> <span class="n">constraints_bindings</span><span class="p">)</span>
+        <span class="n">where_str</span> <span class="o">+=</span> <span class="n">where_str_rest</span>
+        <span class="n">bindings</span> <span class="o">+=</span> <span class="n">bindings_rest</span>
+            
+        <span class="k">if</span> <span class="n">order_by</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">order_by</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">order_by</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">order_by</span> <span class="o">=</span> <span class="p">[</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;_node&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">order_by</span>
+            
+        <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;SELECT </span><span class="si">{}</span><span class="s2"> FROM &quot;</span><span class="o">+</span> <span class="n">table_name</span> <span class="o">+</span> <span class="n">where_str</span> <span class="o">+</span> <span class="s2">&quot; ORDER BY &quot;</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">order_by</span><span class="p">))</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;_rowid&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;.rowid&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fields_str</span><span class="p">)</span>
+        <span class="n">bindings</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bindings</span><span class="p">)</span>
+<span class="c1">#         print(query, constraints_bindings)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">bindings</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span> </div>
+
+    
+<div class="viewcode-block" id="SqliteRoutingTable.joint_lookup"><a class="viewcode-back" href="../../../apart.core.tables.html#apart.core.tables.SqliteRoutingTable.joint_lookup">[docs]</a>    <span class="k">def</span> <span class="nf">joint_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other_table</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">join_on</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraints_bindings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Perform mode advanced lookups, involving a SQL JOIN</span>
+<span class="sd">        </span>
+<span class="sd">        This function is often used by nodes to perform a lookup on a previous</span>
+<span class="sd">        hop (in table :class:`.PrevRoutingTable`), joined on the corresponding</span>
+<span class="sd">        entry of the table :class:`.RoutingTable`. This avoids doing two SQL</span>
+<span class="sd">        queries. See :class:`.PrevRoutingTable` for more details.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            other_table (:obj:`.RoutingTable` or :obj:`.PrevRoutingTable`): the </span>
+<span class="sd">                table to join on the first (the first being the one on which </span>
+<span class="sd">                this function is called)</span>
+<span class="sd">            fields (list of string, optional): see :meth:`.lookup` (Default: None)</span>
+<span class="sd">            join_on (2-tuple of str, optional): the field of each of the rwo routing tables on which to perform the join (Default: None)</span>
+<span class="sd">            constraints (string or dict of str-&gt;any, optional): see :meth:`.lookup` (Default: None)</span>
+<span class="sd">            constraints_bindings (list of any): see :meth:`.lookup` (Default: None)</span>
+<span class="sd">            order_by (list of str): see :meth:`.lookup` (Default: None)</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            (list of :obj:`sqlite3.Row`): the list of routing table entries</span>
+<span class="sd">            returned according to the constraints of the lookup</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">table_name</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">table_name</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fields_str</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">+</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">fields_str</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">+</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">fields</span> <span class="o">+</span> <span class="n">other_table</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span>
+        
+        <span class="n">fields_str</span> <span class="o">=</span> <span class="n">fields_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;_rowid&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;.rowid AS &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;_rowid&quot;</span><span class="p">)</span> \
+                                <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">+</span><span class="n">other_table</span><span class="o">.</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;_rowid&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">+</span><span class="n">other_table</span><span class="o">.</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;.rowid AS &quot;</span><span class="o">+</span><span class="n">other_table</span><span class="o">.</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;_rowid&quot;</span><span class="p">)</span>
+                    
+        <span class="k">try</span><span class="p">:</span>    
+            <span class="n">join_str</span> <span class="o">=</span> <span class="n">join_on</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; = &quot;</span> <span class="o">+</span> <span class="n">join_on</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        
+        <span class="n">where_str</span> <span class="o">=</span> <span class="s2">&quot; WHERE &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;_node=? AND &quot;</span><span class="o">+</span><span class="n">other_table</span><span class="o">.</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;_node=?&quot;</span>
+        <span class="n">bindings</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_node</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_node</span><span class="p">]</span>
+        <span class="n">where_str_rest</span><span class="p">,</span> <span class="n">bindings_rest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constraints_to_where_statement</span><span class="p">(</span><span class="n">constraints</span><span class="p">,</span> <span class="n">constraints_bindings</span><span class="p">)</span>
+        <span class="n">where_str</span> <span class="o">+=</span> <span class="n">where_str_rest</span>
+        <span class="n">bindings</span> <span class="o">+=</span> <span class="n">bindings_rest</span>
+        
+        <span class="k">if</span> <span class="n">order_by</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">order_by</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">order_by</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">order_by</span> <span class="o">=</span> <span class="p">[</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;_node&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">order_by</span>
+        
+        <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;SELECT </span><span class="si">{}</span><span class="s2"> FROM &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot; LEFT JOIN &quot;</span><span class="o">+</span><span class="n">other_table</span><span class="o">.</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot; ON &quot;</span><span class="o">+</span><span class="n">join_str</span> \
+                <span class="o">+</span> <span class="n">where_str</span> <span class="o">+</span> <span class="s2">&quot; ORDER BY &quot;</span><span class="o">+</span> <span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">order_by</span><span class="p">))</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="o">+</span><span class="s1">&#39;_rowid&#39;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;.rowid&quot;</span><span class="p">)</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">+</span><span class="n">other_table</span><span class="o">.</span><span class="n">table_name</span><span class="o">+</span><span class="s1">&#39;_rowid&#39;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">+</span><span class="n">other_table</span><span class="o">.</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;.rowid&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fields_str</span><span class="p">)</span>
+        <span class="n">bindings</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bindings</span><span class="p">)</span>
+<span class="c1">#         print(query)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">bindings</span><span class="p">)</span>
+            
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span></div>
+    
+    
+<div class="viewcode-block" id="SqliteRoutingTable.update_entries"><a class="viewcode-back" href="../../../apart.core.tables.html#apart.core.tables.SqliteRoutingTable.update_entries">[docs]</a>    <span class="k">def</span> <span class="nf">update_entries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraints_bindings</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">table_name</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">table_name</span>
+        
+        <span class="n">set_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">bindings</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">update</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">set_str</span> <span class="o">+=</span> <span class="n">f</span><span class="o">+</span><span class="s2">&quot;=?, &quot;</span>
+            <span class="n">bindings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="n">set_str</span> <span class="o">=</span> <span class="n">set_str</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        
+    
+        <span class="n">where_str</span> <span class="o">=</span> <span class="s2">&quot; WHERE &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;_node=?&quot;</span>
+        <span class="n">bindings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_node</span><span class="p">)</span>
+        <span class="n">where_str_rest</span><span class="p">,</span> <span class="n">bindings_rest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constraints_to_where_statement</span><span class="p">(</span><span class="n">constraints</span><span class="p">,</span> <span class="n">constraints_bindings</span><span class="p">)</span>
+        <span class="n">where_str</span> <span class="o">+=</span> <span class="n">where_str_rest</span>
+        <span class="n">bindings</span> <span class="o">+=</span> <span class="n">bindings_rest</span>
+
+        
+        <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;UPDATE &quot;</span><span class="o">+</span> <span class="n">table_name</span> <span class="o">+</span><span class="s2">&quot; SET &quot;</span> <span class="o">+</span> <span class="n">set_str</span> <span class="o">+</span> <span class="n">where_str</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;_rowid&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;.rowid&quot;</span><span class="p">)</span>
+        <span class="n">bindings</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bindings</span><span class="p">)</span>
+<span class="c1">#         print(query, bindings)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">bindings</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="SqliteRoutingTable.remove_entries"><a class="viewcode-back" href="../../../apart.core.tables.html#apart.core.tables.SqliteRoutingTable.remove_entries">[docs]</a>    <span class="k">def</span> <span class="nf">remove_entries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraints_bindings</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove entries from a routing table that fit into the specified constraints.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            constraints (string or dict of str-&gt;any, optional): see :meth:`.lookup` (Default: None)</span>
+<span class="sd">            constraints_bindings (list of any): see :meth:`.lookup` (Default: None)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">table_name</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">table_name</span>
+        
+        <span class="n">where_str</span> <span class="o">=</span> <span class="s2">&quot; WHERE &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot;_node=?&quot;</span>
+        <span class="n">bindings</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_node</span><span class="p">]</span>
+        <span class="n">where_str_rest</span><span class="p">,</span> <span class="n">bindings_rest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constraints_to_where_statement</span><span class="p">(</span><span class="n">constraints</span><span class="p">,</span> <span class="n">constraints_bindings</span><span class="p">)</span>
+        <span class="n">where_str</span> <span class="o">+=</span> <span class="n">where_str_rest</span>
+        <span class="n">bindings</span> <span class="o">+=</span> <span class="n">bindings_rest</span>
+            
+        <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;DELETE FROM &quot;</span><span class="o">+</span><span class="n">table_name</span><span class="o">+</span> <span class="n">where_str</span>
+        <span class="n">bindings</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bindings</span><span class="p">)</span>
+        <span class="c1">#print(query, constraints_bindings)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">bindings</span><span class="p">)</span></div>
+    
+    <span class="k">def</span> <span class="nf">_constraints_to_where_statement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraints</span><span class="p">,</span> <span class="n">constraints_bindings</span><span class="p">):</span>
+        <span class="n">where_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">where_bindings</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">where_str</span> <span class="o">+=</span> <span class="s2">&quot; AND (&quot;</span><span class="o">+</span><span class="n">constraints</span><span class="o">+</span><span class="s2">&quot;)&quot;</span>
+            <span class="n">where_bindings</span> <span class="o">+=</span> <span class="n">constraints_bindings</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">constraints</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">where_str</span> <span class="o">+=</span> <span class="s2">&quot; AND &quot;</span><span class="o">+</span><span class="n">f</span><span class="o">+</span><span class="s2">&quot;=?&quot;</span>
+                    <span class="n">where_bindings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">where_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="n">where_bindings</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">where_str</span><span class="p">,</span> <span class="n">where_bindings</span>
+    
+    
+    <span class="c1"># Special function for serialising (pickling) this weird routing table</span>
+    <span class="c1"># implementation based on a memroy sqlite db</span>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># The whole in-memory database is dumped into a string</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">database_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__routing_tables_db_conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_network_uid</span><span class="p">]</span><span class="o">.</span><span class="n">iterdump</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+     
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">database_str</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;database_str&#39;</span><span class="p">)</span>
+        <span class="n">init_db</span> <span class="o">=</span> <span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;_network_uid&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__routing_tables_db_conn</span><span class="p">)</span>
+        <span class="c1"># Put the boolean to True, so that the __init__ function of e.g. the</span>
+        <span class="c1"># RoutingTable class does not try to create the tables: they will be</span>
+        <span class="c1"># created and populated afterward</span>
+        <span class="c1"># Note that, still, the below __ini__ will initialize</span>
+        <span class="c1"># type(self).__routing_tables_db_conn if it is None</span>
+        <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__is_table_initialised</span><span class="p">[</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;_network_uid&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;_node&#39;</span><span class="p">],</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;_network_uid&#39;</span><span class="p">])</span>
+        
+        
+        <span class="c1"># If this is the first table object that we unpickle, the following</span>
+        <span class="c1"># condition is true. Then, reconstruct the full db from the script str</span>
+        <span class="k">if</span> <span class="n">init_db</span><span class="p">:</span>
+            <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__routing_tables_db_conn</span><span class="p">[</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;_network_uid&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">executescript</span><span class="p">(</span><span class="n">database_str</span><span class="p">)</span></div>
+            
+        
+    
+    
+                
+
+<div class="viewcode-block" id="RoutingTable"><a class="viewcode-back" href="../../../apart.core.tables.html#apart.core.tables.RoutingTable">[docs]</a><span class="k">class</span> <span class="nc">RoutingTable</span><span class="p">(</span><span class="n">SqliteRoutingTable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The main routing table of nodes. </span>
+<span class="sd">    </span>
+<span class="sd">    Each node has a different instance of this class.</span>
+<span class="sd">    </span>
+<span class="sd">    This table features rows that describe routes that a given node knows. Each</span>
+<span class="sd">    entry in the table exhibits the following fields:</span>
+<span class="sd">    * ROWID (int): the (unique) identifier of the table entry</span>
+<span class="sd">    * NODE (int): used internally, to differentiate which SQL table entry belongs to which node </span>
+<span class="sd">    * PSEUDO (int): pseudonym of the end-receiver of the route </span>
+<span class="sd">    * CONE (:obj:`~apart.crypto.Ctxt`): encryption of one used to encrypt/re-encrypt messages on the route</span>
+<span class="sd">    * NEXT_NODE (int): index of the next node on the route (can be considered as the next hop&#39;s IP address) </span>
+<span class="sd">    * NEXT_CID (int): circuit identifier of the next hop </span>
+<span class="sd">    * REPROPOSED (bool): whether the node relayed this route to its neighbor. Used in the route proposal policy.  </span>
+<span class="sd">    * IN_USE (bool): True if the node uses this route as end-sender, False if it uses it only as relay. </span>
+<span class="sd">    * TIMESTAMP (int): time at which the routing table entry was created </span>
+<span class="sd">    * ACTUAL_RCVR (int): index of the end-receiver of the route. used only for debug and statistics purposes. </span>
+<span class="sd">    * ACTUAL_LENGTH (int): number of hops between the node and the end-receiver of the route. Used only for debug and statistics purposes</span>
+<span class="sd">        </span>
+<span class="sd">    Each of these fields can be accessed by :obj:`.RoutingTable.FIELD`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># The table&#39;s name and fields</span>
+    <span class="n">_table_name</span> <span class="o">=</span> <span class="s2">&quot;rt&quot;</span>
+    <span class="n">_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ROWID&#39;</span><span class="p">,</span> 
+               <span class="s1">&#39;NODE&#39;</span><span class="p">,</span> 
+               <span class="s1">&#39;PSEUDO&#39;</span><span class="p">,</span> 
+               <span class="s1">&#39;CONE&#39;</span><span class="p">,</span> 
+               <span class="s1">&#39;NEXT_NODE&#39;</span><span class="p">,</span> 
+               <span class="s1">&#39;NEXT_CID&#39;</span><span class="p">,</span> 
+               <span class="s1">&#39;REPROPOSED&#39;</span><span class="p">,</span> 
+               <span class="s1">&#39;IN_USE&#39;</span><span class="p">,</span> 
+               <span class="s1">&#39;TIMESTAMP&#39;</span><span class="p">,</span> 
+               <span class="s1">&#39;ACTUAL_RCVR&#39;</span><span class="p">,</span> 
+               <span class="s1">&#39;ACTUAL_LENGTH&#39;</span><span class="p">]</span>
+    
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_init_table</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">db_cursor</span><span class="p">):</span>
+        <span class="c1"># Upon creating the first RoutingTable instance (in a given</span>
+        <span class="c1"># network/simulation run), this function is called to create the SQL</span>
+        <span class="c1"># table.</span>
+        <span class="n">rt_fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">field_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">RoutingTable</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+        <span class="n">rt_spec</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;CREATE TABLE IF NOT EXISTS </span><span class="si">{0}</span><span class="s2"> (</span>
+<span class="s2">        </span><span class="si">{1}</span><span class="s2"> SMALLINT NOT NULL,</span>
+<span class="s2">        </span><span class="si">{2}</span><span class="s2"> BIGINT(64)  NOT NULL,</span>
+<span class="s2">        </span><span class="si">{3}</span><span class="s2"> CTXT NOT NULL,</span>
+<span class="s2">        </span><span class="si">{4}</span><span class="s2"> SMALLINT NOT NULL,</span>
+<span class="s2">        </span><span class="si">{5}</span><span class="s2"> BIGINT(64) NOT NULL,</span>
+<span class="s2">        </span><span class="si">{6}</span><span class="s2"> BOOLEAN NOT NULL,</span>
+<span class="s2">        </span><span class="si">{7}</span><span class="s2"> BOOLEAN NOT NULL,</span>
+<span class="s2">        </span><span class="si">{8}</span><span class="s2"> BIGINT NOT NULL,</span>
+<span class="s2">        </span><span class="si">{9}</span><span class="s2"> SMALLINT NOT NULL,</span>
+<span class="s2">        </span><span class="si">{10}</span><span class="s2"> SMALLINT NOT NULL);</span>
+<span class="s2">        CREATE INDEX rt_node_key ON </span><span class="si">{0}</span><span class="s2">(rt_node);</span>
+<span class="s2">        CREATE INDEX rt_localid_key ON </span><span class="si">{0}</span><span class="s2">(rt_pseudo);&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">RoutingTable</span><span class="o">.</span><span class="n">_table_name</span><span class="p">,</span> <span class="o">*</span><span class="n">rt_fields</span><span class="p">)</span>
+        
+        <span class="n">db_cursor</span><span class="o">.</span><span class="n">executescript</span><span class="p">(</span><span class="n">rt_spec</span><span class="p">)</span></div>
+        
+<span class="c1">#     def insert_entry(self, **kwargs):</span>
+<span class="c1">#         # Override the method only to </span>
+<span class="c1">#         return super().insert_entry(**kwargs)</span>
+
+<div class="viewcode-block" id="PrevRoutingTable"><a class="viewcode-back" href="../../../apart.core.tables.html#apart.core.tables.PrevRoutingTable">[docs]</a><span class="k">class</span> <span class="nc">PrevRoutingTable</span><span class="p">(</span><span class="n">SqliteRoutingTable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The routing table of nodes that specifies the *previous hops* associated to each entry of their main routing table.</span>
+<span class="sd">    </span>
+<span class="sd">    Each node has a different instance of this class. </span>
+<span class="sd">    </span>
+<span class="sd">    This table features rows that describe (possibly multiple) previous hops</span>
+<span class="sd">    associated to each route known by a given node. That is, each row in this</span>
+<span class="sd">    table refers to a row in the main routing table :obj:`.RoutingTable` of the</span>
+<span class="sd">    node. </span>
+<span class="sd">    </span>
+<span class="sd">    To illustrate the use of this table: when a node receives a message from a</span>
+<span class="sd">    neighbor node Y and with circuit identifier cid, it makes a lookup in this</span>
+<span class="sd">    table for (PREV_NODE = Y, PREV_CID = cid), which allows to retrieve the</span>
+<span class="sd">    ROWID of the associated entry in the main routing table. Consequently, the</span>
+<span class="sd">    node makes a lookup in the main routing table (and then possibly relays the</span>
+<span class="sd">    message on the specified next hop).</span>
+<span class="sd">    </span>
+<span class="sd">    Each entry in the table exhibits the following fields:</span>
+<span class="sd">        * ROWID (int): the (unique) identifier of the table entry</span>
+<span class="sd">        * NODE (int): used internally, to differentiate which SQL table entry belongs to which node </span>
+<span class="sd">        * PREV_NODE (int): the index of the previous node on the route  (can be considered as its IP address)</span>
+<span class="sd">        * PREV_CID (int): the circuit identifier of the previous hop</span>
+<span class="sd">        * RT_ROWID (int): the ROWID of the :obj:`.RoutingTable` entry that this previous hop relates to </span>
+<span class="sd">        </span>
+<span class="sd">        Each of these fields can be accessed by :obj:`.PrevRoutingTable.FIELD`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="c1"># The table&#39;s name and fields</span>
+    <span class="n">_table_name</span> <span class="o">=</span> <span class="s2">&quot;prevrt&quot;</span>
+    <span class="n">_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ROWID&#39;</span><span class="p">,</span> <span class="s1">&#39;NODE&#39;</span><span class="p">,</span> <span class="s1">&#39;PREV_NODE&#39;</span><span class="p">,</span> <span class="s1">&#39;PREV_CID&#39;</span><span class="p">,</span> <span class="s1">&#39;RT_ROWID&#39;</span><span class="p">]</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_init_table</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">db_cursor</span><span class="p">):</span>
+        <span class="c1"># Upon creating the first PrevRoutingTable instance (in a given</span>
+        <span class="c1"># network/simulation run), this function is called to create the SQL</span>
+        <span class="c1"># table.</span>
+        
+        <span class="n">prevrt_fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">field_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">PrevRoutingTable</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+        <span class="n">prevrt_spec</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;CREATE TABLE IF NOT EXISTS </span><span class="si">{0}</span><span class="s2"> (</span>
+<span class="s2">        </span><span class="si">{1}</span><span class="s2"> SMALLINT NOT NULL,</span>
+<span class="s2">        </span><span class="si">{2}</span><span class="s2"> SMALLINT NOT NULL,</span>
+<span class="s2">        </span><span class="si">{3}</span><span class="s2"> BIGINT(64) NOT NULL,</span>
+<span class="s2">        </span><span class="si">{4}</span><span class="s2"> INT  NOT NULL);</span>
+<span class="s2">        CREATE INDEX prevrt_node_key ON </span><span class="si">{0}</span><span class="s2">(prevrt_node);&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">PrevRoutingTable</span><span class="o">.</span><span class="n">_table_name</span><span class="p">,</span> <span class="o">*</span><span class="n">prevrt_fields</span><span class="p">)</span>
+        
+        <span class="n">db_cursor</span><span class="o">.</span><span class="n">executescript</span><span class="p">(</span><span class="n">prevrt_spec</span><span class="p">)</span></div>
+                
+  
+        
+<div class="viewcode-block" id="RoutingTableError"><a class="viewcode-back" href="../../../apart.core.tables.html#apart.core.tables.RoutingTableError">[docs]</a><span class="k">class</span> <span class="nc">RoutingTableError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raised when an invalid operation is performed on the routing tables&quot;&quot;&quot;</span> 
+    <span class="k">pass</span></div>
+    
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c1"># Some basic tests</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fields of PrevRoutingTable: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">PrevRoutingTable</span><span class="o">.</span><span class="n">fields</span><span class="p">))</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sqlite3 cursor : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SqliteRoutingTable</span><span class="o">.</span><span class="n">sqlite_db_cursor</span><span class="p">()))</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Instanciating RoutingTable&quot;</span><span class="p">)</span>
+    <span class="n">rt</span> <span class="o">=</span> <span class="n">RoutingTable</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">rt</span><span class="o">.</span><span class="n">insert_entry</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">RoutingTable</span><span class="o">.</span><span class="n">PSEUDO</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="n">RoutingTable</span><span class="o">.</span><span class="n">CONE</span><span class="p">:</span> <span class="n">Ctxt</span><span class="p">(</span><span class="mi">52</span><span class="p">,</span> <span class="nb">set</span><span class="p">([</span><span class="mi">8899</span><span class="p">])),</span> 
+                        <span class="n">RoutingTable</span><span class="o">.</span><span class="n">NEXT_NODE</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>  <span class="n">RoutingTable</span><span class="o">.</span><span class="n">NEXT_CID</span><span class="p">:</span> <span class="mi">5588</span><span class="p">,</span> 
+                        <span class="n">RoutingTable</span><span class="o">.</span><span class="n">TIMESTAMP</span><span class="p">:</span>  <span class="mi">78936543</span><span class="p">,</span> <span class="n">RoutingTable</span><span class="o">.</span><span class="n">REPROPOSED</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="n">RoutingTable</span><span class="o">.</span><span class="n">IN_USE</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="n">RoutingTable</span><span class="o">.</span><span class="n">ACTUAL_RCVR</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="n">RoutingTable</span><span class="o">.</span><span class="n">ACTUAL_LENGTH</span><span class="p">:</span> <span class="mi">3</span><span class="p">})</span>
+    <span class="nb">print</span><span class="p">([</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">rt</span><span class="o">.</span><span class="n">lookup</span><span class="p">()[</span><span class="mi">0</span><span class="p">]])</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sqlite3 cursor : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SqliteRoutingTable</span><span class="o">.</span><span class="n">sqlite_db_cursor</span><span class="p">()))</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Instanciating PrevRoutingTable&quot;</span><span class="p">)</span>
+    <span class="n">prt</span> <span class="o">=</span> <span class="n">PrevRoutingTable</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Instanciating SqliteRoutingTable&quot;</span><span class="p">)</span>
+    <span class="n">shouldnotbepossible</span> <span class="o">=</span> <span class="n">SqliteRoutingTable</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        
+    <span class="c1">#===========================================================================</span>
+    <span class="c1"># rt = RoutingTable(1)</span>
+    <span class="c1"># </span>
+    <span class="c1"># # Testing insert and lookup</span>
+    <span class="c1"># rt_entry = (0,2,3,5,6,&#39;7&#39;,8,9,10,11)</span>
+    <span class="c1"># rt._insert_entry(*rt_entry)</span>
+    <span class="c1"># </span>
+    <span class="c1"># res = rt.lookup()</span>
+    <span class="c1"># if res is None or len(res) != 1 or res[0] != rt_entry:</span>
+    <span class="c1">#     print(&quot;Error 1&quot;)</span>
+    <span class="c1">#     print(res)</span>
+    <span class="c1"># </span>
+    <span class="c1"># # Testing lookup for particular _fields</span>
+    <span class="c1"># res = rt.lookup([RoutingTable.PSEUDO, RoutingTable.NEXT_NODE])</span>
+    <span class="c1"># if res is None or len(res) != 1 or res[0] != (2,8):</span>
+    <span class="c1">#     print(&quot;Error 2&quot;)</span>
+    <span class="c1">#     print(res)</span>
+    <span class="c1">#     </span>
+    <span class="c1">#===========================================================================</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

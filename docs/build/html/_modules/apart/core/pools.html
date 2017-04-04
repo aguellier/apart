@@ -1,0 +1,564 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>apart.core.pools &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="APART  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">APART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../packages.html">Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>apart.core.pools</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for apart.core.pools</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Author: Antoine Guellier</span>
+<span class="c1"># Copyright (c) 2017 Université de Rennes 1</span>
+<span class="c1"># License: CeCILL. The full license text is available at:</span>
+<span class="c1">#  - http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html</span>
+
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This module gathers the components for the management of pools. </span>
+
+<span class="sd">It defines a class :class:`.NeighborMsgPool` which models on message pool, and a</span>
+<span class="sd">class  :class:`.NeighborMsgPoolSet` modeling a set of pools containing one</span>
+<span class="sd">:obj:`.NeighborMsgPool` instance for each neighbor.  </span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="kn">from</span> <span class="nn">common.custom_logging</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">apart.core.messages</span> <span class="k">import</span> <span class="n">LinkMsg</span><span class="p">,</span> <span class="n">MsgFlag</span>
+
+
+<div class="viewcode-block" id="NeighborMsgPool"><a class="viewcode-back" href="../../../apart.core.pools.html#apart.core.pools.NeighborMsgPool">[docs]</a><span class="k">class</span> <span class="nc">NeighborMsgPool</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_min</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">neighbor</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This class represents one message pool, following the design of our variant of *cottrell mix*. It is paramterd by a value nmin and f.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            n_min (int): the parameter nmin of the pool</span>
+<span class="sd">            f (float): the paramter f of the pool (between 0 and 1)</span>
+<span class="sd">            node (:obj:`~apart.core.node.Node`): the node to which this pool belongs to</span>
+<span class="sd">            neighbor (int): the index (in the network) of the neighbor of ``node`` to which this pool relates. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_real_msgs_pool</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dummy_msgs_pool</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n_min</span> <span class="o">=</span> <span class="n">n_min</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__f</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__node</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__neighbor</span> <span class="o">=</span> <span class="n">neighbor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__nb_dummy_msgs</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: The number of messages (dummy and reals counted together) currently in the pool&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_real</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dummy</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_real</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: The number of real messages currently in the pool&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_real_msgs_pool</span><span class="p">)</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: The number of dummy messages currently in the pool&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dummy_msgs_pool</span><span class="p">)</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_available</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: The number of *available* messages that can be taken out of the pool</span>
+<span class="sd">        </span>
+<span class="sd">        That is : min(:attr:`.n` - nmin, f * :attr:`.n`)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__n_min</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">__f</span><span class="p">)))</span>
+    
+<div class="viewcode-block" id="NeighborMsgPool.add_msg"><a class="viewcode-back" href="../../../apart.core.pools.html#apart.core.pools.NeighborMsgPool.add_msg">[docs]</a>    <span class="k">def</span> <span class="nf">add_msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a message in the pool</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            m (:obj:`~apart.core.messages.LinkMsg`): the message to add</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">flag</span> <span class="ow">is</span> <span class="n">MsgFlag</span><span class="o">.</span><span class="n">DUMMY</span><span class="p">:</span>
+            <span class="k">pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dummy_msgs_pool</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_real_msgs_pool</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">m</span><span class="p">)</span></div>
+            
+<div class="viewcode-block" id="NeighborMsgPool.add_msgs"><a class="viewcode-back" href="../../../apart.core.pools.html#apart.core.pools.NeighborMsgPool.add_msgs">[docs]</a>    <span class="k">def</span> <span class="nf">add_msgs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add several messages to the pool</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            *args (list of obj:`~apart.core.messages.LinkMsg`): the messages to add in the pool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_msg</span><span class="p">(</span><span class="n">m</span><span class="p">)</span></div>
+    
+    <span class="c1"># Shortcut </span>
+<div class="viewcode-block" id="NeighborMsgPool.add_dummy_msg"><a class="viewcode-back" href="../../../apart.core.pools.html#apart.core.pools.NeighborMsgPool.add_dummy_msg">[docs]</a>    <span class="k">def</span> <span class="nf">add_dummy_msg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a dummy message in the pool. </span>
+<span class="sd">        </span>
+<span class="sd">        Function provided for convenience</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_msg</span><span class="p">(</span><span class="n">LinkMsg</span><span class="o">.</span><span class="n">create_dummy</span><span class="p">(</span><span class="n">sent_by</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__node</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">sent_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__neighbor</span><span class="p">))</span></div>
+
+        
+<div class="viewcode-block" id="NeighborMsgPool.remove_batch"><a class="viewcode-back" href="../../../apart.core.pools.html#apart.core.pools.NeighborMsgPool.remove_batch">[docs]</a>    <span class="k">def</span> <span class="nf">remove_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove a set of messages from the pool</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            batch (dict of string-&gt;list :obj:`~apart.core.messages.LinkMsg`): a</span>
+<span class="sd">                dict with two keys (&#39;reals&#39; and &#39;dummies&#39;), each respectively </span>
+<span class="sd">                containing a list of real and dummy messages</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_real_msgs_pool</span> <span class="o">-=</span> <span class="nb">set</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s1">&#39;reals&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dummy_msgs_pool</span> <span class="o">-=</span> <span class="nb">set</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s1">&#39;dummies&#39;</span><span class="p">])</span></div>
+    
+    <span class="c1"># sampling bias is in [0,1[</span>
+<div class="viewcode-block" id="NeighborMsgPool.sample_batch"><a class="viewcode-back" href="../../../apart.core.pools.html#apart.core.pools.NeighborMsgPool.sample_batch">[docs]</a>    <span class="k">def</span> <span class="nf">sample_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">sampling_bias</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Randomly sample messages from the pool</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            k (int): the number of messages to sample</span>
+<span class="sd">            sampling_bias (float, optional): a float between 0 and 1, biasing the sampling towards real messages as it gets closer to 1 (Default: 0.0)</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict of string-&gt;list :obj:`~apart.core.messages.LinkMsg`: a</span>
+<span class="sd">                dict with two keys (&#39;reals&#39; and &#39;dummies&#39;), each respectively </span>
+<span class="sd">                containing a list of real and dummy messages</span>
+<span class="sd">            </span>
+<span class="sd">        </span>
+<span class="sd">        Raises:</span>
+<span class="sd">            MsgPoolError: if ``k`` is greater than :attr:`.n_available`</span>
+<span class="sd">        &quot;&quot;&quot;</span> 
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">sampling_bias</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;The sampling bias must be a floating number between 0 (included) and 1 (excluded). Received </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sampling_bias</span><span class="p">))</span>
+            <span class="n">sampling_bias</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">sampling_bias</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sampling_bias</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">sampling_bias</span> <span class="o">=</span> <span class="mf">0.99999</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sampling_bias</span> <span class="o">=</span> <span class="mi">0</span>
+         
+        <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_available</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MsgPoolError</span><span class="p">(</span><span class="s2">&quot;Not enough messages in pool to sample </span><span class="si">{}</span><span class="s2"> messages (</span><span class="si">{}</span><span class="s2"> available)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_available</span><span class="p">))</span>
+         
+        <span class="n">separate_batches</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;reals&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;dummies&#39;</span><span class="p">:</span> <span class="p">[]}</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">separate_batches</span>
+         
+        <span class="c1"># We have to resort to numpy for the *weighted* sampling *without replacement*</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_real</span><span class="p">:</span>
+            <span class="n">p_base</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">sampling_bias</span><span class="p">)</span>
+            <span class="n">p_real_msgs</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">n_real</span><span class="p">)</span><span class="o">*</span><span class="n">sampling_bias</span>
+            <span class="n">prob_distrib_real_msgs</span> <span class="o">=</span> <span class="p">[</span><span class="n">p_base</span><span class="o">+</span><span class="n">p_real_msgs</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">n_real</span>
+            <span class="n">prob_distrib_dummy_msgs</span> <span class="o">=</span> <span class="p">[</span><span class="n">p_base</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">n_dummy</span>
+            <span class="n">prob_distrib</span> <span class="o">=</span> <span class="n">prob_distrib_real_msgs</span><span class="o">+</span><span class="n">prob_distrib_dummy_msgs</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prob_distrib</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="n">population</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_real_msgs_pool</span><span class="p">)</span><span class="o">+</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dummy_msgs_pool</span><span class="p">)</span>
+         
+        <span class="n">batch</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">prob_distrib</span><span class="p">)</span>
+         
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">flag</span> <span class="ow">is</span> <span class="n">MsgFlag</span><span class="o">.</span><span class="n">DUMMY</span><span class="p">:</span>
+                <span class="n">separate_batches</span><span class="p">[</span><span class="s1">&#39;dummies&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">separate_batches</span><span class="p">[</span><span class="s1">&#39;reals&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+         
+        <span class="k">return</span> <span class="n">separate_batches</span></div>
+        
+        
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_real_msgs_pool</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dummy_msgs_pool</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_real_msgs_pool</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dummy_msgs_pool</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="NeighborMsgPoolSet"><a class="viewcode-back" href="../../../apart.core.pools.html#apart.core.pools.NeighborMsgPoolSet">[docs]</a><span class="k">class</span> <span class="nc">NeighborMsgPoolSet</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_min</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">neighbors</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class abstracting the set of pools (one per neighbor) managed by any given node.</span>
+<span class="sd">        </span>
+<span class="sd">        An instance of this class contains as many instances of</span>
+<span class="sd">        :class:`.NeighborMsgPool` as there node ``node`` has neighbors.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            n_min (int): the parameter nmin of the pool</span>
+<span class="sd">            f (float): the paramter f of the pool (between 0 and 1)</span>
+<span class="sd">            node (:obj:`~apart.core.node.Node`): the node to which this pool belongs to</span>
+<span class="sd">            neighbors (list int): the indexes (in the network) of all neighbors of ``node``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__pools</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">NeighborMsgPool</span><span class="p">(</span><span class="n">n_min</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">neighbors</span><span class="p">)</span>
+        
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_available</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: The overall number of available messages in the pool set.</span>
+<span class="sd">        </span>
+<span class="sd">        Defined as the mininum of the value</span>
+<span class="sd">        :attr:`~.NeighborMsgPool.n_available` over all :obj:`.NeighborMsgPool`</span>
+<span class="sd">        instances.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">((</span><span class="n">p</span><span class="o">.</span><span class="n">n_available</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pools</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_real</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: The total number of real messages in the collection of pools&quot;&quot;&quot;</span> 
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">((</span><span class="n">p</span><span class="o">.</span><span class="n">n_real</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pools</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+ 
+<div class="viewcode-block" id="NeighborMsgPoolSet.sample_neighbor_batches"><a class="viewcode-back" href="../../../apart.core.pools.html#apart.core.pools.NeighborMsgPoolSet.sample_neighbor_batches">[docs]</a>    <span class="k">def</span> <span class="nf">sample_neighbor_batches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sampling_bias</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Randomly sample a set of batches, one from each neighbor pool</span>
+<span class="sd">        </span>
+<span class="sd">        The number of messages sampled is automatically set to the maximum</span>
+<span class="sd">        possible, i.e. to :attr:`.n_available`.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            sampling_bias (float, optional): a float between 0 and 1, biasing the sampling towards real messages as it gets closer to 1 (Default: 0.0)</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict of dict of string-&gt;list :obj:`~apart.core.messages.LinkMsg`: a</span>
+<span class="sd">                dict indexed by neighbors, with as values </span>
+<span class="sd">                dict with two keys (&#39;reals&#39; and &#39;dummies&#39;), each respectively </span>
+<span class="sd">                containing a list of real and dummy messages</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_available</span>
+         
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">sample_batch</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">sampling_bias</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pools</span><span class="o">.</span><span class="n">items</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="NeighborMsgPoolSet.remove_batches"><a class="viewcode-back" href="../../../apart.core.pools.html#apart.core.pools.NeighborMsgPoolSet.remove_batches">[docs]</a>    <span class="k">def</span> <span class="nf">remove_batches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batches</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove messages from the pools</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            batches (dict of dict of string-&gt;list :obj:`~apart.core.messages.LinkMsg`): a</span>
+<span class="sd">                dict indexed by neighbors, with as values </span>
+<span class="sd">                dict with two keys (&#39;reals&#39; and &#39;dummies&#39;), each respectively </span>
+<span class="sd">                containing a list of real and dummy messages </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="ow">in</span> <span class="n">batches</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__pools</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">remove_batch</span><span class="p">(</span><span class="n">b</span><span class="p">)</span></div>
+            
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pools</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">s</span>
+        
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pools</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pools</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div>
+    
+    
+<div class="viewcode-block" id="MsgPoolError"><a class="viewcode-back" href="../../../apart.core.pools.html#apart.core.pools.MsgPoolError">[docs]</a><span class="k">class</span> <span class="nc">MsgPoolError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raised when a bad request for sampling messages in pools is issued.&quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+
+
+<span class="c1"># Misc. very basic unit tests</span>
+
+<span class="k">def</span> <span class="nf">__test_removal</span><span class="p">():</span>
+    <span class="n">neighbor</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">NeighborMsgPool</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    
+    <span class="n">msgs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+        <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LinkMsg</span><span class="o">.</span><span class="n">create_dummy</span><span class="p">(</span><span class="n">sent_by</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sent_to</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>    
+        <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LinkMsg</span><span class="p">(</span><span class="n">sent_by</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sent_to</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">c1</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">c2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">MsgFlag</span><span class="o">.</span><span class="n">PAYLOAD</span><span class="p">,</span> <span class="n">cid</span><span class="o">=</span><span class="n">i</span><span class="o">*</span><span class="mi">12</span><span class="p">))</span>
+    
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">msgs</span><span class="p">:</span>
+        <span class="n">pool</span><span class="o">.</span><span class="n">add_msg</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+    
+    <span class="n">msgs_to_remove</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">msgs</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">msgs_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LinkMsg</span><span class="o">.</span><span class="n">create_dummy</span><span class="p">(</span><span class="n">sent_by</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sent_to</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">msgs_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LinkMsg</span><span class="o">.</span><span class="n">create_dummy</span><span class="p">(</span><span class="n">sent_by</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sent_to</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">msgs_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LinkMsg</span><span class="p">(</span><span class="n">sent_by</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sent_to</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">c1</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">c2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">MsgFlag</span><span class="o">.</span><span class="n">PAYLOAD</span><span class="p">,</span> <span class="n">cid</span><span class="o">=</span><span class="mi">42</span><span class="p">))</span>
+    <span class="n">msgs_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LinkMsg</span><span class="p">(</span><span class="n">sent_by</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sent_to</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">c1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">c2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">MsgFlag</span><span class="o">.</span><span class="n">PAYLOAD</span><span class="p">,</span> <span class="n">cid</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Pool before remova = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pool</span><span class="p">))</span>
+    <span class="n">batch</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;reals&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">msgs_to_remove</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">flag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">MsgFlag</span><span class="o">.</span><span class="n">DUMMY</span><span class="p">],</span> <span class="s1">&#39;dummies&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">msgs_to_remove</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">flag</span> <span class="ow">is</span> <span class="n">MsgFlag</span><span class="o">.</span><span class="n">DUMMY</span><span class="p">]}</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">remove_batch</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> 
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Pool after remova = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pool</span><span class="p">))</span>
+    
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">msgs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">msgs_to_remove</span><span class="p">:</span>
+            <span class="c1"># Should NOT be present in pool</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">m_pool</span> <span class="ow">in</span> <span class="n">pool</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">m_pool</span> <span class="ow">is</span> <span class="n">m</span><span class="p">:</span>
+                    <span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">found</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error !&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Should be present in pool</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">m_pool</span> <span class="ow">in</span> <span class="n">pool</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">m_pool</span> <span class="ow">in</span> <span class="n">pool</span><span class="p">:</span>
+                    <span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">found</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error 2 !&quot;</span><span class="p">)</span>
+ 
+    
+<span class="k">def</span> <span class="nf">__test_bias</span><span class="p">():</span>
+    <span class="n">neighbors</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">pools</span> <span class="o">=</span> <span class="n">NeighborMsgPoolSet</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">neighbors</span><span class="p">)</span>
+    
+    <span class="n">filling_mode</span> <span class="o">=</span> <span class="s1">&#39;random&#39;</span>
+    <span class="n">filling_nb_real_msgs</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">filling_nb_dummy_msgs</span> <span class="o">=</span> <span class="mi">10</span>
+    
+    <span class="k">if</span> <span class="n">filling_mode</span> <span class="o">==</span> <span class="s1">&#39;random&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">neighbors</span><span class="p">)</span><span class="o">*</span><span class="n">filling_nb_dummy_msgs</span><span class="p">):</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">neighbors</span><span class="p">)</span>
+            <span class="n">pools</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">add_dummy_msg</span><span class="p">()</span>
+        <span class="k">for</span>  <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">neighbors</span><span class="p">)</span><span class="o">*</span><span class="n">filling_nb_real_msgs</span><span class="p">):</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">neighbors</span><span class="p">)</span>
+            <span class="n">pools</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">add_msg</span><span class="p">(</span><span class="n">LinkMsg</span><span class="p">(</span><span class="n">sent_by</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sent_to</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">c1</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">c2</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">MsgFlag</span><span class="o">.</span><span class="n">PAYLOAD</span><span class="p">,</span> <span class="n">cid</span><span class="o">=</span><span class="mi">42</span><span class="o">*</span><span class="n">i</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">filling_nb_dummy_msgs</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">neighbors</span><span class="p">:</span>
+                <span class="n">pools</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">add_dummy_msg</span><span class="p">()</span>
+        <span class="k">for</span>  <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">filling_nb_real_msgs</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">neighbors</span><span class="p">:</span>
+                <span class="n">pools</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">add_msg</span><span class="p">(</span><span class="n">LinkMsg</span><span class="p">(</span><span class="n">sent_by</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sent_to</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">c1</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">c2</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">MsgFlag</span><span class="o">.</span><span class="n">PAYLOAD</span><span class="p">,</span> <span class="n">cid</span><span class="o">=</span><span class="mi">42</span><span class="o">*</span><span class="n">i</span><span class="p">))</span>
+            
+            
+    
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> msgs available&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pools</span><span class="o">.</span><span class="n">n_available</span><span class="p">))</span>
+    
+    <span class="k">for</span> <span class="n">bias</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
+        <span class="n">bias</span> <span class="o">=</span> <span class="n">bias</span><span class="o">/</span><span class="mi">100</span>
+        <span class="n">nb_tries</span> <span class="o">=</span> <span class="mi">50</span>
+        <span class="n">avg_nb_reals_overall</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">avg_nb_dummies_overall</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">avg_nb_reals_per_neighbor</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">avg_nb_dummies_per_neighbor</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_tries</span><span class="p">):</span>
+            <span class="n">batches</span> <span class="o">=</span> <span class="n">pools</span><span class="o">.</span><span class="n">sample_neighbor_batches</span><span class="p">(</span><span class="n">sampling_bias</span><span class="o">=</span><span class="n">bias</span><span class="p">)</span>
+            <span class="n">avg_nb_reals_overall</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="s1">&#39;reals&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">batches</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+            <span class="n">avg_nb_dummies_overall</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="s1">&#39;dummies&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">batches</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+
+            
+            
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;For bias = </span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2"> real messages and </span><span class="si">{}</span><span class="s2"> dummy messages selected in average&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bias</span><span class="p">,</span> <span class="n">avg_nb_reals_overall</span><span class="o">/</span><span class="n">nb_tries</span><span class="p">,</span> <span class="n">avg_nb_dummies_overall</span><span class="o">/</span><span class="n">nb_tries</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

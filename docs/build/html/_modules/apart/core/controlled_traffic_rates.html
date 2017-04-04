@@ -1,0 +1,502 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>apart.core.controlled_traffic_rates &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="APART  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">APART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../packages.html">Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>apart.core.controlled_traffic_rates</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for apart.core.controlled_traffic_rates</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Author: Antoine Guellier</span>
+<span class="c1"># Copyright (c) 2017 Université de Rennes 1</span>
+<span class="c1"># License: CeCILL. The full license text is available at:</span>
+<span class="c1">#  - http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html</span>
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This module contains material to manage the traffic counters of the controlled traffic rates mechanism of the protocol.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">_collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">deque</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">from</span> <span class="nn">common.utilities</span> <span class="k">import</span> <span class="n">range1</span>
+
+
+<div class="viewcode-block" id="TrafficController"><a class="viewcode-back" href="../../../apart.core.controlled_traffic_rates.html#apart.core.controlled_traffic_rates.TrafficController">[docs]</a><span class="k">class</span> <span class="nc">TrafficController</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delta_r</span><span class="p">,</span> <span class="n">neighbors</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This class stores and manages the traffic counters of a node. More</span>
+<span class="sd">        exactly, it manages the counters n_i_real, n_i_real over the last</span>
+<span class="sd">        ``delta_r`` rounds, and manages one counter n_i_dum, n_o_dum per</span>
+<span class="sd">        neighbor, for the last ``delta_r`` rounds.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            delta_r (int): the number of rounds over which the traffic rates contraints are relaxed.</span>
+<span class="sd">            neighbors (list of int): the indexes (in the network) of the neighbors of the node to</span>
+<span class="sd">                 which a particular :obj:`.TrafficController` instance belongs to.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">__delta_r</span> <span class="o">=</span> <span class="n">delta_r</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_neighbors</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">neighbors</span><span class="p">)</span>
+        
+        
+        <span class="c1">#=======================================================================</span>
+        <span class="c1"># Counters n_i_real and n_o_real are actually composed of ``delta_r+1``</span>
+        <span class="c1"># elements, representing the last few batching rounds. Counters n_i_dum</span>
+        <span class="c1"># and n_i_dum are actually dict containing each ``detla_r+1`` elements:</span>
+        <span class="c1"># one dict entry per neighbor.</span>
+        <span class="c1">#</span>
+        <span class="c1"># The *vectors* are implemented with a ``collections.deque``, that are</span>
+        <span class="c1"># rotated as rounds pass by. For each  counter c, c[delta_r] represents</span>
+        <span class="c1"># the oldest round, and c[0] is the value for the current round</span>
+        <span class="c1">#=======================================================================</span>
+        <span class="c1">#=======================================================================</span>
+        <span class="n">deque_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__delta_r</span><span class="o">+</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n_i_dum_budget</span> <span class="o">=</span> <span class="n">deque</span><span class="p">([</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">deque_size</span><span class="p">)],</span> <span class="n">maxlen</span><span class="o">=</span><span class="n">deque_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n_o_dum_budget</span> <span class="o">=</span> <span class="n">deque</span><span class="p">([</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">deque_size</span><span class="p">)],</span> <span class="n">maxlen</span><span class="o">=</span><span class="n">deque_size</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n_i_real_unresolved</span> <span class="o">=</span> <span class="n">deque</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">deque_size</span><span class="p">,</span> <span class="n">maxlen</span><span class="o">=</span><span class="n">deque_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n_o_real_unresolved</span> <span class="o">=</span> <span class="n">deque</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">deque_size</span><span class="p">,</span> <span class="n">maxlen</span><span class="o">=</span><span class="n">deque_size</span><span class="p">)</span>
+                
+    <span class="k">def</span> <span class="nf">__index_from_relative_round</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">relative_round</span><span class="p">):</span>
+        <span class="c1"># Si relative_round = -delta_r, return delta_r</span>
+        <span class="c1"># Si relative_round = 0, return 0</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">relative_round</span>
+
+
+<div class="viewcode-block" id="TrafficController.next_round"><a class="viewcode-back" href="../../../apart.core.controlled_traffic_rates.html#apart.core.controlled_traffic_rates.TrafficController.next_round">[docs]</a>    <span class="k">def</span> <span class="nf">next_round</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Move the counters to the next round</span>
+<span class="sd">        </span>
+<span class="sd">        Depending on the implementation, this function may involve a rotation of</span>
+<span class="sd">        queues for instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n_i_dum_budget</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n_i_dum_budget</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="mi">0</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n_o_dum_budget</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n_o_dum_budget</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="mi">0</span><span class="p">)</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n_i_real_unresolved</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n_i_real_unresolved</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n_o_real_unresolved</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n_o_real_unresolved</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span></div>
+        
+        
+<div class="viewcode-block" id="TrafficController.equilibrate_n_o_real_and_n_i_real"><a class="viewcode-back" href="../../../apart.core.controlled_traffic_rates.html#apart.core.controlled_traffic_rates.TrafficController.equilibrate_n_o_real_and_n_i_real">[docs]</a>    <span class="k">def</span> <span class="nf">equilibrate_n_o_real_and_n_i_real</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called at the end of a round, updates n_o_real and n_i_real.</span>
+<span class="sd">        </span>
+<span class="sd">        This function effectively cancels out values of n_i_real with values of</span>
+<span class="sd">        n_o_real, or vice-versa, depending on which one is the greatest of the two2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Start from the (sum of) values of any of the two counter n_i_real or</span>
+        <span class="c1"># n_o_real indifferently. Here, we choose n_i_real</span>
+        <span class="n">amount_resolvable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_unresolved_n_i_real</span>
+        
+        <span class="c1"># Resolve the OTHER counter (n_o_real) by the said amount. If it turns</span>
+        <span class="c1">#out that sum(n_o_real) was LOWER than sum(n_i_real), the below function</span>
+        <span class="c1">#returns the amount NOT consumed from the n_i_real counter</span>
+        <span class="n">amount_left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_consume_real_counter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n_o_real_unresolved</span><span class="p">,</span> <span class="n">amount_resolvable</span><span class="p">)</span>
+        
+        <span class="c1"># Accordingly resolve n_i_real by the SAME amount as n_o_real, i.e.</span>
+        <span class="c1"># ``amount_resolvable-amount_left``</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_consume_real_counter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n_i_real_unresolved</span><span class="p">,</span> <span class="n">amount_resolvable</span><span class="o">-</span><span class="n">amount_left</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="TrafficController.resolve_n_o_real_with_dummies"><a class="viewcode-back" href="../../../apart.core.controlled_traffic_rates.html#apart.core.controlled_traffic_rates.TrafficController.resolve_n_o_real_with_dummies">[docs]</a>    <span class="k">def</span> <span class="nf">resolve_n_o_real_with_dummies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called at the end of a round, to decrease n_o_real according to the dummy budget</span>
+<span class="sd">        </span>
+<span class="sd">        This function effectively consumes incoming dummy budget to resolve</span>
+<span class="sd">        potentially unresolved n_o_real</span>
+<span class="sd">        &quot;&quot;&quot;</span> 
+        <span class="n">amount_resolvable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_n_i_dum_budget</span>
+        <span class="n">amount_left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_consume_real_counter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n_o_real_unresolved</span><span class="p">,</span> <span class="n">amount_resolvable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_consume_dummy_counter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n_i_dum_budget</span><span class="p">,</span> <span class="n">amount_resolvable</span> <span class="o">-</span> <span class="n">amount_left</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="TrafficController.resolve_n_i_real_with_dummies"><a class="viewcode-back" href="../../../apart.core.controlled_traffic_rates.html#apart.core.controlled_traffic_rates.TrafficController.resolve_n_i_real_with_dummies">[docs]</a>    <span class="k">def</span> <span class="nf">resolve_n_i_real_with_dummies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called at the end of a round, to decrease n_i_real according to the dummy budget</span>
+<span class="sd">        </span>
+<span class="sd">        This function effectively consumes outgoing dummy budget to resolve</span>
+<span class="sd">        potentially unresolved n_i_real</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">amount_resolvable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_n_o_dum_budget</span>
+        <span class="n">amount_left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_consume_real_counter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n_i_real_unresolved</span><span class="p">,</span> <span class="n">amount_resolvable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_consume_dummy_counter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n_o_dum_budget</span><span class="p">,</span> <span class="n">amount_resolvable</span><span class="o">-</span><span class="n">amount_left</span><span class="p">)</span></div>
+        
+        
+         
+        
+    <span class="k">def</span> <span class="nf">_consume_real_counter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">counter</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Decrease a real message counter by the specified amount, starting fro mthe oldest round&quot;&quot;&quot;</span>
+        <span class="c1"># Start from the counter (i.e. from the oldest round), and decrement each value when possible</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__delta_r</span>
+        <span class="k">while</span> <span class="n">amount</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">counter</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">amount</span><span class="p">:</span>
+                <span class="n">amount</span><span class="p">,</span> <span class="n">counter</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">amount</span><span class="o">-</span><span class="n">counter</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">amount</span><span class="p">,</span> <span class="n">counter</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">counter</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">amount</span>
+            <span class="n">i</span> <span class="o">-=</span> <span class="mi">1</span>
+            
+        <span class="k">return</span> <span class="n">amount</span>         
+        
+    <span class="k">def</span> <span class="nf">_consume_dummy_counter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">counter</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Decrease a dummy message counter by the specified amount, starting from the value in the oldest round&quot;&quot;&quot;</span> 
+        <span class="n">amount_per_neighbor</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">amount</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neighbors</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__delta_r</span>
+        <span class="k">while</span> <span class="nb">any</span><span class="p">(</span><span class="n">amount_per_neighbor</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">amount_per_neighbor</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">counter</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">amount_per_neighbor</span><span class="p">[</span><span class="n">n</span><span class="p">]:</span>
+                    <span class="n">amount_per_neighbor</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">counter</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">amount_per_neighbor</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">-</span><span class="n">counter</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">n</span><span class="p">],</span> <span class="mi">0</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">amount_per_neighbor</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">counter</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">counter</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">n</span><span class="p">]</span><span class="o">-</span><span class="n">amount_per_neighbor</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">-=</span> <span class="mi">1</span>
+        
+    
+    <span class="c1">#===========================================================================</span>
+    <span class="c1"># Information getters </span>
+    <span class="c1">#===========================================================================</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">current_equilibrium</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: The equilibrium of the counters, i.e. the sum over the last delta_r rounds of n_o_real-n_i_real&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="n">n_o</span><span class="o">-</span><span class="n">n_i</span> <span class="k">for</span> <span class="n">n_o</span><span class="p">,</span><span class="n">n_i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n_o_real_unresolved</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__n_i_real_unresolved</span><span class="p">)])</span> 
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">last_unresolved_n_i_real</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: the value of n_i_real for the oldest rounds, that **must** to be resolved in the current round&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__n_i_real_unresolved</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__delta_r</span><span class="p">]</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">total_unresolved_n_i_real</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: the total excess (compared to sent ones) of received real messages&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n_i_real_unresolved</span><span class="p">)</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">last_unresolved_n_o_real</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: the value of n_o_real for the oldest rounds, that **must** to be resolved in the current round&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__n_o_real_unresolved</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__delta_r</span><span class="p">]</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">total_unresolved_n_o_real</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: the total excess (compared to received ones) of sent real messages&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n_o_real_unresolved</span><span class="p">)</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">total_n_o_dum_budget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: total outgoing dummy budget&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">((</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n_o_dum_budget</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">range1</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__delta_r</span><span class="p">))</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neighbors</span><span class="p">))</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">total_n_i_dum_budget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: total incoming dummy budget&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">((</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n_i_dum_budget</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">range1</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__delta_r</span><span class="p">))</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neighbors</span><span class="p">))</span>
+        
+        
+    
+    
+    
+    <span class="c1">#===========================================================================</span>
+    <span class="c1"># Setters of the counters, under the form of incrementation of the current</span>
+    <span class="c1"># round counter</span>
+    <span class="c1">#===========================================================================</span>
+<div class="viewcode-block" id="TrafficController.inc_current_n_i_real"><a class="viewcode-back" href="../../../apart.core.controlled_traffic_rates.html#apart.core.controlled_traffic_rates.TrafficController.inc_current_n_i_real">[docs]</a>    <span class="k">def</span> <span class="nf">inc_current_n_i_real</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inc</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Increments the n_i_real counter of the current round by the specified value&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n_i_real_unresolved</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">inc</span></div>
+        
+<div class="viewcode-block" id="TrafficController.inc_current_n_o_real"><a class="viewcode-back" href="../../../apart.core.controlled_traffic_rates.html#apart.core.controlled_traffic_rates.TrafficController.inc_current_n_o_real">[docs]</a>    <span class="k">def</span> <span class="nf">inc_current_n_o_real</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inc</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Increments the n_o_real counter of the current round by the specified value&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n_o_real_unresolved</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">inc</span></div>
+
+<div class="viewcode-block" id="TrafficController.inc_current_n_o_dum"><a class="viewcode-back" href="../../../apart.core.controlled_traffic_rates.html#apart.core.controlled_traffic_rates.TrafficController.inc_current_n_o_dum">[docs]</a>    <span class="k">def</span> <span class="nf">inc_current_n_o_dum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neighbor</span><span class="p">,</span> <span class="n">inc</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Increments the n_o_dum counter of the current round by the specified value&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n_o_dum_budget</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">neighbor</span><span class="p">]</span> <span class="o">+=</span> <span class="n">inc</span></div>
+        
+<div class="viewcode-block" id="TrafficController.inc_current_n_i_dum"><a class="viewcode-back" href="../../../apart.core.controlled_traffic_rates.html#apart.core.controlled_traffic_rates.TrafficController.inc_current_n_i_dum">[docs]</a>    <span class="k">def</span> <span class="nf">inc_current_n_i_dum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neighbor</span><span class="p">,</span> <span class="n">inc</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Increments the n_i_dum counter of the current round by the specified value&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n_i_dum_budget</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">neighbor</span><span class="p">]</span> <span class="o">+=</span> <span class="n">inc</span></div>
+        
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;n_i_dum_budget = </span><span class="si">{}</span><span class="s2"> = </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">([[</span><span class="n">ddict</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neighbors</span><span class="p">]</span> <span class="k">for</span> <span class="n">ddict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__n_i_dum_budget</span><span class="p">],</span> <span class="p">[</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n_i_dum_budget</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">range1</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__delta_r</span><span class="p">))</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neighbors</span><span class="p">])</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;n_o_dum_budget = </span><span class="si">{}</span><span class="s2"> = </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">([[</span><span class="n">ddict</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neighbors</span><span class="p">]</span> <span class="k">for</span> <span class="n">ddict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__n_o_dum_budget</span><span class="p">],</span> <span class="p">[</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n_o_dum_budget</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">range1</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__delta_r</span><span class="p">))</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neighbors</span><span class="p">])</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;last_unresolved_n_i_real = </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n_i_real_unresolved</span><span class="p">))</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;last_unresolved_n_o_real = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n_o_real_unresolved</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">s</span></div>
+    
+<span class="c1"># class TrafficRateError(Exception):</span>
+<span class="c1">#     pass    </span>
+        
+        
+        
+<span class="c1"># Some basic tests</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>    
+    <span class="n">delta_r</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">neighbors</span> <span class="o">=</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">42</span><span class="p">]</span>
+    <span class="n">tc</span> <span class="o">=</span> <span class="n">TrafficController</span><span class="p">(</span><span class="n">delta_r</span><span class="p">,</span> <span class="n">neighbors</span><span class="p">)</span>
+    
+    <span class="c1"># First round</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">neighbors</span><span class="p">:</span> <span class="n">tc</span><span class="o">.</span><span class="n">inc_current_n_i_dum</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">inc</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">neighbors</span><span class="p">:</span> <span class="n">tc</span><span class="o">.</span><span class="n">inc_current_n_o_dum</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">inc</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">tc</span><span class="o">.</span><span class="n">inc_current_n_i_real</span><span class="p">(</span><span class="n">inc</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">tc</span><span class="o">.</span><span class="n">inc_current_n_o_real</span><span class="p">(</span><span class="n">inc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="c1">#Second round</span>
+    <span class="n">tc</span><span class="o">.</span><span class="n">next_round</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">neighbors</span><span class="p">:</span> <span class="n">tc</span><span class="o">.</span><span class="n">inc_current_n_i_dum</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">inc</span><span class="o">=</span><span class="mi">1</span><span class="o">+</span><span class="n">n</span><span class="o">%</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">neighbors</span><span class="p">:</span> <span class="n">tc</span><span class="o">.</span><span class="n">inc_current_n_o_dum</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">inc</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">n</span><span class="o">%</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">tc</span><span class="o">.</span><span class="n">inc_current_n_i_real</span><span class="p">(</span><span class="n">inc</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">tc</span><span class="o">.</span><span class="n">inc_current_n_o_real</span><span class="p">(</span><span class="n">inc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="c1"># Third round</span>
+    <span class="n">tc</span><span class="o">.</span><span class="n">next_round</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">neighbors</span><span class="p">:</span> <span class="n">tc</span><span class="o">.</span><span class="n">inc_current_n_i_dum</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">inc</span><span class="o">=</span><span class="mi">1</span><span class="o">+</span><span class="n">n</span><span class="o">%</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">neighbors</span><span class="p">:</span> <span class="n">tc</span><span class="o">.</span><span class="n">inc_current_n_o_dum</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">inc</span><span class="o">=</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="mi">2</span><span class="o">-</span><span class="n">n</span><span class="o">%</span><span class="mi">3</span><span class="p">))</span>
+    <span class="n">tc</span><span class="o">.</span><span class="n">inc_current_n_i_real</span><span class="p">(</span><span class="n">inc</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">tc</span><span class="o">.</span><span class="n">inc_current_n_o_real</span><span class="p">(</span><span class="n">inc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CONSTRAINTS&quot;</span><span class="p">)</span>
+    <span class="n">current_equilibrium</span> <span class="o">=</span> <span class="n">tc</span><span class="o">.</span><span class="n">current_equilibrium</span>
+    <span class="n">o_dum_budget</span> <span class="o">=</span> <span class="o">-</span><span class="n">tc</span><span class="o">.</span><span class="n">total_n_o_dum_budget</span>
+    <span class="n">i_dum_budget</span> <span class="o">=</span> <span class="n">tc</span><span class="o">.</span><span class="n">total_n_i_dum_budget</span>
+    
+    <span class="n">soft_lbound_real_msgs</span> <span class="o">=</span> <span class="n">o_dum_budget</span> <span class="o">-</span> <span class="n">current_equilibrium</span>
+    <span class="n">strict_lbound_real_msgs</span> <span class="o">=</span> <span class="n">o_dum_budget</span> <span class="o">+</span> <span class="n">tc</span><span class="o">.</span><span class="n">last_unresolved_n_i_real</span>
+    
+    <span class="n">strict_ubound_real_msgs</span> <span class="o">=</span> <span class="n">i_dum_budget</span> <span class="o">-</span> <span class="n">current_equilibrium</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> (strict) &lt;= </span><span class="si">{}</span><span class="s2"> (soft) &lt;= nb_reals_to_send_in_this_round &lt;= </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">strict_lbound_real_msgs</span><span class="p">,</span> <span class="n">soft_lbound_real_msgs</span><span class="p">,</span> <span class="n">strict_ubound_real_msgs</span><span class="p">))</span>
+    
+    
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Beginning resolving&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Equilibrium : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tc</span><span class="o">.</span><span class="n">current_equilibrium</span><span class="p">))</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">After equilibration&quot;</span><span class="p">)</span>
+    <span class="n">tc</span><span class="o">.</span><span class="n">equilibrate_n_o_real_and_n_i_real</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Equilibrium : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tc</span><span class="o">.</span><span class="n">current_equilibrium</span><span class="p">))</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">After &#39;resolve n_i_real_with_dummies&#39;&quot;</span><span class="p">)</span>
+    <span class="n">tc</span><span class="o">.</span><span class="n">resolve_n_i_real_with_dummies</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Equilibrium : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tc</span><span class="o">.</span><span class="n">current_equilibrium</span><span class="p">))</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">After &#39;resolve n_o_real_with_dummies&#39;&quot;</span><span class="p">)</span>
+    <span class="n">tc</span><span class="o">.</span><span class="n">resolve_n_o_real_with_dummies</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Equilibrium : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tc</span><span class="o">.</span><span class="n">current_equilibrium</span><span class="p">))</span>
+    
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

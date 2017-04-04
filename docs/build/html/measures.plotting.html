@@ -1,0 +1,414 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>measures.plotting — Plotting Results into Graphs &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="APART  documentation" href="index.html"/>
+        <link rel="up" title="measures — Benchmark &amp; Simulation Framework" href="measures.html"/>
+        <link rel="next" title="Examples" href="examples.html"/>
+        <link rel="prev" title="measures.file_handling — Saving/Loading Measure Results from Disk" href="measures.file_handling.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">APART</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="packages.html">Packages</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.html"><code class="docutils literal"><span class="pre">common</span></code> &#8212; Helper Modules</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="measures.html"><code class="docutils literal"><span class="pre">measures</span></code> &#8212; Benchmark &amp; Simulation Framework</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="measures.network_statistics.html"><code class="docutils literal"><span class="pre">measures.network_statistics</span></code> &#8212; <em>Hook</em> Class into Network Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="measures.advanced_stats_helper.html"><code class="docutils literal"><span class="pre">measures.advanced_stats_helper</span></code> &#8211; Helper Class for Computing Statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="measures.common_measures.html"><code class="docutils literal"><span class="pre">measures.common_measures</span></code> &#8212; Generic Measure Framework</a></li>
+<li class="toctree-l3"><a class="reference internal" href="measures.file_handling.html"><code class="docutils literal"><span class="pre">measures.file_handling</span></code> &#8212; Saving/Loading Measure Results from Disk</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><code class="docutils literal"><span class="pre">measures.plotting</span></code> &#8212; Plotting Results into Graphs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="packages.html">Packages</a> &raquo;</li>
+        
+          <li><a href="measures.html"><code class="docutils literal"><span class="pre">measures</span></code> &#8212; Benchmark &amp; Simulation Framework</a> &raquo;</li>
+        
+      <li><code class="docutils literal"><span class="pre">measures.plotting</span></code> &#8212; Plotting Results into Graphs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/measures.plotting.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-measures.plotting">
+<span id="measures-plotting-plotting-results-into-graphs"></span><h1><code class="docutils literal"><span class="pre">measures.plotting</span></code> &#8212; Plotting Results into Graphs<a class="headerlink" href="#module-measures.plotting" title="Permalink to this headline">¶</a></h1>
+<p>This module provides helper function to plot graphs constructed from the results
+of simulations. It uses the <code class="xref py py-mod docutils literal"><span class="pre">matplotlib.pyplot</span></code> module for all graph creations.</p>
+<p>Note that, for the plotting of complex/custom graphs, the generic functions
+provided in this module may not be flexible enough. However, the code for custom
+function plotting can be inspired by the code in this module.</p>
+<dl class="exception">
+<dt id="measures.plotting.PlottingException">
+<em class="property">exception </em><code class="descclassname">measures.plotting.</code><code class="descname">PlottingException</code><a class="reference internal" href="_modules/measures/plotting.html#PlottingException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.plotting.PlottingException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
+<p>Raised when an error occurs during the formatting of data into a graph</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measures.plotting.do_plot_simple_metric">
+<code class="descclassname">measures.plotting.</code><code class="descname">do_plot_simple_metric</code><span class="sig-paren">(</span><em>x_values</em>, <em>y_values</em>, <em>stdevs</em>, <em>graph_description</em>, <em>several_curves=None</em>, <em>save_to=None</em>, <em>overwrite_existing=False</em>, <em>color='b'</em>, <em>marker='s'</em>, <em>marker_size=6</em>, <em>linestyle='-'</em>, <em>linewidth=1</em>, <em>legend_placement='upper right'</em>, <em>xlim=None</em>, <em>ylim=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/plotting.html#do_plot_simple_metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.plotting.do_plot_simple_metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Actually plots a <em>simple metric</em>,  producing a bar plot of one or several curves, based on data points.</p>
+<p>This function is called by <a class="reference internal" href="#measures.plotting.plot_simple_metric" title="measures.plotting.plot_simple_metric"><code class="xref py py-func docutils literal"><span class="pre">plot_simple_metric()</span></code></a>, but provided in a
+stand-alone mode for a more fine-grained control of its inputs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x_values</strong> (<em>list of numbers</em><em>, or </em><em>dict</em>) &#8211; the values in abscissa. If <cite>several_curves</cite> is not None, expected to be a dict indexed by the label of the curves, with lists of numbers in values.</li>
+<li><strong>x_values</strong> &#8211; the values in ordinate. If <cite>several_curves</cite> is not None, expected to be a dict indexed by the label of the curves, with lists of numbers in values.</li>
+<li><strong>several_curves</strong> (<em>list of string</em><em>, </em><em>optional</em>) &#8211; if None, then only one curve is drawn in the
+graph. If provided as a list of string, draws as many curves as
+there are strings in the list, using these strings as the curves labels.</li>
+<li><strong>save_to</strong> (<em>string</em><em>, </em><em>optional</em>) &#8211; path of the folder in which graphs should be saved. If <cite>None</cite>,
+the graphs are instead displayed on screen. (Default: None)</li>
+<li><strong>overwrite_existing</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; if graphs are saved and this argument is <cite>True</cite>, then the new graph may erase existing files.
+This argument is passed down to <a class="reference internal" href="measures.file_handling.html#measures.file_handling.save_graphs_simulation_results" title="measures.file_handling.save_graphs_simulation_results"><code class="xref py py-func docutils literal"><span class="pre">save_graphs_simulation_results()</span></code></a>. (Default: False)</li>
+<li><strong>others</strong> (<em>color</em><em>, </em><em>marker</em><em>, </em><em>marker_size</em><em>, </em><em>linestyle</em><em>, </em><em>linewidth</em><em>, </em><em>legend_placement</em><em>, </em><em>xlim</em><em>, </em><em>ylim</em>) &#8211; parameters passed down to the <code class="xref py py-mod docutils literal"><span class="pre">matplotlib.pyplot</span></code> module.
+Expected to be simple values when <cite>several_curves</cite> is None, and list of values otherwise.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measures.plotting.plot_histogram">
+<code class="descclassname">measures.plotting.</code><code class="descname">plot_histogram</code><span class="sig-paren">(</span><em>experiments_results</em>, <em>ordered_measure_params_names</em>, <em>y_stat</em>, <em>print_yerr=False</em>, <em>label_rotation=0</em>, <em>xticks=None</em>, <em>max_bars=None</em>, <em>restrict_to_other_params={}</em>, <em>save_to=None</em>, <em>overwrite_existing=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/plotting.html#plot_histogram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.plotting.plot_histogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Analogous to <a class="reference internal" href="#measures.plotting.plot_simple_metric" title="measures.plotting.plot_simple_metric"><code class="xref py py-func docutils literal"><span class="pre">plot_simple_metric()</span></code></a>, but for plotting histograms.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>experiment_results</strong> (<em>dict</em>) &#8211; typically, the output of a call to <a class="reference internal" href="measures.common_measures.html#measures.common_measures.generic_measure" title="measures.common_measures.generic_measure"><code class="xref py py-func docutils literal"><span class="pre">measures.common_measures.generic_measure()</span></code></a>.</li>
+<li><strong>ordered_measure_params_names</strong> (<em>list of string</em>) &#8211; the names of the parameters of the measure.
+The order of these parameters is preserved, but matters only in case
+they are displayed to the user (the function does not rely on that
+order to function).</li>
+<li><strong>y_stat</strong> (<em>tuple</em>) &#8211; the statistic to plot (i.e. the metric to plot in ordinate axis). Is processed by a call to <a class="reference internal" href="#measures.plotting.process_plot_function_inputs" title="measures.plotting.process_plot_function_inputs"><code class="xref py py-func docutils literal"><span class="pre">process_plot_function_inputs()</span></code></a>.</li>
+<li><strong>restrict_to_other_params</strong> (<em>dict</em>) &#8211; a dict with parameter names as keys,
+and strings or lists of strings as values. This argument is similat
+to that of
+<a class="reference internal" href="measures.common_measures.html#measures.common_measures.generic_measure" title="measures.common_measures.generic_measure"><code class="xref py py-func docutils literal"><span class="pre">generic_measure()</span></code></a>,
+and allows to include in the graph only results for a certain subset
+of results.</li>
+<li><strong>save_to</strong> (<em>string</em><em>, </em><em>optional</em>) &#8211; path of the folder in which graphs should be saved. If <cite>None</cite>,
+the graphs are instead displayed on screen. (Default: None)</li>
+<li><strong>overwrite_existing</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; if graphs are saved and this argument is <cite>True</cite>, then the new graph may erase existing files.
+This argument is passed down to <a class="reference internal" href="measures.file_handling.html#measures.file_handling.save_graphs_simulation_results" title="measures.file_handling.save_graphs_simulation_results"><code class="xref py py-func docutils literal"><span class="pre">save_graphs_simulation_results()</span></code></a>. (Default: False)</li>
+<li><strong>print_yerr</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; if <cite>True</cite>, the standard deviation of each bar is printed (Default: False)</li>
+<li><strong>max_bars</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; if set to <cite>n</cite> and the histogram has more than n different x values, the histogram is cut down to n bars.
+And on the last bar are stacked and accumulatged all the remaining values. This avoids huge and unreadable bar plots.</li>
+<li><strong>others</strong> (<em>label_rotation</em><em>, </em><em>xticks</em>) &#8211; parameters passed down to the <code class="xref py py-mod docutils literal"><span class="pre">matplotlib.pyplot</span></code> module.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measures.plotting.plot_simple_metric">
+<code class="descclassname">measures.plotting.</code><code class="descname">plot_simple_metric</code><span class="sig-paren">(</span><em>experiments_results</em>, <em>ordered_measure_params_names</em>, <em>y_stat</em>, <em>x_param</em>, <em>several_curves=None</em>, <em>restrict_to_other_params={}</em>, <em>save_to=None</em>, <em>overwrite_existing=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/plotting.html#plot_simple_metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.plotting.plot_simple_metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic plotting function, producing a bar plot of one or several curves, based on data points.</p>
+<p>Produces a graph and saves it as .png file (or disaplys them on screen).
+This function is designed for plotting <em>simple</em> data; namely, simple curves
+made of data points. It accepts the results of simulations in arguments,
+processes these results, and plots them.</p>
+<p>Note that this function actually calls <a class="reference internal" href="#measures.plotting.do_plot_simple_metric" title="measures.plotting.do_plot_simple_metric"><code class="xref py py-func docutils literal"><span class="pre">do_plot_simple_metric()</span></code></a> to
+plot the graph. Its main purpose is only to process the data from measures
+and simulations into input acceptable by the latter function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>experiment_results</strong> (<em>dict</em>) &#8211; typically, the output of a call to <a class="reference internal" href="measures.common_measures.html#measures.common_measures.generic_measure" title="measures.common_measures.generic_measure"><code class="xref py py-func docutils literal"><span class="pre">measures.common_measures.generic_measure()</span></code></a>.</li>
+<li><strong>ordered_measure_params_names</strong> (<em>list of string</em>) &#8211; the names of the parameters of the measure.
+The order of these parameters is preserved, but matters only in case
+they are displayed to the user (the function does not rely on that
+order to function).</li>
+<li><strong>y_stat</strong> (<em>tuple</em>) &#8211; the statistic to plot (i.e. the metric to plot in ordinate axis). Is processed by a call to <a class="reference internal" href="#measures.plotting.process_plot_function_inputs" title="measures.plotting.process_plot_function_inputs"><code class="xref py py-func docutils literal"><span class="pre">process_plot_function_inputs()</span></code></a>.</li>
+<li><strong>x_param</strong> (<em>tuple</em>) &#8211; the parameter to use in abscissa. Is processed by a call to <a class="reference internal" href="#measures.plotting.process_plot_function_inputs" title="measures.plotting.process_plot_function_inputs"><code class="xref py py-func docutils literal"><span class="pre">process_plot_function_inputs()</span></code></a>. (Default: None)</li>
+<li><strong>several_curves</strong> (<em>list of string</em><em>, </em><em>optional</em>) &#8211; if None, then only one curve is drawn in the
+graph. If provided as a list of string, draws as many curves as
+there are strings in the list, using these strings as the curves labels.</li>
+<li><strong>restrict_to_other_params</strong> (<em>dict</em>) &#8211; a dict with parameter names as keys,
+and strings or lists of strings as values. This argument is similat
+to that of
+<a class="reference internal" href="measures.common_measures.html#measures.common_measures.generic_measure" title="measures.common_measures.generic_measure"><code class="xref py py-func docutils literal"><span class="pre">generic_measure()</span></code></a>,
+and allows to include in the graph only results for a certain subset
+of results.</li>
+<li><strong>save_to</strong> (<em>string</em><em>, </em><em>optional</em>) &#8211; path of the folder in which graphs should be saved. If <cite>None</cite>,
+the graphs are instead displayed on screen. (Default: None)</li>
+<li><strong>overwrite_existing</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; if graphs are saved and this argument is <cite>True</cite>, then the new graph may erase existing files.
+This argument is passed down to <a class="reference internal" href="measures.file_handling.html#measures.file_handling.save_graphs_simulation_results" title="measures.file_handling.save_graphs_simulation_results"><code class="xref py py-func docutils literal"><span class="pre">save_graphs_simulation_results()</span></code></a>. (Default: False)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measures.plotting.plotfunc">
+<code class="descclassname">measures.plotting.</code><code class="descname">plotfunc</code><span class="sig-paren">(</span><em>measure_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/plotting.html#plotfunc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.plotting.plotfunc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator for plotting functions.</p>
+<p>Modifies the behavior of a plotting function in the following way. If no
+&#8216;x_param&#8217; argument is given to the function, then the function is called on
+each parameter in <cite>measure_params</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>measure_params</strong> (<em>list of string</em>) &#8211; the list of the (names of) <cite>x_param</cite> parameters on which to call the decorated plotting function.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measures.plotting.process_plot_function_inputs">
+<code class="descclassname">measures.plotting.</code><code class="descname">process_plot_function_inputs</code><span class="sig-paren">(</span><em>x_param</em>, <em>y_stat</em>, <em>restrict_to_other_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/plotting.html#process_plot_function_inputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.plotting.process_plot_function_inputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks and pre-processes inputs to a plotting function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x_param</strong> (<em>tuple</em>) &#8211; a tuple of strings, containing the name of the
+parameter to put in abscissa of the graph, accompanied with label of
+the axis, plus optionally a label for the file name</li>
+<li><strong>y_stat</strong> (<em>tuple</em>) &#8211; similarl to <cite>x_param</cite>, but for the ordinate axis</li>
+<li><strong>restrict_to_other_params</strong> (<em>dict</em>) &#8211; a dict with parameter names as keys,
+and strings or lists of strings as values.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The processed input parameters</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(tuple, tuple, list)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="measures.file_handling.html" class="btn btn-neutral" title="measures.file_handling — Saving/Loading Measure Results from Disk" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

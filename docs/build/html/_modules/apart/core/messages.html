@@ -1,0 +1,521 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>apart.core.messages &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="APART  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">APART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../packages.html">Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>apart.core.messages</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for apart.core.messages</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Author: Antoine Guellier</span>
+<span class="c1"># Copyright (c) 2017 Université de Rennes 1</span>
+<span class="c1"># License: CeCILL. The full license text is available at:</span>
+<span class="c1">#  - http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html</span>
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This module provides classes to manage messages exchanged by nodes in the protocol.</span>
+
+<span class="sd">The main class is :class:`.LinkMsg`, which models a link message. The enum</span>
+<span class="sd">classes :class:`.MsgFlag` and :class:`.MsgInnerFlag` respectively provides</span>
+<span class="sd">constant coding the types of link and end-to-end messages.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="k">import</span> <span class="n">IntEnum</span>
+
+<span class="kn">from</span> <span class="nn">apart.crypto</span> <span class="k">import</span> <span class="n">Ctxt</span>
+
+
+<div class="viewcode-block" id="MsgFlag"><a class="viewcode-back" href="../../../apart.core.messages.html#apart.core.messages.MsgFlag">[docs]</a><span class="k">class</span> <span class="nc">MsgFlag</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An enumeration class giving the types of link messages in the network&quot;&quot;&quot;</span>
+    
+    <span class="n">RTPROP</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="sd">&quot;&quot;&quot;The first message in a route proposition&quot;&quot;&quot;</span>
+    <span class="n">RTPROP_ANSWER</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="sd">&quot;&quot;&quot;Message sent by the proposee after receiving the :attr:`~apart.core.messages.MsgFlag.RTPROP` and :attr:`~apart.core.messages.MsgFlag.RTPROP_INFO` messages&quot;&quot;&quot;</span>
+    <span class="n">RTPROP_FINAL</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="sd">&quot;&quot;&quot;Message sent by the proposer, that terminates the route proposal&quot;&quot;&quot;</span>
+    <span class="n">RTPROP_RELAY_FWD</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="sd">&quot;&quot;&quot;The message to relay from proposer to receiver in a relayed proposal&quot;&quot;&quot;</span>
+    <span class="n">RTPROP_RELAY_BWD</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="sd">&quot;&quot;&quot;The message to relay from receiver back to proposer in a relayed proposal&quot;&quot;&quot;</span>
+    <span class="n">PAYLOAD</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="sd">&quot;&quot;&quot;A regular payload message&quot;&quot;&quot;</span>
+    <span class="n">DUMMY</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="sd">&quot;&quot;&quot;A dummy link message&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="MsgInnerFlag"><a class="viewcode-back" href="../../../apart.core.messages.html#apart.core.messages.MsgInnerFlag">[docs]</a><span class="k">class</span> <span class="nc">MsgInnerFlag</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An enumeration class giving the different flags an encapsulated message can have.</span>
+<span class="sd">    </span>
+<span class="sd">    These flags usually go into the first ciphertext of the link messages), and</span>
+<span class="sd">    are in particular used to signal end-to-end dummy messages and oriented</span>
+<span class="sd">    communication messages</span>
+<span class="sd">    &quot;&quot;&quot;</span> 
+    
+    <span class="n">DUMMY</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="sd">&quot;&quot;&quot;A dummy en-to-end message&quot;&quot;&quot;</span>
+    <span class="n">OCOM_INIT</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="sd">&quot;&quot;&quot;A message part of the oriented communication initialization, exchanged between sender and helper&quot;&quot;&quot;</span>
+    <span class="n">OCOM_RCV</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="sd">&quot;&quot;&quot;A message part of an oriented communication, for the end-receiver&quot;&quot;&quot;</span>
+    <span class="n">OCOM_CLOSE</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="sd">&quot;&quot;&quot;Indicates to the helper the closing of the session&quot;&quot;&quot;</span></div>
+
+    
+    
+
+
+<div class="viewcode-block" id="LinkMsg"><a class="viewcode-back" href="../../../apart.core.messages.html#apart.core.messages.LinkMsg">[docs]</a><span class="k">class</span> <span class="nc">LinkMsg</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sent_by</span><span class="p">,</span> <span class="n">sent_to</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">flag</span><span class="p">,</span> <span class="n">cid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rcid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">seq_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">additional_info</span><span class="o">=</span><span class="p">{})</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This is the main class of this module. It basically</span>
+<span class="sd">        contains a header (an instance of :class:`.LinkMsgHeader`), two</span>
+<span class="sd">        ciphertexts  ``c1`` and ``c2``, the identities of the link-sender and</span>
+<span class="sd">        the link-receiver, plus additional info for debugging and computing</span>
+<span class="sd">        statistics.</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sent_by</span> <span class="o">=</span> <span class="n">sent_by</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sent_to</span> <span class="o">=</span> <span class="n">sent_to</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_c1</span> <span class="o">=</span> <span class="n">c1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_c2</span> <span class="o">=</span> <span class="n">c2</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_header</span> <span class="o">=</span> <span class="n">LinkMsgHeader</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="n">cid</span><span class="p">,</span> <span class="n">rcid</span><span class="p">,</span> <span class="n">seq_index</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_additional_info</span> <span class="o">=</span> <span class="n">additional_info</span>
+
+        <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="n">flag</span> <span class="ow">is</span> <span class="n">MsgFlag</span><span class="o">.</span><span class="n">PAYLOAD</span> <span class="ow">or</span> <span class="n">flag</span> <span class="ow">is</span> <span class="n">MsgFlag</span><span class="o">.</span><span class="n">RTPROP_RELAY_FWD</span> <span class="ow">or</span> <span class="n">flag</span> <span class="ow">is</span> <span class="n">MsgFlag</span><span class="o">.</span><span class="n">RTPROP_RELAY_BWD</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;end_sender&#39;</span> <span class="ow">in</span> <span class="n">additional_info</span> <span class="ow">and</span> <span class="s1">&#39;end_rcvr&#39;</span> <span class="ow">in</span> <span class="n">additional_info</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="s1">&#39;end_sender&#39;</span> <span class="ow">in</span> <span class="n">additional_info</span> <span class="ow">and</span> <span class="s1">&#39;end_rcvr&#39;</span> <span class="ow">in</span> <span class="n">additional_info</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">additional_info</span><span class="p">[</span><span class="s1">&#39;end_sender&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">additional_info</span><span class="p">[</span><span class="s1">&#39;end_rcvr&#39;</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;, &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">additional_info</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">MsgInnerHeader</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">c1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">flag</span> <span class="ow">is</span> <span class="n">MsgInnerFlag</span><span class="o">.</span><span class="n">OCOM_INIT</span> <span class="ow">or</span> <span class="n">c1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">flag</span> <span class="ow">is</span> <span class="n">MsgInnerFlag</span><span class="o">.</span><span class="n">OCOM_RCV</span> <span class="ow">or</span> <span class="n">c1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">flag</span> <span class="ow">is</span> <span class="n">MsgInnerFlag</span><span class="o">.</span><span class="n">OCOM_CLOSE</span><span class="p">)</span> <span class="p">)</span><span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;is_ocom&#39;</span> <span class="ow">in</span> <span class="n">additional_info</span><span class="p">)</span>
+        
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="LinkMsg.create_dummy"><a class="viewcode-back" href="../../../apart.core.messages.html#apart.core.messages.LinkMsg.create_dummy">[docs]</a>    <span class="k">def</span> <span class="nf">create_dummy</span><span class="p">(</span><span class="n">sent_by</span><span class="p">,</span> <span class="n">sent_to</span><span class="p">,</span> <span class="n">link_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convenience function providing a shortcut to create a link dummy message.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            sent_by (int): index of the link-sender node</span>
+<span class="sd">            sent_to (int): index of the link-receiver node</span>
+<span class="sd">            link_key (any, optional): not used in this implementation</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`.LinkMsg`: a dummy link message (with a *dummy* flag in its header)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># For a fully fledged implementation, here, the DUMMY flag should be</span>
+        <span class="c1"># encrypted with the link key</span>
+        <span class="k">return</span> <span class="n">LinkMsg</span><span class="p">(</span><span class="n">sent_by</span><span class="p">,</span> <span class="n">sent_to</span><span class="p">,</span> <span class="n">c1</span><span class="o">=</span><span class="n">Ctxt</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">c2</span><span class="o">=</span><span class="n">Ctxt</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">flag</span><span class="o">=</span><span class="n">MsgFlag</span><span class="o">.</span><span class="n">DUMMY</span><span class="p">)</span></div>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sent_by</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: the index of the link-sender node&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sent_by</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sent_to</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: the index of the link-receiver node&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sent_to</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;:obj:`.LinkMsgHeader`: the full message header&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">flag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;:obj:`.MsgFlag`: the flag contained in  the message header (see :attr:`.LinkMsgHeader.flag`)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">flag</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: the cid value contained in  the message header (see :attr:`.LinkMsgHeader.cid`)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cid</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rcid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: the rcid contained in the message header (see :attr:`.LinkMsgHeader.rcid`)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">rcid</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">seq_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: the sequence index contained in the message header  (see :attr:`.LinkMsgHeader.seq_index`)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">seq_index</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">c1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;:obj:`~apart.crypto.Ctxt`: the first Elgamal ciphertext of the message&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_c1</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">c2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;:obj:`~apart.crypto.Ctxt`: the second Elgamal ciphertext of the message&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_c2</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">additional_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;dict str-&gt;any: Adidtional information transported along with the message. For debug and measures purposes&quot;&quot;&quot;</span>
+        <span class="c1"># This returns the dict by reference. The dict _additional_info can thus</span>
+        <span class="c1"># be modified, which is what is needed</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_additional_info</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">memory_location</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()[</span><span class="o">-</span><span class="mi">11</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="s2">&quot;LinkMsg&lt;</span><span class="si">{}</span><span class="s2">&gt;(</span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">, from=</span><span class="si">{}</span><span class="s2">, to=</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">memory_location</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sent_by</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sent_to</span><span class="p">)</span>
+      
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span></div>
+    
+<span class="c1">#     def __eq__(self, other):</span>
+<span class="c1">#         return self.lala == other.lala</span>
+    
+
+
+<div class="viewcode-block" id="LinkMsgHeader"><a class="viewcode-back" href="../../../apart.core.messages.html#apart.core.messages.LinkMsgHeader">[docs]</a><span class="k">class</span> <span class="nc">LinkMsgHeader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">,</span> <span class="n">cid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rcid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">seq_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A link message header, containing at least a flag (type), and possibly, a cid, a rcid, and a sequence index.</span>
+<span class="sd">    </span>
+<span class="sd">        Args:</span>
+<span class="sd">            flag (:obj:`.MsgFlag`): the flag of the message, specifying its type </span>
+<span class="sd">            cid (int, optional): the circuit identifier value cid (Default: None)</span>
+<span class="sd">            rcid (int, optional): the reverse circuit identifier value rcid (Default: None)</span>
+<span class="sd">            seq_index (int, optional): the sequence index of the message, used in route proposals (Default: None)   </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># Note that a named tuple could have been used to represent link message headers. The</span>
+        <span class="c1"># only reason a class was created is to overload the __str__ function to a</span>
+        <span class="c1"># nice string for debug</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">__flag</span> <span class="o">=</span> <span class="n">flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cid</span> <span class="o">=</span> <span class="n">cid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__rcid</span> <span class="o">=</span> <span class="n">rcid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__seq_index</span> <span class="o">=</span> <span class="n">seq_index</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">flag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;:obj:`.MsgFlag`: the flag specifying the type of the message&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__flag</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;int: the circuit identifier.</span>
+<span class="sd">        </span>
+<span class="sd">        This value can be None, for messages with flag :attr:`.MsgFlag.DUMMY`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cid</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rcid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;int: the reverse circuit identifier. </span>
+<span class="sd">        </span>
+<span class="sd">        The only type of messages that should have a reverse circuit identifier</span>
+<span class="sd">        are those with flags :attr:`.MsgFlag.RTPROP_RELAY_FWD` and</span>
+<span class="sd">        :attr:`.MsgFlag.RTPROP_RELAY_BWD`. For other messages, this value is None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rcid</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">seq_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;int: the sequence index of the message. </span>
+<span class="sd">        </span>
+<span class="sd">        Sequence indexesUsed are used to differentiate the first and second</span>
+<span class="sd">        message in a route proposal. Indeed, every step of the route proposals</span>
+<span class="sd">        require two messages. Having this sequence index makes it easier to</span>
+<span class="sd">        differentiate them.&lt;</span>
+<span class="sd">        </span>
+<span class="sd">        The only type of messages that should have a sequence index</span>
+<span class="sd">        are those relating to route proposals. For other messages, this value is None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__seq_index</span>
+    
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot; || cid(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rcid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot; || rcid(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rcid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seq_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot; || seq(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seq_index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">s</span>
+    
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="MsgInnerHeader"><a class="viewcode-back" href="../../../apart.core.messages.html#apart.core.messages.MsgInnerHeader">[docs]</a><span class="k">class</span> <span class="nc">MsgInnerHeader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">,</span> <span class="n">ocomid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">seq_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Inner header of a message of type :attr:`.MsgFlag.PAYLOAD`.</span>
+<span class="sd">        </span>
+<span class="sd">        An inner header contains data regarding the management of  oriented</span>
+<span class="sd">        communications and their initializations, and regarding end-to-end dummy</span>
+<span class="sd">        messages </span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            flag (:obj:`.MsgInnerFlag`): the inner flag, specifying whether the message is an end-to-end dummy, </span>
+<span class="sd">                    or one pertaining to an oriented communication</span>
+<span class="sd">            ocomid (int, optional): the oriented communication identifier (Default: None)</span>
+<span class="sd">            seq_index (int, optional): the sequence index of messages in an oriented communication (Default: None)</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">__flag</span> <span class="o">=</span> <span class="n">flag</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ocomid</span> <span class="o">=</span> <span class="n">ocomid</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">__seq_index</span> <span class="o">=</span> <span class="n">seq_index</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">flag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;:obj:`.MsgInnerFlag`: the inner flag.</span>
+<span class="sd">        </span>
+<span class="sd">        This flag specifies whether the message is an end-to-end dummy, or one</span>
+<span class="sd">        pertaining to an oriented communication. In th elatter case, it also</span>
+<span class="sd">        specifies which message it is as part of the initialisation of the communication.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__flag</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ocomid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;int: the oriented communication identifier.</span>
+<span class="sd">        </span>
+<span class="sd">        Present in all payload and rtproprelay messages of oriented communications.</span>
+<span class="sd">        </span>
+<span class="sd">        This value is None for end-to-end dummy messages (with inner flag :attr:`.MsgInnerFlag.DUMMY`).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ocomid</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">seq_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;int: the sequence index of messages in an oriented communication</span>
+<span class="sd">        </span>
+<span class="sd">        This allows the actors of an oriented communication to know which</span>
+<span class="sd">        message contains which information. Without this sequence index, the</span>
+<span class="sd">        end-sender and indirectio nnode would not be able to run the oriented</span>
+<span class="sd">        communicatio ninitlaisation properly.</span>
+<span class="sd">        </span>
+<span class="sd">        This value is None for end-to-end dummy messages (with inner flag :attr:`.MsgInnerFlag.DUMMY`).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+         
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__seq_index</span>
+    
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ocomid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot; || ocomid(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ocomid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seq_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot; || seq(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seq_index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">s</span>
+    
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="EndToEndDummyError"><a class="viewcode-back" href="../../../apart.core.messages.html#apart.core.messages.EndToEndDummyError">[docs]</a><span class="k">class</span> <span class="nc">EndToEndDummyError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raised when a node is not able to produce an end-to-end dummy&quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+        
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

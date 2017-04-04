@@ -1,0 +1,953 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>apart.core.network &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="APART  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">APART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../packages.html">Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>apart.core.network</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for apart.core.network</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Author: Antoine Guellier</span>
+<span class="c1"># Copyright (c) 2017 Université de Rennes 1</span>
+<span class="c1"># License: CeCILL. The full license text is available at:</span>
+<span class="c1">#  - http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html</span>
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This module contains classes managing the network. </span>
+
+<span class="sd">The class :class:`~apart.core.network.Network` represents a network, and class</span>
+<span class="sd">:class:`~apart.core.network.NetworkManager` the manager of the network.The</span>
+<span class="sd">manager is responsible for triggering the different *phases* of the network</span>
+<span class="sd">(coded in :class:`~apart.core.network.NetPhase`), and starting the nodes</span>
+<span class="sd">processes. The network itself contains the topology graph and the list of nodes</span>
+<span class="sd">that compose the network.</span>
+
+<span class="sd">This module does not contain code properly relatin to the protocol. All the code</span>
+<span class="sd">of the protocol, and the behavior of nodes, is coded in module</span>
+<span class="sd">:mod:`~apart.core.node`.</span>
+
+<span class="sd">This module also defines the :exc:`.SimulationException` exception.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="k">import</span> <span class="n">IntEnum</span>
+<span class="kn">import</span> <span class="nn">graphviz</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">simpy</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">common.custom_logging</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">apart.core.node</span> <span class="k">import</span> <span class="n">Node</span>
+<span class="kn">from</span> <span class="nn">apart.core.tables</span> <span class="k">import</span> <span class="n">SqliteRoutingTable</span><span class="p">,</span> <span class="n">RoutingTable</span> <span class="k">as</span> <span class="n">RT</span><span class="p">,</span> <span class="n">PrevRoutingTable</span> <span class="k">as</span> <span class="n">PRT</span>
+<span class="kn">import</span> <span class="nn">collections</span> <span class="k">as</span> <span class="nn">c</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">measures.network_statistics</span> <span class="k">import</span> <span class="n">NetworkStats</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+
+
+<div class="viewcode-block" id="Network"><a class="viewcode-back" href="../../../apart.core.network.html#apart.core.network.Network">[docs]</a><span class="k">class</span> <span class="nc">Network</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    
+    <span class="n">__next_network_uid</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="c1"># A counter to keep track of network unique identifiers. Used for managing</span>
+    <span class="c1"># the weird routing table implementation (see apart.core.tables)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">net_manager</span><span class="p">,</span> <span class="n">simpy_env</span><span class="p">,</span> <span class="n">sim_params</span><span class="p">,</span> <span class="n">net_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The network which nodes are part of.</span>
+
+<span class="sd">        This class is repsonsible for:</span>
+<span class="sd">            * Managing the set of nodes</span>
+<span class="sd">            * Creating and managing the topology graph</span>
+<span class="sd">        </span>
+<span class="sd">        The constructor creates the topology graph, creates the nodes </span>
+<span class="sd">        (:obj:`~apart.core.node.Node` objects), generates a subset of </span>
+<span class="sd">        corrupted nodes,</span>
+<span class="sd">        </span>
+<span class="sd">        Arguments:</span>
+<span class="sd">            net_manager (:obj:`~apart.core.network.NetworManager`): the manager of </span>
+<span class="sd">                        the network</span>
+<span class="sd">            simpy_env (:obj:`simpy.Environment`): the simpy environment</span>
+<span class="sd">            sim_params (:obj:`~simulation.simulation.SimulationParams`): set of </span>
+<span class="sd">                        parameters for the simulation</span>
+<span class="sd">            net_params (:obj:`~apart.core.network.NetworkParams`): set of </span>
+<span class="sd">                        parameters for the network (nb nodes, etc.)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_network_uid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()))</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">Network</span><span class="o">.</span><span class="n">__next_network_uid</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;The network identity, uniquely identifying the network run (and the set of nodes therein)&quot;&quot;&quot;</span>
+        <span class="n">Network</span><span class="o">.</span><span class="n">__next_network_uid</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_env</span> <span class="o">=</span> <span class="n">simpy_env</span>
+        <span class="sd">&quot;&quot;&quot;The SimPy environment&quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sim_params</span> <span class="o">=</span> <span class="n">sim_params</span>
+        <span class="sd">&quot;&quot;&quot;Parameters of the simulation&quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="n">net_params</span>
+        <span class="sd">&quot;&quot;&quot;Network parameters&quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_net_manager</span> <span class="o">=</span> <span class="n">net_manager</span>
+        <span class="sd">&quot;&quot;&quot;The network manager&quot;&quot;&quot;</span> 
+        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">topology_graph</span><span class="p">,</span> <span class="n">nx</span><span class="o">.</span><span class="n">classes</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">topology_graph</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">nb_nodes</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_topology_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">topology_graph</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SimulationException</span><span class="p">(</span><span class="s2">&quot;The provided topology graph has </span><span class="si">{}</span><span class="s2"> nodes, while </span><span class="si">{}</span><span class="s2"> were expected.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">topology_graph</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">nb_nodes</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_topology_graph</span> <span class="o">=</span> <span class="n">Network</span><span class="o">.</span><span class="n">gen_topology_graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">nb_nodes</span><span class="p">)</span>     
+            <span class="sd">&quot;&quot;&quot;The topology graph, i.e. graph connecting the nodes&quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Topology graph has </span><span class="si">{0}</span><span class="s2"> nodes with </span><span class="si">{1}</span><span class="s2"> neighbors each&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">nb_nodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_topology_graph</span><span class="o">.</span><span class="n">degree</span><span class="p">(</span><span class="mi">0</span><span class="p">)))</span>
+        
+        <span class="c1"># Set the maximum route length, if not specified by the parameters</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">rtprop_policy_max_hop_count</span><span class="p">:</span>
+            <span class="n">all_shortest_paths_lengths</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">shortest_path_length</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_topology_graph</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">rtprop_policy_max_hop_count</span> <span class="o">=</span> <span class="mi">1</span><span class="o">+</span><span class="nb">max</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="p">([</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+                                                                            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">all_shortest_paths_lengths</span><span class="o">.</span><span class="n">values</span><span class="p">())))</span>
+        
+        <span class="c1"># Draw the network graph at startup if asked to</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sim_params</span><span class="o">.</span><span class="n">draw_topology_graph</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">draw_topology_graph</span><span class="p">()</span>
+        
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">Node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_env</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_net_manager</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_topology_graph</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">n</span><span class="p">))</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">nb_nodes</span><span class="p">)]</span>
+        <span class="sd">&quot;&quot;&quot;The list of :obj:`~apart.core.node.Node` objects&quot;&quot;&quot;</span>
+        
+        <span class="c1"># Among those nodes, mark some of them as corrupted</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_corrupted_nodes_indexes</span> <span class="o">=</span> <span class="n">Network</span><span class="o">.</span><span class="n">gen_corruption_states</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_nodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">corruption_ratio</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_topology_graph</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;The indexes of the corrupted nodes&quot;&quot;&quot;</span>
+        
+        <span class="c1"># Inform node of their corruption</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_corrupted_nodes_indexes</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodes</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">set_corruption_state</span><span class="p">(</span><span class="n">corrupted</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">is_corrupted</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodes</span><span class="p">[</span><span class="n">neigh</span><span class="p">]</span><span class="o">.</span><span class="n">is_corrupted</span> <span class="k">for</span> <span class="n">neigh</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">neighbors</span><span class="p">)</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodes</span><span class="p">)</span>
+
+         
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">network_uid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: The network unique id&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_network_uid</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;list of :obj:`~apart.core.node.Node`: The list of nodes in the network. The list is passed by reference, but should not be modified. Nodes inside the list can be modified.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodes</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">corrupted_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;list of :obj:`~apart.core.node.Node`: The set of corrupted nodes&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_corrupted_nodes_indexes</span><span class="p">]</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nb_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: Number of nodes in the networks&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nodes</span><span class="p">)</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;:obj:`apart.core.network.NetworkParams`: The network parameters&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">topology_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;:obj:`networkx.Graph`: The network&#39;s underlying topology graph&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_topology_graph</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">routing_tables_sqlite_db_cursor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;:obj:`sqlite3.Cursor`: The sqlite3 database cursor internally used by the node&#39;s routing table implementations</span>
+<span class="sd">        </span>
+<span class="sd">        For statistics computing, and inspection of routing tables after the run</span>
+<span class="sd">        of the network, it is sometimes useful to directly access the sqlite3 cursor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">SqliteRoutingTable</span><span class="o">.</span><span class="n">sqlite_db_cursor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network_uid</span><span class="p">)</span>
+    
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: Returns the SimPy simulation time, rounded to the next integer&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_env</span><span class="o">.</span><span class="n">now</span><span class="p">)</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">batching_round</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: Returns the current network batching round</span>
+<span class="sd">        </span>
+<span class="sd">        In a real-world network, each node would  manage its own batching</span>
+<span class="sd">        counter. Although all nodes have the same batching interval, skewing in</span>
+<span class="sd">        their clocks imply that different nodes can be in different rounds (all</span>
+<span class="sd">        nodes are not perfectly in sync). This function returns the maximum</span>
+<span class="sd">        batching round over all nodes.</span>
+<span class="sd">        </span>
+<span class="sd">        Note that in this &quot;implementation&quot; with SimPy, all node clocks are</span>
+<span class="sd">        perfectly in sync, and thus all nodes are exactly in the same batching round.</span>
+<span class="sd">        &quot;&quot;&quot;</span> 
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">batching_round</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+        
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Network.gen_topology_graph"><a class="viewcode-back" href="../../../apart.core.network.html#apart.core.network.Network.gen_topology_graph">[docs]</a>    <span class="k">def</span> <span class="nf">gen_topology_graph</span><span class="p">(</span><span class="n">nb_nodes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Makes a random (but fully connected) physical graph of the appropriate number of nodes. </span>
+<span class="sd">        </span>
+<span class="sd">        Uses the networkx graph library.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`networkx.Graph`: a topology graph (random connected graph)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">num_neighbors</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">nb_nodes</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+
+        <span class="c1"># Generate a random graph (networkx package requires n*d to be even)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">num_neighbors</span> <span class="o">*</span> <span class="n">nb_nodes</span><span class="p">)</span><span class="o">%</span><span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> <span class="n">num_neighbors</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">physical_graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">random_regular_graph</span><span class="p">(</span><span class="n">num_neighbors</span><span class="p">,</span> <span class="n">nb_nodes</span><span class="p">)</span>
+        <span class="c1">#physical_graph = nx.connected_watts_strogatz_graph(self.params.nb_nodes, num_neighbors, 0.8)</span>
+        
+        <span class="c1"># Check connectivity</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nx</span><span class="o">.</span><span class="n">is_connected</span><span class="p">(</span><span class="n">physical_graph</span><span class="p">):</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;The physical graph is not connected!&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">physical_graph</span></div>
+    
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Network.gen_corruption_states"><a class="viewcode-back" href="../../../apart.core.network.html#apart.core.network.Network.gen_corruption_states">[docs]</a>    <span class="k">def</span> <span class="nf">gen_corruption_states</span><span class="p">(</span><span class="n">nb_nodes</span><span class="p">,</span> <span class="n">corruption_ratio</span><span class="p">,</span> <span class="n">topology_graph</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generates a random set of corrupted nodes. </span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            nb_nodes (int): total number of nodes in the network</span>
+<span class="sd">            corruption_ratio (float): float between 0 and 1, representing</span>
+<span class="sd">                    the percent of corrupted nodes in the network</span>
+<span class="sd">            topology_graph (:obj:`networkx.Graph`): the topology graph of the </span>
+<span class="sd">                    network</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+            <span class="n">corrupted_nodes_indexes</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nb_nodes</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">nb_nodes</span><span class="o">*</span><span class="n">corruption_ratio</span><span class="p">))</span>
+            
+            <span class="c1"># Check the base assumption: that each node has at least one honest</span>
+            <span class="c1"># neighbor</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_nodes</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">corrupted_nodes_indexes</span> 
+                    <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">neigh</span> <span class="ow">in</span> <span class="n">corrupted_nodes_indexes</span> <span class="k">for</span> <span class="n">neigh</span> <span class="ow">in</span> <span class="n">topology_graph</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">n</span><span class="p">))):</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">corrupted_nodes_indexes</span>
+            
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SimulationException</span><span class="p">(</span><span class="s2">&quot;Impossible to find a network corruption&quot;</span>
+                                      <span class="s2">&quot; state with a ratio of </span><span class="si">{}</span><span class="s2"> and such that&quot;</span>
+                                      <span class="s2">&quot; each honest node has at least one honest&quot;</span>
+                                      <span class="s2">&quot; neighbor&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">corruption_ratio</span><span class="p">))</span></div>
+        
+        
+    
+    
+<div class="viewcode-block" id="Network.draw_topology_graph"><a class="viewcode-back" href="../../../apart.core.network.html#apart.core.network.Network.draw_topology_graph">[docs]</a>    <span class="k">def</span> <span class="nf">draw_topology_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Draw the topology graph of the network</span>
+<span class="sd">        </span>
+<span class="sd">        Creates a new gtk window, and displays the graph in it. This function</span>
+<span class="sd">        can be called in a *blocking* fashion or not, in which case the program</span>
+<span class="sd">        (and the network simulation) are stopped while the gtk window is open.2</span>
+<span class="sd">        </span>
+<span class="sd">        Arguments:</span>
+<span class="sd">            * blocking (bool, optional): whether or not the python program</span>
+<span class="sd">                            should be stopped until the gtk window is closed, or</span>
+<span class="sd">                            should continue to run in the background</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">do_draw</span><span class="p">():</span>
+            <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">physical_graph</span><span class="p">)</span><span class="c1">#, pos=nx.get_node_attributes(self.physical_graph, &quot;coords&quot;))</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">blocking</span><span class="p">:</span>
+            <span class="n">do_draw</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">class</span> <span class="nc">PlotThread</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+                <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">physical_graph</span><span class="p">):</span>
+                    <span class="n">Thread</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                    <span class="c1">#---------------------- self.physical_graph = physical_graph</span>
+                <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                    <span class="n">do_draw</span><span class="p">()</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">PlotThread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">physical_graph</span><span class="p">)</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+            
+            
+
+<div class="viewcode-block" id="Network.draw_routes"><a class="viewcode-back" href="../../../apart.core.network.html#apart.core.network.Network.draw_routes">[docs]</a>    <span class="k">def</span> <span class="nf">draw_routes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">blocking</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Draw the routes between one or several pairs of nodes</span>
+<span class="sd">        </span>
+<span class="sd">        For each sender-receiver pair in argument, the function will draw all</span>
+<span class="sd">        the routes that the sender knows towards the receiver.</span>
+<span class="sd">        </span>
+<span class="sd">        </span>
+<span class="sd">        Arguments:</span>
+<span class="sd">            args(list of 2-tuple):  a list of 2-tuple, each specifying a source and a destination</span>
+<span class="sd">            blocking (bool, optional): whether or not the python program</span>
+<span class="sd">                            should be stopped until the gtk window is closed, or</span>
+<span class="sd">                            should continue to run in the background</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">for</span> <span class="n">from_node</span><span class="p">,</span> <span class="n">to_node</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">from_node</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">from_node</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">from_node</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sim_params</span><span class="o">.</span><span class="n">nb_nodes</span> <span class="ow">or</span> 
+                <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">to_node</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">to_node</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">to_node</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sim_params</span><span class="o">.</span><span class="n">nb_nodes</span><span class="p">)</span> <span class="ow">or</span> <span class="n">from_node</span> <span class="o">==</span> <span class="n">to_node</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+
+            <span class="c1"># Create a directed graph with no edges, using the physical graph</span>
+            <span class="n">routes_graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiGraph</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+                <span class="n">routes_graph</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">(((</span><span class="n">n</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">neighbor</span><span class="p">)</span> <span class="k">for</span> <span class="n">neighbor</span> <span class="ow">in</span> <span class="n">n</span><span class="o">.</span><span class="n">neighbors</span> <span class="k">if</span> <span class="n">neighbor</span> <span class="o">&gt;</span> <span class="n">n</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+            <span class="n">edge_labels</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Recursive function crawling through the nodes&#39; tables</span>
+            <span class="k">def</span> <span class="nf">trace_route</span><span class="p">(</span><span class="n">current_node</span><span class="p">,</span> <span class="n">next_node</span><span class="p">,</span> <span class="n">next_cid</span><span class="p">,</span> <span class="n">previous_node</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                <span class="c1"># Update the edge list and edge labels</span>
+                <span class="k">if</span> <span class="n">previous_node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">edge_labels</span><span class="p">[</span><span class="n">current_node</span><span class="p">,</span> <span class="n">next_node</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_node</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">edge_labels</span><span class="p">[</span><span class="n">current_node</span><span class="p">,</span> <span class="n">next_node</span><span class="p">]</span> <span class="o">=</span> <span class="n">edge_labels</span><span class="p">[</span><span class="n">previous_node</span><span class="p">,</span> <span class="n">current_node</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_node</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+                <span class="n">routes_graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">current_node</span><span class="p">,</span> <span class="n">next_node</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">edge_labels</span><span class="p">[</span><span class="n">current_node</span><span class="p">,</span> <span class="n">next_node</span><span class="p">],</span> <span class="n">penwidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">next_node</span> <span class="o">==</span> <span class="n">to_node</span><span class="p">:</span>
+                    <span class="k">return</span>
+
+                <span class="c1"># Retrieve, using the RT+PRTof the &quot;next_node&quot;, the next hop.</span>
+                <span class="c1"># VERY WRONG : this table lookup triggers a sql query. SQL</span>
+                <span class="c1"># queries inside loops are wrooooong, and can often be avoided.</span>
+                <span class="c1"># But this is much simpler, and this function&#39;s efficiency is</span>
+                <span class="c1"># not critical, since called only for debug</span>
+                <span class="n">entries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">next_node</span><span class="p">]</span><span class="o">.</span><span class="n">rt</span><span class="o">.</span><span class="n">joint_lookup</span><span class="p">(</span><span class="n">PRT</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="n">RT</span><span class="o">.</span><span class="n">NEXT_NODE</span><span class="p">,</span><span class="n">RT</span><span class="o">.</span><span class="n">NEXT_CID</span><span class="p">],</span> <span class="n">join_on</span><span class="o">=</span><span class="p">(</span><span class="n">RT</span><span class="o">.</span><span class="n">ROWID</span><span class="p">,</span> <span class="n">PRT</span><span class="o">.</span><span class="n">RT_ROWID</span><span class="p">),</span> 
+                                                   <span class="n">constraints</span><span class="o">=</span><span class="p">{</span><span class="n">PRT</span><span class="o">.</span><span class="n">PREV_NODE</span><span class="p">:</span> <span class="n">current_node</span><span class="p">,</span> <span class="n">PRT</span><span class="o">.</span><span class="n">PREV_CID</span><span class="p">:</span> <span class="n">next_cid</span><span class="p">})</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">entries</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> entries returned: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">While tracing from node </span><span class="si">{}</span><span class="s2"> to node </span><span class="si">{}</span><span class="s2">, with current_node = </span><span class="si">{}</span><span class="s2">, next_hop = </span><span class="si">{}</span><span class="s2">. See tables&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">entries</span><span class="p">),</span> <span class="p">[[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">r</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">],</span> <span class="n">from_node</span><span class="p">,</span> <span class="n">to_node</span><span class="p">,</span> <span class="n">current_node</span><span class="p">,</span> <span class="p">(</span><span class="n">next_node</span><span class="p">,</span> <span class="n">next_cid</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">next_node</span><span class="p">]</span><span class="o">.</span><span class="n">display_node_table</span><span class="p">())</span>
+                <span class="n">next_hop</span> <span class="o">=</span> <span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                
+
+                <span class="c1"># There may be several possible next hops that lead to the destination</span>
+                <span class="c1"># For each possible next hop, call trace_route again (unless the next _node is the destination)</span>
+                <span class="n">trace_route</span><span class="p">(</span><span class="n">next_node</span><span class="p">,</span> <span class="n">next_hop</span><span class="p">[</span><span class="n">RT</span><span class="o">.</span><span class="n">NEXT_NODE</span><span class="p">],</span> <span class="n">next_hop</span><span class="p">[</span><span class="n">RT</span><span class="o">.</span><span class="n">NEXT_CID</span><span class="p">],</span> <span class="n">previous_node</span><span class="o">=</span><span class="n">current_node</span><span class="p">)</span>
+
+
+            <span class="c1"># Add edges according to the RT of nodes in the network</span>
+            <span class="n">starts_of_routes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">from_node</span><span class="p">]</span><span class="o">.</span><span class="n">rt</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="n">RT</span><span class="o">.</span><span class="n">NEXT_NODE</span><span class="p">,</span> <span class="n">RT</span><span class="o">.</span><span class="n">NEXT_CID</span><span class="p">],</span> <span class="n">constraints</span><span class="o">=</span><span class="p">{</span><span class="n">RT</span><span class="o">.</span><span class="n">ACTUAL_RCVR</span><span class="p">:</span> <span class="n">to_node</span><span class="p">})</span>
+<span class="c1">#             self._db.execute(&quot;SELECT rowid, * FROM drt WHERE _node=? AND actualdest=? AND istemporary=0 AND actualnexthop&lt;&gt;-1&quot;, (from_node, to_node,))</span>
+<span class="c1">#             drt_entries = self._db.fetchall()</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Drawing </span><span class="si">{}</span><span class="s2"> routes from </span><span class="si">{}</span><span class="s2"> to </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">starts_of_routes</span><span class="p">),</span> <span class="n">from_node</span><span class="p">,</span> <span class="n">to_node</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">route</span> <span class="ow">in</span> <span class="n">starts_of_routes</span><span class="p">:</span>
+                <span class="n">trace_route</span><span class="p">(</span><span class="n">from_node</span><span class="p">,</span> <span class="n">route</span><span class="p">[</span><span class="n">RT</span><span class="o">.</span><span class="n">NEXT_NODE</span><span class="p">],</span> <span class="n">route</span><span class="p">[</span><span class="n">RT</span><span class="o">.</span><span class="n">NEXT_CID</span><span class="p">])</span>
+
+            <span class="n">nx</span><span class="o">.</span><span class="n">drawing</span><span class="o">.</span><span class="n">nx_pydot</span><span class="o">.</span><span class="n">write_dot</span><span class="p">(</span><span class="n">routes_graph</span><span class="p">,</span> <span class="s1">&#39;/tmp/routes_graph_</span><span class="si">{}</span><span class="s1">-</span><span class="si">{}</span><span class="s1">.dot&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">from_node</span><span class="p">,</span> <span class="n">to_node</span><span class="p">))</span>
+            <span class="n">graphviz</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;dot&#39;</span><span class="p">,</span> <span class="s1">&#39;png&#39;</span><span class="p">,</span> <span class="s1">&#39;/tmp/routes_graph_</span><span class="si">{}</span><span class="s1">-</span><span class="si">{}</span><span class="s1">.dot&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">from_node</span><span class="p">,</span> <span class="n">to_node</span><span class="p">))</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">graphviz</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="s1">&#39;/tmp/routes_graph_</span><span class="si">{}</span><span class="s1">-</span><span class="si">{}</span><span class="s1">.dot.png&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">from_node</span><span class="p">,</span> <span class="n">to_node</span><span class="p">))</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;/tmp/routes_graph_</span><span class="si">{}</span><span class="s1">-</span><span class="si">{}</span><span class="s1">.dot&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">from_node</span><span class="p">,</span> <span class="n">to_node</span><span class="p">))</span></div></div>
+
+
+<div class="viewcode-block" id="NetPhase"><a class="viewcode-back" href="../../../apart.core.network.html#apart.core.network.NetPhase">[docs]</a><span class="k">class</span> <span class="nc">NetPhase</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Constants coding the different phases of the network&quot;&quot;&quot;</span>
+    <span class="n">INIT</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">TOPO_DISS</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">TOPO_DISS_FINISHED</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">OCOM</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">OCOM_FINISHED</span> <span class="o">=</span> <span class="mi">4</span></div>
+
+
+<div class="viewcode-block" id="NetworkManager"><a class="viewcode-back" href="../../../apart.core.network.html#apart.core.network.NetworkManager">[docs]</a><span class="k">class</span> <span class="nc">NetworkManager</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+        
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim_params</span><span class="p">,</span> <span class="n">net_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class modeling a network manager.</span>
+<span class="sd">    </span>
+<span class="sd">        The network manager is responsible for:</span>
+<span class="sd">        </span>
+<span class="sd">            * Creating and managing a :obj:`.Network` instance</span>
+<span class="sd">            * Checking the termination of the topology dissemination and oriented communication phases</span>
+<span class="sd">            * Managing the (uniqueness of) the cid, rcid, and ocomid</span>
+<span class="sd">            * Gathering the statistics on the network</span>
+<span class="sd">        </span>
+<span class="sd">        Note that after a simulation of the network,</span>
+<span class="sd">        :func:`~apart.simulation.run_simulation` returns an instance of this</span>
+<span class="sd">        class. That is, it returns the network manager, containing the network</span>
+<span class="sd">        in its final state, and the attribute :attr:`.net_params`. The latter is</span>
+<span class="sd">        particularly useful to extract information on the network and the</span>
+<span class="sd">        protocol (such as the total number of routes proposed, or the latency of</span>
+<span class="sd">        communications).</span>
+<span class="sd">            </span>
+<span class="sd">        Args:</span>
+<span class="sd">            sim_params (:obj:`~simulation.simulation.SimulationParams`): set of </span>
+<span class="sd">                        parameters for the simulation</span>
+<span class="sd">            net_params (:obj:`~apart.core.network.NetworkParams`): set of </span>
+<span class="sd">                        parameters for the network (nb nodes, etc.)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_env</span> <span class="o">=</span> <span class="n">simpy</span><span class="o">.</span><span class="n">Environment</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;The SimPy environment&quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sim_params</span> <span class="o">=</span> <span class="n">sim_params</span>
+        <span class="sd">&quot;&quot;&quot;Simulation parameters&quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_net_params</span> <span class="o">=</span> <span class="n">net_params</span>
+        <span class="sd">&quot;&quot;&quot;Simulation parameters&quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_net_stats</span> <span class="o">=</span> <span class="n">NetworkStats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_net_params</span><span class="o">.</span><span class="n">nb_nodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sim_params</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;The :obj:`~measure.network_statistics.NetworkStats` instance where statistics on the network run (e.g. number of rt props, etc.)&quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_net</span> <span class="o">=</span> <span class="n">Network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_env</span><span class="p">,</span> <span class="n">sim_params</span><span class="p">,</span> <span class="n">net_params</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;The network this class instance manages&quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_network_is_running</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot;The state of the network: running or stopped&quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_network_phase</span> <span class="o">=</span> <span class="n">NetPhase</span><span class="o">.</span><span class="n">INIT</span>
+        <span class="sd">&quot;&quot;&quot;Current phase of the network. Mainly: topo dissemination, or oriented communication&quot;&quot;&quot;</span>
+        
+        <span class="c1"># Normally, no two cid value between two nodes  should be equal. but for</span>
+        <span class="c1"># simplicity, we cheat by using a global network counter. Same thing for</span>
+        <span class="c1"># rcids and ocomids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cids</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;Dict indexed by pairs of neighboring node, giving the next cid those should use&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rcids</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;Dict indexed by pairs of neighboring node, giving the next rcid those should use&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ocomids</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="sd">&quot;&quot;&quot;Integer giving the next ocomid nodes should use (common for all nodes)&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;:obj:`~apart.core.network.Network`: The network instance&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_net</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">network_phase</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;:obj:`.NetPhase`: The current phase the network is in&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_network_phase</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_running</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;bool: True is the network is running (in the sense of SimPy)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_network_is_running</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">net_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;:obj:`~measures.network_statistics.NetworkStats`: The network statistics instance&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_net_stats</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sim_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;:obj:`~simulation.SimulationParams`: The simulation parameters&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sim_params</span>
+    
+<div class="viewcode-block" id="NetworkManager.start"><a class="viewcode-back" href="../../../apart.core.network.html#apart.core.network.NetworkManager.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Starts the network. Calls :meth:`.start_topology_dissemination`&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_topology_dissemination</span><span class="p">()</span></div>
+    
+<div class="viewcode-block" id="NetworkManager.start_topology_dissemination"><a class="viewcode-back" href="../../../apart.core.network.html#apart.core.network.NetworkManager.start_topology_dissemination">[docs]</a>    <span class="k">def</span> <span class="nf">start_topology_dissemination</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Starts the network.</span>
+<span class="sd">        </span>
+<span class="sd">        Basically registers the nodes as SimPy processes, and starts the SimPy</span>
+<span class="sd">        environment</span>
+<span class="sd">        </span>
+<span class="sd">        Raises:</span>
+<span class="sd">            SimulationException: if the network is not in its initiation phase, e.g. if the topology dissemination already took place</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_network_phase</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NetPhase</span><span class="o">.</span><span class="n">INIT</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SimulationException</span><span class="p">(</span><span class="s2">&quot;Impossible to start the topology dissemination phase.&quot;</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">network_start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_network_phase</span> <span class="o">=</span> <span class="n">NetPhase</span><span class="o">.</span><span class="n">TOPO_DISS</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_running</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_start_nodes</span><span class="p">()</span></div>
+    
+        
+<div class="viewcode-block" id="NetworkManager.start_oriented_communication_phase"><a class="viewcode-back" href="../../../apart.core.network.html#apart.core.network.NetworkManager.start_oriented_communication_phase">[docs]</a>    <span class="k">def</span> <span class="nf">start_oriented_communication_phase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ocom_sessions_per_node</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Start the oriented communication phase in the network.</span>
+<span class="sd">        </span>
+<span class="sd">        Using the `ocom_session_per_node` argument if one is provided, or the</span>
+<span class="sd">        :attr:`~apart.simulation.simulation.SimulationParams.oriented_communication_sessions`</span>
+<span class="sd">        attribute of the simulation parameters, provides each node with a set of</span>
+<span class="sd">        sessions to run as end-sender.</span>
+<span class="sd">        </span>
+<span class="sd">        Raises:</span>
+<span class="sd">            SimulationException: if the oriented communication parameter is not well formed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_network_phase</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NetPhase</span><span class="o">.</span><span class="n">TOPO_DISS_FINISHED</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SimulationException</span><span class="p">(</span><span class="s2">&quot;Impossible to start the oriented communication phase.&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># By default, use the simulation params regarding ocom sessions. </span>
+        <span class="c1"># But allow manual override by argument</span>
+        <span class="k">if</span> <span class="n">ocom_sessions_per_node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ocom_sessions_per_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sim_params</span><span class="o">.</span><span class="n">oriented_communication_sessions</span>
+        
+        
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting oriented communication phase.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_network_phase</span> <span class="o">=</span> <span class="n">NetPhase</span><span class="o">.</span><span class="n">OCOM</span>
+        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ocom_sessions_per_node</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span> 
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ocom_sessions</span> <span class="o">=</span> <span class="n">ocom_sessions_per_node</span><span class="p">[</span><span class="n">n</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">ocom_sessions</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">n</span><span class="o">.</span><span class="n">start_oriented_communications</span><span class="p">(</span><span class="n">ocom_sessions</span><span class="o">=</span><span class="n">ocom_sessions</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">ocom_sessions_per_node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span> 
+                <span class="n">n</span><span class="o">.</span><span class="n">start_oriented_communications</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SimulationException</span><span class="p">(</span><span class="s1">&#39;Network manager: oriented communication sessions parameter is not well formed. Dict excepted, indexed by sender nodes.&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_running</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_start_nodes</span><span class="p">()</span></div>
+    
+            
+    <span class="k">def</span> <span class="nf">_start_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Starts the nodes&#39; SimPy processes&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_network_is_running</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_env</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">run</span><span class="p">())</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_env</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+        
+    <span class="k">def</span> <span class="nf">_stop_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Stops the process of each node in the network.</span>
+<span class="sd">        </span>
+<span class="sd">        Note that the function&#39;s name may be misleading, because there is no</span>
+<span class="sd">        properly speaking &quot;network process&quot;, only a collection of node processes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">network_end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_network_is_running</span> <span class="o">=</span> <span class="kc">False</span>
+    
+<div class="viewcode-block" id="NetworkManager.check_network_idleness"><a class="viewcode-back" href="../../../apart.core.network.html#apart.core.network.NetworkManager.check_network_idleness">[docs]</a>    <span class="k">def</span> <span class="nf">check_network_idleness</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check of all nodes in the network are idle, and takes the adequate course of  actions.</span>
+<span class="sd">        </span>
+<span class="sd">        The network becomes idle a first time at the end of topology</span>
+<span class="sd">        dissemination. At this point, if the simulation asks to perform the</span>
+<span class="sd">        oriented communication phase, the network manager moves to this phase,</span>
+<span class="sd">        and notifies the nodes. Otherwise, it stops all nodes.</span>
+<span class="sd">        &quot;&quot;&quot;</span> 
+        <span class="k">if</span> <span class="nb">all</span><span class="p">((</span><span class="n">n</span><span class="o">.</span><span class="n">is_idle</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">nodes</span><span class="p">)):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Network has come to a stop at batching round: </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">batching_round</span><span class="p">))</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_network_phase</span> <span class="ow">is</span> <span class="n">NetPhase</span><span class="o">.</span><span class="n">TOPO_DISS</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_current_network_phase</span> <span class="o">=</span> <span class="n">NetPhase</span><span class="o">.</span><span class="n">TOPO_DISS_FINISHED</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_net_stats</span><span class="o">.</span><span class="n">log_end_topo_diss</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">batching_round</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;End of topology dissemination at batching round: </span><span class="si">{}</span><span class="s2"> (i.e. </span><span class="si">{}</span><span class="s2"> hours).&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">batching_round</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">batching_round</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">batching_t_interval</span><span class="o">/</span><span class="p">(</span><span class="mi">1000</span><span class="o">*</span><span class="mi">60</span><span class="o">*</span><span class="mi">60</span><span class="p">),</span> <span class="mi">1</span><span class="p">)))</span>
+                
+                <span class="c1"># debug : check that all node know all others</span>
+                <span class="n">ok</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+                    <span class="n">nodes_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">nb_nodes</span><span class="p">))</span>
+                    <span class="n">rows</span> <span class="o">=</span> <span class="n">n</span><span class="o">.</span><span class="n">rt</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="n">RT</span><span class="o">.</span><span class="n">ACTUAL_RCVR</span><span class="p">])</span>
+                    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+                        <span class="n">nodes_set</span> <span class="o">-=</span> <span class="nb">set</span><span class="p">([</span><span class="n">r</span><span class="p">[</span><span class="n">RT</span><span class="o">.</span><span class="n">ACTUAL_RCVR</span><span class="p">]])</span>
+                    <span class="k">if</span> <span class="n">nodes_set</span><span class="p">:</span>
+                        <span class="n">ok</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;After topo. diss, node </span><span class="si">{}</span><span class="s2"> is missing routes towards nodes </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">nodes_set</span><span class="p">))</span>
+                <span class="k">assert</span> <span class="n">ok</span>
+                
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sim_params</span><span class="o">.</span><span class="n">print_nodes_tables</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span> <span class="n">n</span><span class="o">.</span><span class="n">display_node_table</span><span class="p">(</span><span class="n">table</span><span class="o">=</span><span class="s2">&quot;rt&quot;</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sim_params</span><span class="o">.</span><span class="n">automatic_oriented_comm_phase</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">start_oriented_communication_phase</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_stop_nodes</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;End of oriented communications at batching round: </span><span class="si">{}</span><span class="s2"> (i.e. </span><span class="si">{}</span><span class="s2"> hours).&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">batching_round</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">batching_round</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">batching_t_interval</span><span class="o">/</span><span class="p">(</span><span class="mi">1000</span><span class="o">*</span><span class="mi">60</span><span class="o">*</span><span class="mi">60</span><span class="p">),</span> <span class="mi">1</span><span class="p">)))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">log_end_ocom_phase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">batching_round</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_stop_nodes</span><span class="p">()</span></div>
+    
+                
+            
+<div class="viewcode-block" id="NetworkManager.get_next_cid"><a class="viewcode-back" href="../../../apart.core.network.html#apart.core.network.NetworkManager.get_next_cid">[docs]</a>    <span class="k">def</span> <span class="nf">get_next_cid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the next circuit identifier between nodes `n1` and `n2`</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            n1 (int): index of the first node</span>
+<span class="sd">            n2 (int): index of the second node</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            int: a new cid for use between node n1 and node n2, a cid never used by this pair&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cids</span><span class="p">[(</span><span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">)]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cids</span><span class="p">[(</span><span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">)]</span></div>
+    
+<div class="viewcode-block" id="NetworkManager.get_next_rcid"><a class="viewcode-back" href="../../../apart.core.network.html#apart.core.network.NetworkManager.get_next_rcid">[docs]</a>    <span class="k">def</span> <span class="nf">get_next_rcid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the next reverse circuit identifier between nodes `n1` and `n2`</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            n1 (int): index of the first node</span>
+<span class="sd">            n2 (int): index of the second node</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            int: a new rcid for use between node n1 and node n2, a rcid never used by this pair</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rcids</span><span class="p">[(</span><span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">)]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rcids</span><span class="p">[(</span><span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">)]</span></div>
+    
+<div class="viewcode-block" id="NetworkManager.get_next_ocomid"><a class="viewcode-back" href="../../../apart.core.network.html#apart.core.network.NetworkManager.get_next_ocomid">[docs]</a>    <span class="k">def</span> <span class="nf">get_next_ocomid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the next oriented communication identifier </span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            int: a network-wide unique oriented communication identifier</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ocomids</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ocomids</span></div></div>
+    
+
+
+<div class="viewcode-block" id="NetworkParams"><a class="viewcode-back" href="../../../apart.core.network.html#apart.core.network.NetworkParams">[docs]</a><span class="k">class</span> <span class="nc">NetworkParams</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class grouping all the parameters of the network</span>
+<span class="sd">        </span>
+<span class="sd">        Accepts keyword arguments, corresponding to the network parameters, to</span>
+<span class="sd">        replace the default values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">nb_nodes</span> <span class="o">=</span> <span class="mi">7</span>
+        <span class="sd">&quot;&quot;&quot;int: Number of nodes in the network.</span>
+
+<span class="sd">        Default: 7.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">corruption_ratio</span> <span class="o">=</span> <span class="mf">0.3</span>
+        <span class="sd">&quot;&quot;&quot;float between 0 and 1: The percentage of corrupted nodes in the network.</span>
+
+<span class="sd">        Default: 0.3.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># How long should a node &quot;wait&quot; before sending a message. This parameters</span>
+        <span class="c1"># basically models the time it takes for a node to forge and send a message</span>
+        <span class="c1"># Assuming a message takes 1024 bits = 1 Mb, and assuming a the nodes send data at a bit rate of 50 Mbps, a message takes 20 ms to send</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">communication_latency</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># in milliseconds.</span>
+        <span class="sd">&quot;&quot;&quot;int: Latency of message delivery in the network (simulated with SimPy).</span>
+
+<span class="sd">        Default: 20.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># The security parameter for crypto</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">secparam</span> <span class="o">=</span> <span class="mi">128</span>
+        <span class="sd">&quot;&quot;&quot;int: The cryptographic security parameter of the network. Typically, 80, 128, or 256.</span>
+
+<span class="sd">        Default: 128.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">topology_graph</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&quot;&quot;&quot;:obj:`networkx.Graph`: The topology graph for the simulation. If left to None, one is randomly generated.</span>
+
+<span class="sd">        Default: None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># Maximum length of a route (nodes refuse the route proposition for routes</span>
+        <span class="c1"># longer than this)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rtprop_policy_max_hop_count</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&quot;&quot;&quot;int: Route proposal policy, maximum length of a route. </span>
+<span class="sd">        </span>
+<span class="sd">        Default: None. </span>
+<span class="sd">        </span>
+<span class="sd">        If set to 0 or None, this parameter is automatically set to the </span>
+<span class="sd">        smallest integer so that any node is ensured to obtain a route </span>
+<span class="sd">        towards any other (i.e. the longest shortest path in the topo graph)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    
+        <span class="c1"># Maximum number of routes a node can have towards a given destination. For</span>
+        <span class="c1"># example, if this value is 5, and some node already have 5 routes towards</span>
+        <span class="c1"># destination D, upon receiving a route prop towards D, it will refuse it</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rtprop_policy_max_routes</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="sd">&quot;&quot;&quot;int: Route proposal policy, maximum number of routes per receiver.</span>
+
+<span class="sd">        Default: 3.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    
+        <span class="c1"># When a node gets a route proposal for a destination it already knows, it</span>
+        <span class="c1"># has a probability to refuse it straight away (independently from the other</span>
+        <span class="c1"># decision elements such as routing loops, route length, etc). The proba.</span>
+        <span class="c1"># below gives is the proba. of NOT refusing straight away</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rtprop_policy_p_reaccept</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="sd">&quot;&quot;&quot;float between 0 and 1: Route proposal policy, probability of accepting a second route towards an already known receiver.</span>
+
+<span class="sd">        Default: 0.5.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># When a node already has enough routes towards a receiver, but receives one</span>
+        <span class="c1"># more, it has a chance of replacing one of its already known route with the</span>
+        <span class="c1"># new one</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rtprop_policy_p_replace</span> <span class="o">=</span> <span class="mf">0.25</span>
+        <span class="sd">&quot;&quot;&quot;float between 0 and 1: Route proposal policy, probability to &quot;replace&quot; a known route with a newly learned one.</span>
+
+<span class="sd">        Default: 0.25.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+            
+        <span class="c1"># When a node re-discovers a destination (i.e. obtains a second or more</span>
+        <span class="c1"># route towards a given destination already known beforehand), this node has</span>
+        <span class="c1"># a probability to propose this route to its neighbors. This proba is</span>
+        <span class="c1"># computed from the value below, put to the power of the number of routes</span>
+        <span class="c1"># already proposed by the node (towards the concerned destination).</span>
+<span class="c1">#         self.rtprop_policy_p_reprop = 0.1</span>
+        <span class="c1">#&quot;&quot;&quot;Route proposal policy: probability of re-proposing a route&quot;&quot;&quot;</span>
+    
+        <span class="c1"># Parameters of the pool-based message re-ordering mechanism</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batching_t_interval</span> <span class="o">=</span> <span class="mi">1</span><span class="o">*</span><span class="mi">60</span><span class="o">*</span><span class="mi">1000</span> <span class="c1"># 1 minute in milliseconds</span>
+        <span class="sd">&quot;&quot;&quot;int: message re-ordering, batching interval, in milliseconds (i.e. in SimPy simulation time).</span>
+
+<span class="sd">        Default: 1 minute.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batching_nmin</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="sd">&quot;&quot;&quot;int: Message re-ordering, minimum of message that must always be in pools.</span>
+
+<span class="sd">        Default: 5.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batching_f</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="sd">&quot;&quot;&quot;float between 0 and 1: Message re-ordering, maximum fraction of pools that can be sent in one round.</span>
+
+<span class="sd">        Default: 0.5.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># Parameters of the dummy message and traffic rates policy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dummypol_fdum</span> <span class="o">=</span> <span class="mf">0.8</span>
+        <span class="sd">&quot;&quot;&quot;float between 0 and 1: Dummy messages and Controlled Traffic rates, fraction of neighbors pools in which to insert a dummy at each round.</span>
+
+<span class="sd">        Default: 0.8.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dummypol_deltar</span> <span class="o">=</span> <span class="mi">8</span>
+        <span class="sd">&quot;&quot;&quot;int: Dummy messages and Controlled Traffic rates, number of rounds on which the controlled traffic rate equation is relaxed.</span>
+
+<span class="sd">        Default: 8.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_params</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+<div class="viewcode-block" id="NetworkParams.update_params"><a class="viewcode-back" href="../../../apart.core.network.html#apart.core.network.NetworkParams.update_params">[docs]</a>    <span class="k">def</span> <span class="nf">update_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Updates the parameters after instanciation of the object.</span>
+<span class="sd">        </span>
+<span class="sd">        Accepts keyword arguments, corresponding to the network parameters. Only</span>
+<span class="sd">        keyword arguments that match a valid attribute of the class are taken</span>
+<span class="sd">        into accounts. Others are simply ignored silently.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Above are the default argument values. If kwargs is not empty,</span>
+        <span class="c1"># override these values</span>
+        <span class="k">for</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_value</span><span class="p">)</span></div>
+                
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">p_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;upgrade_params&#39;</span><span class="p">:</span> <span class="k">continue</span>
+            <span class="n">p_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="s2">&quot;=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">(</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">p_list</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="SimulationException"><a class="viewcode-back" href="../../../apart.core.network.html#apart.core.network.SimulationException">[docs]</a><span class="k">class</span> <span class="nc">SimulationException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raised when an error occurs due to the handling SimPy simulation, or during the lifetime of the network&quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

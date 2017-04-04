@@ -1,0 +1,337 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>APART &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="APART  documentation" href="#"/>
+        <link rel="next" title="Packages" href="packages.html"/>
+        <link rel="prev" title="Documentation For APART" href="contents.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">APART</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-started-running-simulations">Getting Started: Running Simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#documentation">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#license">License</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="packages.html">Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="contents.html">Docs</a> &raquo;</li>
+        
+      <li>APART</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <p id="overview">This is the documentation corresponding to the GitHub repository that can be found at the following address <a class="reference external" href="https://github.com/aguellier/apart">https://github.com/aguellier/apart</a> . This page is a copy of the <code class="docutils literal"><span class="pre">README</span></code> file in this repository.</p>
+<div class="section" id="apart">
+<h1>APART<a class="headerlink" href="#apart" title="Permalink to this headline">¶</a></h1>
+<p>This repository contains the academic implementation of the protocol
+proposed as part of my PhD thesis. This code is made available for the
+community to reproduce the results.</p>
+<p>[1] Antoine Guellier. &#8220;Strongly Private Communications in a Homogeneous
+Network&#8221;. CentraleSupélec (to be published)</p>
+<p>This thesis was funded by the University of Rennes 1.</p>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>The protocol is aimed at providing ironclad privacy in Internet communications.
+It is meant to be run as a peer-to-peer Internet overlay, providing privacy to
+individuals around the world. The design is in particular inspired from <a class="reference external" href="https://torproject.org/">Tor</a>, and builds on the scientific literature about
+<em>mixnets</em>. It however provides stronger privacy guarantees then existing works.
+In particular, the protocol functions on a <em>homogeneous network</em>, in which all
+nodes simultaneously act as client, and as relay servers for other nodes. This
+allows each node to conceal its own traffic in the traffic it relays for other
+users.</p>
+<p>This repository only contains a basic, insecure implementation of this
+protocol, for purposes of measuring the privacy and performances that can be
+expected from the protocol. More accurately, it is a <em>simulation</em> of the
+protocol that is implemented, using the <a class="reference external" href="http://simpy.readthedocs.io/en/latest/">SimPy</a> discrete-event simulator. The code
+also uses the <a class="reference external" href="http://networkx.readthedocs.io/en/stable/">Networkx</a> library
+to generate and manipulate the network graph, and <a class="reference external" href="http://matplotlib.org/">matplotlib.pyplot</a> to draw various graphs.</p>
+</div>
+<div class="section" id="getting-started-running-simulations">
+<h2>Getting Started: Running Simulations<a class="headerlink" href="#getting-started-running-simulations" title="Permalink to this headline">¶</a></h2>
+<p>The documentation provides details on how to run simulations, and
+gathering statistics on network runs.</p>
+<p>To run a simulation, one possibility is to create a <code class="docutils literal"><span class="pre">main.py</span></code> file
+that imports the <code class="docutils literal"><span class="pre">apart.simulation</span></code> module. The latter provides a
+<code class="docutils literal"><span class="pre">run_simulation()</span></code> function, that accepts parameters for the network
+(<em>e.g.</em> the number of nodes), and for the simulation (<em>e.g</em> logging
+level, pieces of information that should be recorded during the network
+run). The execution of the function may take some time for a number of
+node greater than 10. It also makes log outputs to the standard output,
+letting the user follow the stages of the simulation. Ultimately, the
+function returns a <code class="docutils literal"><span class="pre">NetworkManager</span></code> instance, which in particular
+contains a <code class="docutils literal"><span class="pre">net_stat</span></code> attribute, itself containing all gathered
+statistics and pieces of information on the network and the simulation.</p>
+<p>The user can then exploit these pieces of information in the way she
+sees fit. However, it is more interesting to run fully-fledged measure
+campaign, in which many simulations are run with different network
+parameters. This is possible with the material provided in the
+<code class="docutils literal"><span class="pre">measures</span></code> package. It provides ways to run many network simulations,
+and compute statistics on them. This allows <em>e.g.</em> to obtain an average
+over many runs and over many possible network topologies of the latency
+in communications. The <code class="docutils literal"><span class="pre">measures</span></code> package further provides ways to
+draw graphs from the results.</p>
+<p>The <code class="docutils literal"><span class="pre">examples/</span></code> folder includes several modules that make use of the
+benchmark package <code class="docutils literal"><span class="pre">measures</span></code>:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">measure_general_efficiency</span></code>, allowing in particular to measure
+communication latency,</li>
+<li><code class="docutils literal"><span class="pre">measure_route_prop</span></code>, allowing to measure various metrics on the route
+proposal mechanism proposed in the protocol,</li>
+<li><code class="docutils literal"><span class="pre">measure_privacy</span></code>, allowing to measure the expected privacy that users
+get from the protocol.</li>
+<li><code class="docutils literal"><span class="pre">measure_all</span></code>, that simultaneously performs the measures of all three
+modules at once.</li>
+</ul>
+<p>Note that running these modules may take some time. Parameters for
+simulations can be easily changed in the respective <em>main part</em> of each
+module. The user is also free to create its own modules and construct
+custom measure campains (<em>e.g.</em> based on the same model as the above
+modules)</p>
+</div>
+<div class="section" id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<p>The sources of the documentation are located in <code class="docutils literal"><span class="pre">docs/</span></code>. Documentation
+is generated using Sphinx (v. 1.5.3), and the ReadTheDocs theme (v.
+0.2.4). It is thus required to have those packages installed (<em>via</em> the
+system package manager, pip, or any virtual environment).</p>
+<p>To build the documentation (in html format), run <code class="docutils literal"><span class="pre">make</span> <span class="pre">html</span></code> while in
+the <code class="docutils literal"><span class="pre">docs/</span></code> directory. This creates a <code class="docutils literal"><span class="pre">docs/build/</span></code> folder. You can
+then open the file <code class="docutils literal"><span class="pre">docs/build/html/index.html</span></code> in your favorite
+browser.</p>
+</div>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<p>The project is written for Python 3.4, with the following packages and
+versions:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://simpy.readthedocs.io/en/latest/">Simpy</a> 3.0.10</li>
+<li><a class="reference external" href="http://networkx.readthedocs.io/en/stable/">Networkx</a> 1.11</li>
+<li><a class="reference external" href="http://matplotlib.org/">Matplotlib</a> 1.3.1, for its pyplot sub-package</li>
+<li>dill 0.2.5</li>
+</ul>
+<p>Sphinx 1.5.3 is used to generate the documentation, along with the
+ReadTheDocs theme (v. 0.2.4)</p>
+</div>
+<div class="section" id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<p>This software is licensed under the <a class="reference external" href="http://www.cecill.info">CeCILL
+license</a>, created by the Inria, CNRS, and CEA
+French research institutes. It is inspired from and compatible with the
+GNU GPL license.</p>
+<p>Copyright (c) 2017 University of Rennes 1</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="packages.html" class="btn btn-neutral float-right" title="Packages" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="contents.html" class="btn btn-neutral" title="Documentation For APART" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

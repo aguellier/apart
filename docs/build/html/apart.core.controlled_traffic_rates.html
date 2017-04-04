@@ -1,0 +1,380 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>apart.core.controlled_traffic_rates —- Controlled traffic rates mechanism &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="APART  documentation" href="index.html"/>
+        <link rel="up" title="apart.core — Protocol’s Core Components" href="apart.core.html"/>
+        <link rel="next" title="apart.core.protocol_constants — Misc. Constants" href="apart.core.protocol_constants.html"/>
+        <link rel="prev" title="apart.core.pools — Message Pools and Batching" href="apart.core.pools.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">APART</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="packages.html">Packages</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="apart.crypto.html"><code class="docutils literal"><span class="pre">apart.crypto</span></code> &#8212; Cryptography</a></li>
+<li class="toctree-l3"><a class="reference internal" href="apart.simulation.html"><code class="docutils literal"><span class="pre">apart.simulation</span></code> &#8212; Running simulations</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="apart.core.html"><code class="docutils literal"><span class="pre">apart.core</span></code> &#8212; Protocol&#8217;s Core Components</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="apart.core.network.html"><code class="docutils literal"><span class="pre">apart.core.network</span></code> &#8212; Network and Network Manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.node.html"><code class="docutils literal"><span class="pre">apart.core.node</span></code> &#8212; Node Code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.tables.html"><code class="docutils literal"><span class="pre">apart.core.tables</span></code> &#8212; Routing Tables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.messages.html"><code class="docutils literal"><span class="pre">apart.core.messages</span></code> &#8212; Network Messages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.pools.html"><code class="docutils literal"><span class="pre">apart.core.pools</span></code> &#8212; Message Pools and Batching</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="docutils literal"><span class="pre">apart.core.controlled_traffic_rates</span></code> &#8212;- Controlled traffic rates mechanism</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.protocol_constants.html"><code class="docutils literal"><span class="pre">apart.core.protocol_constants</span></code> &#8212; Misc. Constants</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html"><code class="docutils literal"><span class="pre">common</span></code> &#8212; Helper Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="measures.html"><code class="docutils literal"><span class="pre">measures</span></code> &#8212; Benchmark &amp; Simulation Framework</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="packages.html">Packages</a> &raquo;</li>
+        
+          <li><a href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a> &raquo;</li>
+        
+          <li><a href="apart.core.html"><code class="docutils literal"><span class="pre">apart.core</span></code> &#8212; Protocol&#8217;s Core Components</a> &raquo;</li>
+        
+      <li><code class="docutils literal"><span class="pre">apart.core.controlled_traffic_rates</span></code> &#8212;- Controlled traffic rates mechanism</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/apart.core.controlled_traffic_rates.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-apart.core.controlled_traffic_rates">
+<span id="apart-core-controlled-traffic-rates-controlled-traffic-rates-mechanism"></span><h1><code class="docutils literal"><span class="pre">apart.core.controlled_traffic_rates</span></code> &#8212;- Controlled traffic rates mechanism<a class="headerlink" href="#module-apart.core.controlled_traffic_rates" title="Permalink to this headline">¶</a></h1>
+<p>This module contains material to manage the traffic counters of the controlled traffic rates mechanism of the protocol.</p>
+<dl class="class">
+<dt id="apart.core.controlled_traffic_rates.TrafficController">
+<em class="property">class </em><code class="descclassname">apart.core.controlled_traffic_rates.</code><code class="descname">TrafficController</code><span class="sig-paren">(</span><em>delta_r</em>, <em>neighbors</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/controlled_traffic_rates.html#TrafficController"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.controlled_traffic_rates.TrafficController" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>This class stores and manages the traffic counters of a node. More
+exactly, it manages the counters n_i_real, n_i_real over the last
+<code class="docutils literal"><span class="pre">delta_r</span></code> rounds, and manages one counter n_i_dum, n_o_dum per
+neighbor, for the last <code class="docutils literal"><span class="pre">delta_r</span></code> rounds.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>delta_r</strong> (<em>int</em>) &#8211; the number of rounds over which the traffic rates contraints are relaxed.</li>
+<li><strong>neighbors</strong> (<em>list of int</em>) &#8211; the indexes (in the network) of the neighbors of the node to
+which a particular <a class="reference internal" href="#apart.core.controlled_traffic_rates.TrafficController" title="apart.core.controlled_traffic_rates.TrafficController"><code class="xref py py-obj docutils literal"><span class="pre">TrafficController</span></code></a> instance belongs to.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="apart.core.controlled_traffic_rates.TrafficController.equilibrate_n_o_real_and_n_i_real">
+<code class="descname">equilibrate_n_o_real_and_n_i_real</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/controlled_traffic_rates.html#TrafficController.equilibrate_n_o_real_and_n_i_real"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.controlled_traffic_rates.TrafficController.equilibrate_n_o_real_and_n_i_real" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called at the end of a round, updates n_o_real and n_i_real.</p>
+<p>This function effectively cancels out values of n_i_real with values of
+n_o_real, or vice-versa, depending on which one is the greatest of the two2</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.controlled_traffic_rates.TrafficController.inc_current_n_i_dum">
+<code class="descname">inc_current_n_i_dum</code><span class="sig-paren">(</span><em>neighbor</em>, <em>inc=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/controlled_traffic_rates.html#TrafficController.inc_current_n_i_dum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.controlled_traffic_rates.TrafficController.inc_current_n_i_dum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increments the n_i_dum counter of the current round by the specified value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.controlled_traffic_rates.TrafficController.inc_current_n_i_real">
+<code class="descname">inc_current_n_i_real</code><span class="sig-paren">(</span><em>inc=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/controlled_traffic_rates.html#TrafficController.inc_current_n_i_real"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.controlled_traffic_rates.TrafficController.inc_current_n_i_real" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increments the n_i_real counter of the current round by the specified value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.controlled_traffic_rates.TrafficController.inc_current_n_o_dum">
+<code class="descname">inc_current_n_o_dum</code><span class="sig-paren">(</span><em>neighbor</em>, <em>inc=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/controlled_traffic_rates.html#TrafficController.inc_current_n_o_dum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.controlled_traffic_rates.TrafficController.inc_current_n_o_dum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increments the n_o_dum counter of the current round by the specified value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.controlled_traffic_rates.TrafficController.inc_current_n_o_real">
+<code class="descname">inc_current_n_o_real</code><span class="sig-paren">(</span><em>inc=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/controlled_traffic_rates.html#TrafficController.inc_current_n_o_real"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.controlled_traffic_rates.TrafficController.inc_current_n_o_real" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increments the n_o_real counter of the current round by the specified value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.controlled_traffic_rates.TrafficController.next_round">
+<code class="descname">next_round</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/controlled_traffic_rates.html#TrafficController.next_round"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.controlled_traffic_rates.TrafficController.next_round" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move the counters to the next round</p>
+<p>Depending on the implementation, this function may involve a rotation of
+queues for instance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.controlled_traffic_rates.TrafficController.resolve_n_i_real_with_dummies">
+<code class="descname">resolve_n_i_real_with_dummies</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/controlled_traffic_rates.html#TrafficController.resolve_n_i_real_with_dummies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.controlled_traffic_rates.TrafficController.resolve_n_i_real_with_dummies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called at the end of a round, to decrease n_i_real according to the dummy budget</p>
+<p>This function effectively consumes outgoing dummy budget to resolve
+potentially unresolved n_i_real</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.controlled_traffic_rates.TrafficController.resolve_n_o_real_with_dummies">
+<code class="descname">resolve_n_o_real_with_dummies</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/controlled_traffic_rates.html#TrafficController.resolve_n_o_real_with_dummies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.controlled_traffic_rates.TrafficController.resolve_n_o_real_with_dummies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called at the end of a round, to decrease n_o_real according to the dummy budget</p>
+<p>This function effectively consumes incoming dummy budget to resolve
+potentially unresolved n_o_real</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.controlled_traffic_rates.TrafficController.current_equilibrium">
+<code class="descname">current_equilibrium</code><a class="headerlink" href="#apart.core.controlled_traffic_rates.TrafficController.current_equilibrium" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; The equilibrium of the counters, i.e. the sum over the last delta_r rounds of n_o_real-n_i_real</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.controlled_traffic_rates.TrafficController.last_unresolved_n_i_real">
+<code class="descname">last_unresolved_n_i_real</code><a class="headerlink" href="#apart.core.controlled_traffic_rates.TrafficController.last_unresolved_n_i_real" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; the value of n_i_real for the oldest rounds, that <strong>must</strong> to be resolved in the current round</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.controlled_traffic_rates.TrafficController.last_unresolved_n_o_real">
+<code class="descname">last_unresolved_n_o_real</code><a class="headerlink" href="#apart.core.controlled_traffic_rates.TrafficController.last_unresolved_n_o_real" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; the value of n_o_real for the oldest rounds, that <strong>must</strong> to be resolved in the current round</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.controlled_traffic_rates.TrafficController.total_n_i_dum_budget">
+<code class="descname">total_n_i_dum_budget</code><a class="headerlink" href="#apart.core.controlled_traffic_rates.TrafficController.total_n_i_dum_budget" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; total incoming dummy budget</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.controlled_traffic_rates.TrafficController.total_n_o_dum_budget">
+<code class="descname">total_n_o_dum_budget</code><a class="headerlink" href="#apart.core.controlled_traffic_rates.TrafficController.total_n_o_dum_budget" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; total outgoing dummy budget</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.controlled_traffic_rates.TrafficController.total_unresolved_n_i_real">
+<code class="descname">total_unresolved_n_i_real</code><a class="headerlink" href="#apart.core.controlled_traffic_rates.TrafficController.total_unresolved_n_i_real" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; the total excess (compared to sent ones) of received real messages</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.controlled_traffic_rates.TrafficController.total_unresolved_n_o_real">
+<code class="descname">total_unresolved_n_o_real</code><a class="headerlink" href="#apart.core.controlled_traffic_rates.TrafficController.total_unresolved_n_o_real" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; the total excess (compared to received ones) of sent real messages</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="apart.core.protocol_constants.html" class="btn btn-neutral float-right" title="apart.core.protocol_constants — Misc. Constants" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="apart.core.pools.html" class="btn btn-neutral" title="apart.core.pools — Message Pools and Batching" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

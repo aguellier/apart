@@ -1,0 +1,867 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>measures.common_measures &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="APART  documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">APART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../packages.html">Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>measures.common_measures</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for measures.common_measures</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Author: Antoine Guellier</span>
+<span class="c1"># Copyright (c) 2017 Université de Rennes 1</span>
+<span class="c1"># License: CeCILL. The full license text is available at:</span>
+<span class="c1">#  - http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html</span>
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This module provides helper function to make simulations, experimentations and</span>
+<span class="sd">measures. It in particular provides the function :func:`.generic_measure`, which</span>
+<span class="sd">allows to run many network runs, and gather statistics on them.</span>
+
+
+<span class="sd">.. seealso::</span>
+<span class="sd">    See the examples measure modules that make use of the</span>
+<span class="sd">    :func:`measures.common_measures.generic_measure` function. These may be</span>
+<span class="sd">    found in the the `examples/` folder, or in the *Example* topic of the</span>
+<span class="sd">    documentation.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span><span class="p">,</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">gc</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">common.custom_logging</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">apart.core.network</span> <span class="k">import</span> <span class="n">NetworkParams</span><span class="p">,</span> <span class="n">Network</span>
+<span class="kn">from</span> <span class="nn">apart.simulation</span> <span class="k">import</span> <span class="n">run_simulation</span><span class="p">,</span> <span class="n">SimulationParams</span>
+<span class="kn">from</span> <span class="nn">measures.file_handling</span> <span class="k">import</span> <span class="n">matchstring_results_file_name</span><span class="p">,</span> \
+    <span class="n">format_net_states_file_name</span><span class="p">,</span> <span class="n">save_network_state</span><span class="p">,</span> <span class="n">format_results_file_name</span><span class="p">,</span> <span class="n">save_measures_results</span><span class="p">,</span> \
+    <span class="n">load_measures_results</span>
+
+
+<span class="n">_NET_STATES_REL_FOLDER</span> <span class="o">=</span> <span class="s1">&#39;net_states/&#39;</span>
+
+
+<div class="viewcode-block" id="generic_measure"><a class="viewcode-back" href="../../measures.common_measures.html#measures.common_measures.generic_measure">[docs]</a><span class="k">def</span> <span class="nf">generic_measure</span><span class="p">(</span><span class="n">measure_title</span><span class="p">,</span> <span class="n">save_results_to</span><span class="p">,</span> <span class="n">net_params_combinations</span><span class="p">,</span> <span class="n">metrics_computer_callback</span><span class="p">,</span> 
+                    <span class="n">sim_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">net_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_network_states</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">force_recomputation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">restrict_to_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">log_to_file</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generic function to run a series of network simulations, and gather statistics about them.</span>
+<span class="sd">    </span>
+<span class="sd">    For each parameter combination provided in net_params_combinations, this</span>
+<span class="sd">    function runs  series of network simulations, computes statistics about them</span>
+<span class="sd">    using the callback given in metrics_computer_callback (which also aggregates</span>
+<span class="sd">    the results over several network runs).    </span>
+<span class="sd">    </span>
+<span class="sd">    More exactly, for each parameter combination (provided as dict) in the</span>
+<span class="sd">    net_params_combinations list, one or several network simulations are</span>
+<span class="sd">    launched (this depends on the value of the nb_iters parameter, given in this</span>
+<span class="sd">    dict).</span>
+<span class="sd">       </span>
+<span class="sd">    Because measures may take a very long time, and may fail or be interrupted</span>
+<span class="sd">    (*e.g.* because of a system shutdown), by default, the function checks if</span>
+<span class="sd">    there are already some results saved for this series of measure. If so, it</span>
+<span class="sd">    resumes to the next missing parameter combination. However, this behavior</span>
+<span class="sd">    can be modified, by specifying force_recomputation to `True`.</span>
+<span class="sd">    </span>
+<span class="sd">    Finally, this function does *not* run several network simulations in</span>
+<span class="sd">    parallel, and uses only one core. It is however theoretically possible to</span>
+<span class="sd">    parallelize this work, since each parameter combination can be processed</span>
+<span class="sd">    independently. To allow a form of parallelism, the python program must be</span>
+<span class="sd">    launched several times. This is where the restrict_to_params argument</span>
+<span class="sd">    becomes useful. It allows to restrict the set of parameters combinations to</span>
+<span class="sd">    compute, and thus partition the measures, allowing to launch them in</span>
+<span class="sd">    parallel. An example of this partition can be found in the</span>
+<span class="sd">    :mod:`~apart.measures.measure_campains`.</span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    The function can be further tweaked:</span>
+<span class="sd">        </span>
+<span class="sd">        * For each parameter combination, a certain number of iterations *on the</span>
+<span class="sd">          same topology graph* can be ran. And several runs for different</span>
+<span class="sd">          topology graphs can also be run, for a given parameter set. See</span>
+<span class="sd">          :func:`.make_params_combinations` for more information.</span>
+<span class="sd">        * The function allows the specification of sim_params and net_param</span>
+<span class="sd">          (respectively instances of :class:`~apart.simulation.SimulationParams`</span>
+<span class="sd">          and :class:`~apart.core.network.NetworkParams`), common to all</span>
+<span class="sd">          simulation that will be run. Of course, some of these parameters will</span>
+<span class="sd">          be overridden by the parameters specified in net_params_combinations.</span>
+<span class="sd">          That is, sim_params and net_params specify the *default* parameters.</span>
+<span class="sd">        * If save_network_states is `True`, then the</span>
+<span class="sd">          :obj:`~apart.core.network.NetworkManager` instance after each network</span>
+<span class="sd">          simulation is saved in the sub-folder net_states/  within the folder</span>
+<span class="sd">          specified by save_results_to.</span>
+<span class="sd">        * If overwrite_existing is set to `True`, then when the simulation resulsts</span>
+<span class="sd">          (and network states) are saved, previous measure results may be erased.</span>
+<span class="sd">        * The log_to_file argument modifies the standard /O behavior of the function.</span>
+<span class="sd">          By default, all information that is logged as per the network simulation</span>
+<span class="sd">          (mainly by the code in the class :class:`~apart.core.node.Node`), allowing</span>
+<span class="sd">          browsing of the log after the measures are finished. However, if log_to_file</span>
+<span class="sd">          is set to `False`, these logging messages are made on the standard output.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        measure_title (string): the name of the measure (user-defined, can be anything)</span>
+<span class="sd">        save_results_to (string): folder in which to save the simulation results (and possibly the network states)</span>
+<span class="sd">        net_params_combinations (list of dict): the set of parameter combinations. Should be the output of a call to :func:`.make_params_combinations`.   </span>
+<span class="sd">        metrics_computer_callback (function): the function computing and aggregating (averaging) the statistics between each network run. </span>
+<span class="sd">                Must accept two arguments: one that is passed on in between every network run over the same combination parameters, </span>
+<span class="sd">                and one corresponding to the :obj:`~apart.core.network.NetworkManager` instance. </span>
+<span class="sd">        sim_params (:obj:`~apart.simulation.SimulationParams`, optional): the simulation parameters for all network runs. (Default: None)</span>
+<span class="sd">        net_params (:obj:`~apart.core.network.NetworkParams`, optional): the (default) network parameters for all network runs. Overridden by the parameter combinations from the net_params_combinations argument. (Default: None) </span>
+<span class="sd">        save_network_states (bool, optional): if `True` the network state (*i.e.* :obj:`~apart.core.network.NetworkManager` instance) of each and every network run is saved to the disk. Can consume several gigabytes of disk memory. (Default: True)</span>
+<span class="sd">        overwrite_existing (bool, optional): if `True`, then the simulation results (and possibly the network states) that are saved are allowed to erase existing files.  (Default: False)</span>
+<span class="sd">        force_recomputation (bool, optional): if `False`, resumes a measure starting from where it was stopped previously. Otherwise, process *all* parameter combinations, even if measures for these parameters were already carried out (Default: False) </span>
+<span class="sd">        restrict_to_params (dict, optional): a dict indexed by the names of parameters (given as strings), with values specifying lists of values to process (parameter combinations with values not in these lists are skipped). These restrictions can be used along with the resuming of computations. When this argument is `None`, no restrictions are applied. (Default: None) </span>
+<span class="sd">        log_to_file (bool, optional): if `True`, redirects all logging output from the network run into a the file which name is based on the measure_tile argument (Default: True)</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        list of dict: a list in which each element gives the results for one parameter combinations. Each element of the list is a dict of the form::</span>
+<span class="sd">        </span>
+<span class="sd">        {</span>
+<span class="sd">         &#39;measure_params&#39;: #the parameter combination</span>
+<span class="sd">         &#39;sim_params&#39;: sim_params, &#39;net_params&#39;: net_params, </span>
+<span class="sd">         &#39;results&#39;:</span>
+<span class="sd">             {</span>
+<span class="sd">             &#39;overall&#39;: # The final results of the measure. Usually these are the only that matter.</span>
+<span class="sd">                 {&#39;stat1&#39;: stat1_value, &#39;stat2&#39;: ...},</span>
+<span class="sd">             &#39;by_ite&#39;: # Result by iteration (there may be several iterations for a given parameter combination)</span>
+<span class="sd">                 [{&#39;stat1&#39;: stat1_val, &#39;stat2&#39;: ...}, ...]</span>
+<span class="sd">             },</span>
+<span class="sd">         }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="n">log_to_file</span><span class="p">:</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">_get_logger</span><span class="p">(</span><span class="n">log_to_file</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_results_to</span><span class="p">,</span> <span class="n">measure_title</span><span class="o">+</span><span class="s2">&quot;.log&quot;</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">_get_logger</span><span class="p">()</span>
+    
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;NEW MEASURE RUN&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    
+    
+    <span class="c1"># Look for existing measure files</span>
+    <span class="n">sim_outputs_file_names</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">all_combinations_indexes_to_do</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">restrict_to_params</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">comb_index</span><span class="p">,</span> <span class="n">comb</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">net_params_combinations</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">restrict_to_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">comb</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span> 
+                        <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">comb</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">!=</span> <span class="n">v</span><span class="p">:</span>
+                        <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">all_combinations_indexes_to_do</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">comb_index</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">all_combinations_indexes_to_do</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">net_params_combinations</span><span class="p">)))</span>
+    
+    
+    <span class="c1"># Compute all the intervals to do</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_combinations_indexes_to_do</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">param_comb_intervals</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_combinations_indexes_to_do</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">net_params_combinations</span><span class="p">):</span>
+        <span class="n">param_comb_intervals</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">net_params_combinations</span><span class="p">))]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">param_comb_intervals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">current_interval</span> <span class="o">=</span> <span class="p">(</span><span class="n">all_combinations_indexes_to_do</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">all_combinations_indexes_to_do</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">comb_index</span> <span class="ow">in</span> <span class="n">all_combinations_indexes_to_do</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="k">if</span> <span class="n">current_interval</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">comb_index</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">current_interval</span> <span class="o">=</span> <span class="p">(</span><span class="n">current_interval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">comb_index</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">param_comb_intervals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_interval</span><span class="p">)</span>
+                <span class="n">current_interval</span> <span class="o">=</span> <span class="p">(</span><span class="n">comb_index</span><span class="p">,</span> <span class="n">comb_index</span><span class="p">)</span>
+        <span class="n">param_comb_intervals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_interval</span><span class="p">)</span>
+        <span class="n">param_comb_intervals</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">param_comb_intervals</span><span class="p">]</span>
+    
+    
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting measures for &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">measure_title</span><span class="p">))</span>
+    <span class="n">total_nb_combinations</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">net_params_combinations</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> combinations of parameters to test in total&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">total_nb_combinations</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">restrict_to_params</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Restriction to parameters </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">restrict_to_params</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="n">param_comb_intervals</span><span class="p">:</span>
+        <span class="n">param_comb_intervals_str</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s2">&quot;[</span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">param_comb_intervals</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">(</span><span class="si">{}</span><span class="s2"> combinations, param_comb_intervals: </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_combinations_indexes_to_do</span><span class="p">),</span> <span class="n">param_comb_intervals_str</span><span class="p">))</span> 
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Nothing to do&quot;</span><span class="p">)</span>
+    
+    
+    <span class="c1"># Search in the folder, if there are already files for this measure, of the</span>
+    <span class="c1"># type &quot;[measure title]_i.pickle&quot;, then search for the greatest i, and set</span>
+    <span class="c1"># combination_counter = i. This is useful to resume a series of measures</span>
+    <span class="c1"># that crashed mid-way. This automatic feature can be explicitely disabled.</span>
+    <span class="n">combinations_indexes_to_do</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">all_combinations_indexes_to_do</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">save_results_to</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force_recomputation</span><span class="p">:</span>
+        <span class="n">dir_listing</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">save_results_to</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">dir_listing</span><span class="p">:</span>
+            <span class="n">match_obj</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">matchstring_results_file_name</span><span class="p">(</span><span class="n">measure_title</span><span class="p">),</span> <span class="n">file</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">sim_outputs_file_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+                <span class="n">combinations_indexes_to_do</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">match_obj</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        
+    <span class="n">combinations_indexes_to_do</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">combinations_indexes_to_do</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">combinations_indexes_to_do</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_combinations_indexes_to_do</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Resuming measure: only </span><span class="si">{}</span><span class="s2"> measures remaining.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">combinations_indexes_to_do</span><span class="p">)))</span>
+    
+    
+
+        
+    
+    
+    <span class="c1"># Init randomness</span>
+    <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">10000</span><span class="p">))</span>
+
+    <span class="c1"># Generate the simulation parameters and pre-set some general parameters</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sim_params</span><span class="p">:</span>
+        <span class="n">sim_params</span> <span class="o">=</span> <span class="n">SimulationParams</span><span class="p">(</span><span class="n">logging_level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span> <span class="n">print_nodes_tables</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+                                      <span class="n">draw_topology_graph</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">draw_routes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                                      <span class="n">time_of_simulation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">automatic_oriented_ocomm_phase</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+                                      <span class="n">oriented_communication_sessions</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> 
+
+
+    
+    <span class="c1"># MAIN LOOP</span>
+    <span class="c1"># Iterate over all the combination of parameters to process</span>
+<span class="c1">#     for combination_counter, current_interval in itertools.chain(*([(i, interval) for i in range1(*interval)] for interval in param_comb_intervals)):</span>
+    <span class="k">for</span> <span class="n">combination_index</span> <span class="ow">in</span> <span class="n">combinations_indexes_to_do</span><span class="p">:</span>
+<span class="c1">#         combination_index = combination_counter - 1</span>
+        <span class="n">combination_counter</span> <span class="o">=</span> <span class="n">combination_index</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">p_comb</span> <span class="o">=</span> <span class="n">net_params_combinations</span><span class="p">[</span><span class="n">combination_index</span><span class="p">]</span>
+        
+        <span class="c1"># Set the simulation parameters accordingly</span>
+        <span class="n">this_combination_sim_params</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">sim_params</span><span class="p">)</span>
+        <span class="c1"># A particular case for the ocom sessions: it is a simulation param</span>
+        <span class="k">if</span> <span class="s1">&#39;ocom_sessions&#39;</span> <span class="ow">in</span> <span class="n">p_comb</span><span class="p">:</span>
+            <span class="n">this_combination_sim_params</span><span class="o">.</span><span class="n">oriented_communication_sessions</span> <span class="o">=</span> <span class="n">p_comb</span><span class="p">[</span><span class="s1">&#39;ocom_sessions&#39;</span><span class="p">]</span>
+        
+        <span class="c1"># Get the number of iterations to do for this param combination</span>
+        <span class="n">this_combination_nb_iters</span> <span class="o">=</span> <span class="n">p_comb</span><span class="p">[</span><span class="s1">&#39;nb_iters&#39;</span><span class="p">]</span>
+
+        <span class="c1"># Create a set of network parameters</span>
+        <span class="k">if</span> <span class="n">net_params</span><span class="p">:</span>
+            <span class="n">this_combination_net_params</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">net_params</span><span class="p">)</span>
+            <span class="n">this_combination_net_params</span><span class="o">.</span><span class="n">update_params</span><span class="p">(</span><span class="o">**</span><span class="n">p_comb</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">this_combination_net_params</span> <span class="o">=</span> <span class="n">NetworkParams</span><span class="p">(</span><span class="o">**</span><span class="n">p_comb</span><span class="p">)</span>
+
+        <span class="n">this_params_combination_text</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">acc</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">acc</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="p">,</span> <span class="n">p_comb</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Combination </span><span class="si">{}</span><span class="s2"> in </span><span class="si">{}</span><span class="s2">. Starting </span><span class="si">{}</span><span class="s2"> simulations with network params </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">combination_counter</span><span class="p">,</span> <span class="n">param_comb_intervals_str</span><span class="p">,</span> <span class="n">this_combination_nb_iters</span><span class="p">,</span> <span class="n">this_params_combination_text</span><span class="p">))</span>
+    
+        <span class="c1"># Prepare the structure for this simulation output</span>
+        <span class="n">this_param_combination_results</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;measure_params&#39;</span><span class="p">:</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">p_comb</span><span class="p">),</span>
+                                         <span class="s1">&#39;sim_params&#39;</span><span class="p">:</span> <span class="n">this_combination_sim_params</span><span class="p">,</span>
+                                         <span class="s1">&#39;net_params&#39;</span><span class="p">:</span> <span class="n">this_combination_net_params</span><span class="p">,</span> 
+                                         <span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;overall&#39;</span><span class="p">:</span> <span class="p">{},</span> <span class="s1">&#39;by_ite&#39;</span><span class="p">:</span> <span class="p">[]}}</span>
+
+        <span class="c1"># This structure allows to aggregate the stats between iterations, e.g.</span>
+        <span class="c1"># so as to compute the mean on-the-go</span>
+        <span class="n">aggregated_results</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="c1">#         shortcut_to_compute_mean = c.defaultdict(list)</span>
+
+        <span class="c1"># For 1 combination of parameters iterate as many times as required by</span>
+        <span class="c1"># nb_iters for this combination</span>
+        <span class="n">skip_to_next_combination</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">percent_progress</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">previous_percent_decile</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">this_combination_nb_iters</span><span class="p">):</span>
+            <span class="c1"># logger.info(&quot;\t\t\t\tTo start simulation i = {}. Press any key...&quot;.format(i))</span>
+            <span class="c1"># input()</span>
+            <span class="c1"># logger.info(&quot;\t\t\t\t Starting simulation i = {}&quot;.format(i))</span>
+
+            <span class="c1"># Print progression in a sort of progress bar</span>
+            <span class="n">percent_progress</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">/</span> <span class="n">this_combination_nb_iters</span><span class="p">)</span>
+            <span class="n">percent_decile</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">percent_progress</span> <span class="o">/</span> <span class="mi">10</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span>
+            <span class="k">if</span> <span class="n">percent_decile</span> <span class="o">&gt;</span> <span class="n">previous_percent_decile</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">% &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">percent_decile</span><span class="p">,</span> <span class="n">i</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">previous_percent_decile</span> <span class="o">=</span> <span class="n">percent_decile</span>
+
+                <span class="k">if</span> <span class="n">percent_progress</span> <span class="o">==</span> <span class="mi">100</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;... &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Run simulation once. If error, catch and begin again, up to 20 times</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">this_iteration_net_manager</span> <span class="o">=</span> <span class="n">run_simulation</span><span class="p">(</span><span class="n">sim_params</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">this_combination_sim_params</span><span class="p">),</span> <span class="n">net_params</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">this_combination_net_params</span><span class="p">))</span>
+                    <span class="k">break</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error in network run : Exception &#39;</span><span class="si">{}</span><span class="s2">&#39;, msg = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Fatal error: after 20, could not run the network simulation properly. Skipping parameter combination&quot;</span><span class="p">)</span>
+                <span class="n">skip_to_next_combination</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+            
+            <span class="n">aggregated_results</span><span class="p">,</span> <span class="n">this_iteration_results</span> <span class="o">=</span> <span class="n">metrics_computer_callback</span><span class="p">(</span><span class="n">aggregated_results</span><span class="p">,</span> <span class="n">this_iteration_net_manager</span><span class="p">)</span>
+            
+
+            <span class="c1"># Compute relevant statistics</span>
+<span class="c1">#             this_iteration_results = AdvancedNetworkStatsHelper.compute(stats_to_compute, this_iteration_net_manager)</span>
+            
+            <span class="c1"># If asked to, save the network state. Do so, identify it by the network uid</span>
+            <span class="k">if</span> <span class="n">save_network_states</span><span class="p">:</span>
+                <span class="n">file_name</span> <span class="o">=</span> <span class="n">format_net_states_file_name</span><span class="p">(</span><span class="n">measure_title</span><span class="p">,</span> <span class="n">combination_counter</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">save_network_state</span><span class="p">(</span><span class="n">this_iteration_net_manager</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="n">file_name</span><span class="p">,</span> <span class="n">folder</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_results_to</span><span class="p">,</span> <span class="n">_NET_STATES_REL_FOLDER</span><span class="p">))</span>
+
+            
+            <span class="c1"># Clean and free all memory possible</span>
+            <span class="k">del</span> <span class="n">this_iteration_net_manager</span>
+            <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+
+            <span class="c1"># Record the results in the &#39;by_ite&#39; field of the current value</span>
+            <span class="c1"># tested for num_nodes</span>
+            <span class="n">this_param_combination_results</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;by_ite&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">this_iteration_results</span><span class="p">)</span>
+
+            <span class="c1"># Fill the structure that will be used to compute the overall mean</span>
+            <span class="c1"># and std dev of the statistics computed</span>
+<span class="c1">#             for s, sval in this_iteration_results[&#39;computed_stats&#39;].items():</span>
+<span class="c1">#                 shortcut_to_compute_mean[s].append(sval)</span>
+
+        <span class="c1"># END for (end of simulations for this combination of params)</span>
+        
+        <span class="k">if</span> <span class="n">skip_to_next_combination</span><span class="p">:</span>
+            <span class="k">continue</span>
+        
+        <span class="n">this_param_combination_results</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;overall&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aggregated_results</span>
+
+        <span class="c1"># Write results of all iteration of this parameters combination to the disk</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Writing results of parameters combination #</span><span class="si">{}</span><span class="s2"> of measure &#39;</span><span class="si">{}</span><span class="s2">&#39; to disk on </span><span class="si">{}</span><span class="s2">...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">combination_counter</span><span class="p">,</span> <span class="n">measure_title</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">asctime</span><span class="p">()))</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="n">format_results_file_name</span><span class="p">(</span><span class="n">measure_title</span><span class="p">,</span> <span class="n">combination_counter</span><span class="p">,</span> <span class="n">this_combination_nb_iters</span><span class="p">)</span> 
+        <span class="n">save_measures_results</span><span class="p">(</span><span class="n">this_param_combination_results</span><span class="p">,</span> <span class="n">folder</span><span class="o">=</span><span class="n">save_results_to</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="n">file_name</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">sim_outputs_file_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+        
+
+    <span class="c1"># END for loop over all parameters combinations</span>
+    
+    <span class="c1"># Merge all intermediary files into one big pickle file, overwriting it if it exists</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Merging all results of measures on </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">asctime</span><span class="p">()))</span>
+    <span class="n">merge_measures_outputs</span><span class="p">(</span><span class="n">save_results_to</span><span class="p">,</span> <span class="n">sim_outputs_file_names</span><span class="p">,</span> <span class="n">new_file_name</span><span class="o">=</span><span class="n">measure_title</span><span class="o">+</span><span class="s2">&quot;.pickle&quot;</span><span class="p">,</span> <span class="n">sort_key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;measure_params&#39;</span><span class="p">][</span><span class="s1">&#39;nb_nodes&#39;</span><span class="p">],</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Measures done.&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="merge_measures_outputs"><a class="viewcode-back" href="../../measures.common_measures.html#measures.common_measures.merge_measures_outputs">[docs]</a><span class="k">def</span> <span class="nf">merge_measures_outputs</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">files_list</span><span class="p">,</span> <span class="n">new_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">new_file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restrict_to_params</span><span class="o">=</span><span class="p">{},</span> <span class="n">sort_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Merge several files, each containing one or several serialized simulation results, and put them together in one big file.</span>
+<span class="sd">    </span>
+<span class="sd">    This function merges simulation results, saves them to a new file, and also returns the result. </span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        folder (string): the folder in which to search for the binary files of the serialized simulation results</span>
+<span class="sd">        files_list (string): the files to merge together</span>
+<span class="sd">        new_folder (string, optional): folder where to save the merged data. By default, the result file is saved in the specified folder argument (Default: None). </span>
+<span class="sd">        new_file_name (string, optional): name of the file to save the merged data. A random default name is used if none is provided. (Default: None)</span>
+<span class="sd">        restrict_to_params (dict, optional): of a similar form the to argument of :func:`.generic_measure` of the same name. Allows to filter out some parameter combinations from the results. By default, no filtering is applied. (Default: None).</span>
+<span class="sd">        sort_key (function, optional): function used to sort the measure results (Default: None).</span>
+<span class="sd">        overwirte_existing (bool, optional): whether, if the file_path provided already exists, it should be overwritten or not (Default: False)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        list of dict: the merged results, in a structure of the same form as the output of :func:`.generic_measure`.</span>
+<span class="sd">    </span>
+<span class="sd">    Raises:</span>
+<span class="sd">        :exc:`.MeasureException`: if at least one of the files merged does not contain the expected data (a list or a dict) </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">_get_logger</span><span class="p">()</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Merging results from following files:&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Load and merge all files</span>
+    <span class="n">sims_outputs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">file_name</span> <span class="ow">in</span> <span class="n">files_list</span><span class="p">:</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+        <span class="n">file_contents</span> <span class="o">=</span> <span class="n">load_measures_results</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">file_path</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_contents</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span> 
+            <span class="c1"># Case when the file contains result for *one* parameters combination</span>
+            <span class="n">file_contents</span> <span class="o">=</span> <span class="p">[</span><span class="n">file_contents</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_contents</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">MeasureException</span><span class="p">(</span><span class="s2">&quot;Error while merging measure results: got file contents of type &#39;</span><span class="si">{}</span><span class="s2">&#39; (expected dict of list)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">file_contents</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;* </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_path</span><span class="p">))</span>
+        
+        <span class="k">for</span> <span class="n">one_result</span> <span class="ow">in</span> <span class="n">file_contents</span><span class="p">:</span>
+<span class="c1">#             if (one_result[&#39;measure_params&#39;][&#39;nb_nodes&#39;] == 20</span>
+<span class="c1">#                 and one_result[&#39;measure_params&#39;][&#39;rtprop_policy_p_reaccept&#39;] == 0.7):</span>
+<span class="c1">#                 print(&quot;FOUND&quot;)</span>
+<span class="c1">#                 for k, v in one_result[&#39;measure_params&#39;].items():</span>
+<span class="c1">#                     print(&quot;{} : {}&quot;.format(k, v))</span>
+<span class="c1">#                 exit()</span>
+            <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">restrict_to_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">one_result</span><span class="p">[</span><span class="s1">&#39;measure_params&#39;</span><span class="p">][</span><span class="n">p</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span> 
+                        <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">one_result</span><span class="p">[</span><span class="s1">&#39;measure_params&#39;</span><span class="p">][</span><span class="n">p</span><span class="p">]</span> <span class="o">!=</span> <span class="n">v</span><span class="p">:</span>
+                        <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sims_outputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">one_result</span><span class="p">)</span>
+                
+
+    <span class="k">if</span> <span class="n">sort_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Sorting merged results according to provided key.&quot;</span><span class="p">)</span>
+        <span class="n">sims_outputs</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">sort_key</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="n">new_folder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">new_folder</span> <span class="o">=</span> <span class="n">folder</span>
+    
+    <span class="c1"># Rewrite everything in one file</span>
+    <span class="k">return</span> <span class="n">save_measures_results</span><span class="p">(</span><span class="n">sims_outputs</span><span class="p">,</span> <span class="n">new_folder</span><span class="p">,</span> <span class="n">new_file_name</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="merge_measures_outputs_with_prefix"><a class="viewcode-back" href="../../measures.common_measures.html#measures.common_measures.merge_measures_outputs_with_prefix">[docs]</a><span class="k">def</span> <span class="nf">merge_measures_outputs_with_prefix</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file_prefix</span><span class="p">,</span> <span class="n">new_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">new_file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restrict_to_params</span><span class="o">=</span><span class="p">{},</span> <span class="n">sort_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Variant of :func:`.merge_measures_outputs` where files sharing a common prefix in their name are merged.</span>
+<span class="sd">    </span>
+<span class="sd">    The only difference with :func:`.merge_measures_outputs` is the second</span>
+<span class="sd">    argument: based on a prefix, the file list is built automatically.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        folder (string): the folder in which to search for the binary files of the serialized simulation results</span>
+<span class="sd">        file_prefix (string): the common prefix of files from the specified folder that must be merged</span>
+<span class="sd">        new_folder (string, optional): folder where to save the merged data. By default, the result file is saved in the specified folder argument (Default: None). </span>
+<span class="sd">        new_file_name (string, optional): name of the file to save the merged data. A random default name is used if none is provided. (Default: None)</span>
+<span class="sd">        restrict_to_params (dict, optional): of a similar form the to argument of :func:`.generic_measure` of the same name. Allows to filter out some parameter combinations from the results. By default, no filtering is applied. (Default: None). </span>
+<span class="sd">        sort_key (function, optional): function used to sort the measure results (Default: None).</span>
+<span class="sd">        overwirte_existing (bool, optional): whether, if the file_path provided already exists, it should be overwritten or not (Default: False)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        list of dict: the merged results, in a structure of the same form as the output of :func:`.generic_measure`.</span>
+<span class="sd">    </span>
+<span class="sd">    Raises:</span>
+<span class="sd">        :exc:`.MeasureException`: if at least one of the files merged does not contain the expected data (a list or a dict)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">_get_logger</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="n">new_file_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">new_file_name</span> <span class="o">=</span> <span class="n">file_prefix</span> <span class="o">+</span> <span class="s2">&quot;.pickle&quot;</span>
+    <span class="k">if</span> <span class="n">new_folder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">new_folder</span> <span class="o">=</span> <span class="n">folder</span>
+
+    <span class="c1"># Find files with specified prefix</span>
+    <span class="n">dir_listing</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">folder</span><span class="p">))</span>
+    <span class="n">files_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">dir_listing</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">file_prefix</span><span class="o">+</span><span class="s2">&quot;(.+).pickle&quot;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">file</span> <span class="o">!=</span> <span class="n">file_prefix</span> <span class="o">+</span> <span class="s2">&quot;.pickle&quot;</span><span class="p">:</span>
+            <span class="n">files_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">files_list</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No file with prefix &#39;</span><span class="si">{}</span><span class="s2">&#39; were found in folder &#39;</span><span class="si">{}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_prefix</span><span class="p">,</span> <span class="n">folder</span><span class="p">))</span>
+        <span class="k">return</span>
+
+    <span class="k">return</span> <span class="n">merge_measures_outputs</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">files_list</span><span class="p">,</span> <span class="n">new_folder</span><span class="p">,</span> <span class="n">new_file_name</span><span class="p">,</span> <span class="n">restrict_to_params</span><span class="o">=</span><span class="n">restrict_to_params</span><span class="p">,</span> <span class="n">sort_key</span><span class="o">=</span><span class="n">sort_key</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="make_params_combinations"><a class="viewcode-back" href="../../measures.common_measures.html#measures.common_measures.make_params_combinations">[docs]</a><span class="k">def</span> <span class="nf">make_params_combinations</span><span class="p">(</span><span class="n">nb_iters</span><span class="p">,</span> <span class="n">nb_iters_same_topo_graph</span><span class="p">,</span> <span class="n">measure_params_order</span><span class="p">,</span> <span class="n">measure_params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper function that creates the parameter combination structure.</span>
+<span class="sd">    </span>
+<span class="sd">    To make the generation of parameter combinations easy and dynamic, this</span>
+<span class="sd">    function takes as input a dict (in measure_params) containing an entry for</span>
+<span class="sd">    each parameters of the measure, and specifying for each of them a list of</span>
+<span class="sd">    values. The function then creates a list of dict, by recursively generating</span>
+<span class="sd">    all possible combinations of parameters, based on these list of values.</span>
+<span class="sd">    </span>
+<span class="sd">    The number of iterations per set of parameter, and the number of iteration</span>
+<span class="sd">    for a same topology graph are handled independently to the rest of the</span>
+<span class="sd">    parameters, and must be the of a specific form. See the function</span>
+<span class="sd">    :func:`.preprocess_measure_input_params` for details on the form of each</span>
+<span class="sd">    parameter. Any call to `make_params_combinations` should be preceded by a</span>
+<span class="sd">    call to :func:`.preprocess_measure_input_params`.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        nb_iters (dict): a dict indexed by the values of the parameter</span>
+<span class="sd">            `&#39;nb_nodes&#39;`, representing the number of network simulations that</span>
+<span class="sd">            must be run over each parameter combinations. This argument is made</span>
+<span class="sd">            to depend on the value(s) of `&#39;nb_nodes&#39;` because the time taken by</span>
+<span class="sd">            a simulation largely depends on the number of nodes in the</span>
+<span class="sd">            simulation. It is advised to greatly decrease the number of</span>
+<span class="sd">            iterations as the number of nodes in the network to be simulated</span>
+<span class="sd">            increases. This parameter can also be a:obj:`collections.defaultdict`.</span>
+<span class="sd">        nb_iters (list of dict): this parameter is similar to nb_iters, except</span>
+<span class="sd">            that it allows to specify how many runs should be made on any given</span>
+<span class="sd">            topology graph. It must be provided as a list that contains dict of</span>
+<span class="sd">            the same form as the nb_iters argument. Each element of this list</span>
+<span class="sd">            will yield different combination(s) of parameters. On the contrary,</span>
+<span class="sd">            the nb_iters parameter does not make the number of parameter</span>
+<span class="sd">            combinations augment.</span>
+<span class="sd">        measure_params_order (list of string): the names of the measure</span>
+<span class="sd">            parameters, in order (the order is only to be user-friendly in the</span>
+<span class="sd">            printing of results, and does not actually matter)</span>
+<span class="sd">        measure_params (dict): the desired measure parameters (should be</span>
+<span class="sd">            processed and checked by a call to</span>
+<span class="sd">            :func:`.preprocess_measure_input_params`). This dict (in</span>
+<span class="sd">            measure_params) *must* contain an entry for each parameters of the</span>
+<span class="sd">            measure (those present in measreu_params_order, plus `&#39;nb_iters&#39;`</span>
+<span class="sd">            and `&#39;nb_iters_same_topo_graph&#39;`), and specify for each of them a</span>
+<span class="sd">            list of values.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        list of dict: the list of parameter combinations, which is of the following form::</span>
+<span class="sd">        </span>
+<span class="sd">        [</span>
+<span class="sd">            {&#39;param1&#39;: p1_value,</span>
+<span class="sd">             &#39;param2&#39;: p2_value,</span>
+<span class="sd">             ...</span>
+<span class="sd">            },</span>
+<span class="sd">            ...</span>
+<span class="sd">        ]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">inner_make_params_combinations</span><span class="p">(</span><span class="n">params_dict</span><span class="p">,</span> <span class="n">param_n</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">kwargs_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">params_dict</span><span class="p">:</span>
+            <span class="n">this_param_combinations</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">((</span><span class="n">p</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">p</span><span class="p">])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">measure_params_order</span><span class="p">)</span>
+            <span class="n">new_combinations</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">n_dict</span> <span class="ow">in</span> <span class="n">nb_iters_same_topo_graph</span><span class="p">:</span>
+                <span class="n">this_param_combinations</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">this_param_combinations</span><span class="p">)</span>
+                <span class="n">this_param_combinations</span><span class="p">[</span><span class="s1">&#39;nb_iters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_dict</span><span class="p">[</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;nb_nodes&#39;</span><span class="p">]]</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_iters</span><span class="p">[</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;nb_nodes&#39;</span><span class="p">]]):</span>
+                    <span class="n">this_param_combinations</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">this_param_combinations</span><span class="p">)</span>
+                    <span class="n">this_param_combinations</span><span class="p">[</span><span class="s1">&#39;topology_graph&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Network</span><span class="o">.</span><span class="n">gen_topology_graph</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;nb_nodes&#39;</span><span class="p">])</span>
+                    <span class="n">new_combinations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">this_param_combinations</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">new_combinations</span>
+    
+        <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">one_param_name</span> <span class="o">=</span> <span class="n">measure_params_order</span><span class="p">[</span><span class="n">param_n</span><span class="p">]</span>
+        <span class="n">one_param_values</span> <span class="o">=</span> <span class="n">params_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">one_param_name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">one_param_values</span><span class="p">:</span>
+            <span class="n">kwargs_copy</span><span class="p">[</span><span class="n">one_param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">inner_make_params_combinations</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">params_dict</span><span class="p">),</span> <span class="n">param_n</span><span class="o">=</span><span class="n">param_n</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_copy</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">res</span>
+    
+    <span class="k">return</span> <span class="n">inner_make_params_combinations</span><span class="p">(</span><span class="n">measure_params</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="preprocess_measure_input_params"><a class="viewcode-back" href="../../measures.common_measures.html#measures.common_measures.preprocess_measure_input_params">[docs]</a><span class="k">def</span> <span class="nf">preprocess_measure_input_params</span><span class="p">(</span><span class="n">accepted_measure_parameters</span><span class="p">,</span> <span class="n">supplied_measure_parameters</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Pre-processes and checks the validity of measure parameters.</span>
+<span class="sd">    </span>
+<span class="sd">    This function checks, that the supplied parameters (second argument) respect</span>
+<span class="sd">    the specification given in first argument. The function does not return any</span>
+<span class="sd">    data, but modifies the supplied_measure_parameters argument in-place. It</span>
+<span class="sd">    processes the measure parameters so that they fulfill the following</span>
+<span class="sd">    constraints:</span>
+<span class="sd">    </span>
+<span class="sd">        * For each parameter that is not supplied, the default value is used</span>
+<span class="sd">          (as specified in accepted_measure_parameters)</span>
+<span class="sd">        * For each supplied parameter, verify the type (specified in</span>
+<span class="sd">          accepted_measure_parameters). If a single value was provided, create a</span>
+<span class="sd">          one-element list from it.</span>
+<span class="sd">        * Special case for the `&#39;nb_iters&#39;` parameter: if it is not present, a</span>
+<span class="sd">          default one is created (a dict indexed by values of the `&#39;nb_nodes`&#39;</span>
+<span class="sd">          parameter, with number of iterations in values). It if exists, its</span>
+<span class="sd">          type is checked (should be a dict).</span>
+<span class="sd">        * Special case for the `&#39;nb_iters_same_topo_graph&#39;` parameter: if it is not present, a</span>
+<span class="sd">          default one is created (a list containing dicts indexed by values of</span>
+<span class="sd">          the `&#39;nb_nodes`&#39; parameter, with number of iterations in values). It</span>
+<span class="sd">          if exists, its type is checked (should be a list of dict).</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        accepted_measure_parameters (dict): a dict specifying in keys the name of the accepted parameters (in the form of strings), </span>
+<span class="sd">            and in value a 2-tuple (type, value) representing the expected type and default value of the parameter. The first element </span>
+<span class="sd">            of the tuple can be an iterable, containing several types, meaning that the parameter is allowed to have several types.</span>
+<span class="sd">        supplied_measure_parameters (dict): a dict with parameter names as keys (in the form of strings), and any data in values.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        :exc:`.MeasureException`: if supplied_measure_parameters contains a</span>
+<span class="sd">        paramter not allowed according to accepted_measure_parameters, or if a</span>
+<span class="sd">        parameter is not of the expected type</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">all_accepted_parameters</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">accepted_measure_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;nb_iters&#39;</span><span class="p">,</span> <span class="s1">&#39;nb_iters_same_topo_graph&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">((</span><span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_accepted_parameters</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">supplied_measure_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
+        <span class="k">raise</span> <span class="n">MeasureException</span><span class="p">(</span><span class="s2">&quot;Wrong measure parameter(s) supplied: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;&#39;&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;&#39;&quot;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">supplied_measure_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_accepted_parameters</span><span class="p">])))</span>
+    
+    <span class="k">for</span> <span class="n">p_name</span><span class="p">,</span> <span class="p">(</span><span class="n">p_type</span><span class="p">,</span> <span class="n">p_default_value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">accepted_measure_parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">p_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supplied_measure_parameters</span><span class="p">:</span>
+                <span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="n">p_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_default_value</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="n">p_name</span><span class="p">],</span> <span class="n">p_type</span><span class="p">)</span> <span class="ow">and</span> 
+              <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="n">p_name</span><span class="p">],</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">p_type</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="n">p_name</span><span class="p">]))):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">types</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">p_type</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">types</span> <span class="o">=</span> <span class="p">[</span><span class="n">p_type</span><span class="p">]</span> 
+            <span class="k">raise</span> <span class="n">MeasureException</span><span class="p">(</span><span class="s2">&quot;Wrong parameter type for &#39;</span><span class="si">{}</span><span class="s2">&#39;, expected &#39;</span><span class="si">{}</span><span class="s2">&#39; (or list of such elements)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p_name</span><span class="p">,</span> <span class="s2">&quot;&#39; or &#39;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">types</span><span class="p">])))</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="n">p_name</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="n">p_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="n">p_name</span><span class="p">]]</span>
+        <span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="n">p_name</span><span class="p">]</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        
+    <span class="c1"># Always treat the case of &#39;nb_iters&#39; and &#39;nb_iters_same_topo_graph&#39;</span>
+    <span class="k">if</span> <span class="s1">&#39;nb_iters_same_topo_graph&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supplied_measure_parameters</span><span class="p">:</span>        
+        <span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters_same_topo_graph&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">2</span><span class="p">)]</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters_same_topo_graph&#39;</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">aux</span> <span class="o">=</span> <span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters_same_topo_graph&#39;</span><span class="p">]</span> 
+        <span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters_same_topo_graph&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">defaultdict</span><span class="p">(</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="n">aux</span><span class="p">))]</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters_same_topo_graph&#39;</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters_same_topo_graph&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters_same_topo_graph&#39;</span><span class="p">]]</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters_same_topo_graph&#39;</span><span class="p">],</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">dict</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters_same_topo_graph&#39;</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters_same_topo_graph&#39;</span><span class="p">])):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters_same_topo_graph&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="n">aux</span> <span class="o">=</span> <span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters_same_topo_graph&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> 
+                <span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters_same_topo_graph&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="n">aux</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span><span class="c1">#if  not isinstance(supplied_measure_parameters[&#39;nb_iters_same_topo_graph&#39;], (dict, defaultdict))  or not all(isinstance(v, int) for v in supplied_measure_parameters[&#39;nb_iters_same_topo_graph&#39;]):</span>
+        <span class="k">raise</span> <span class="n">MeasureException</span><span class="p">(</span><span class="s2">&quot;The parameter &#39;nb_iters_same_topo_graph&#39; is not of the expected form (int or dict, or list of (int or dict) indexed by nb_nodes)&quot;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="s1">&#39;nb_iters&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supplied_measure_parameters</span><span class="p">:</span>        
+        <span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_nodes&#39;</span><span class="p">]:</span>
+            <span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="mf">154.685</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.029342</span> <span class="o">*</span> <span class="n">n</span><span class="p">)))</span>
+            <span class="c1"># This formula is an exponential fit of {{5, 130}, {7, 125}, {10,</span>
+            <span class="c1"># 120}, {30, 65}, {50, 40}, {75, 10}, {100, 5}, {150, 3}}, a set of</span>
+            <span class="c1"># nb_iters put by hand</span>
+            <span class="c1"># The goal is to keep the time of  simulation runs manageable: The </span>
+            <span class="c1"># more nodes there are, the less iteration we make </span>
+            <span class="c1"># (because the simulation time augments exponentially with nodes...) </span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters&#39;</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">aux</span> <span class="o">=</span> <span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters&#39;</span><span class="p">]</span>
+        <span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="n">aux</span><span class="p">))</span>
+    <span class="k">elif</span>  <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters&#39;</span><span class="p">],</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">))</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">supplied_measure_parameters</span><span class="p">[</span><span class="s1">&#39;nb_iters&#39;</span><span class="p">]):</span>
+        <span class="k">raise</span> <span class="n">MeasureException</span><span class="p">(</span><span class="s2">&quot;The parameter &#39;nb_iters&#39; is not of the expected form (int or dict of int indexed by nb_nodes)&quot;</span><span class="p">)</span></div>
+
+
+<span class="n">__logger</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">def</span> <span class="nf">_get_logger</span><span class="p">(</span><span class="n">log_to_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">__logger</span>
+    <span class="k">if</span> <span class="n">__logger</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        
+        <span class="n">__logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">MEASURE_LOGGER_NAME</span><span class="p">)</span>
+        <span class="n">__logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">__logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+        
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%(levelname)s</span><span class="s2"> | Measures (</span><span class="si">%(asctime)s</span><span class="s2">) | </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">handler1</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+        <span class="n">handler1</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+        <span class="n">__logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler1</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">log_to_file</span><span class="p">:</span>
+            <span class="n">folder</span><span class="p">,</span> <span class="n">_a</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">log_to_file</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span><span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o775</span><span class="p">)</span>
+            <span class="n">handler2</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="n">log_to_file</span><span class="p">)</span>
+            <span class="n">handler2</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+            <span class="n">__logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler2</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">__logger</span>
+    
+
+<div class="viewcode-block" id="MeasureException"><a class="viewcode-back" href="../../measures.common_measures.html#measures.common_measures.MeasureException">[docs]</a><span class="k">class</span> <span class="nc">MeasureException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raised when an error occurs during a measure or network run, or when measure parameters are not well-formed&quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,438 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>measures.advanced_stats_helper &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="APART  documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">APART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../packages.html">Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>measures.advanced_stats_helper</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for measures.advanced_stats_helper</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Author: Antoine Guellier</span>
+<span class="c1"># Copyright (c) 2017 Université de Rennes 1</span>
+<span class="c1"># License: CeCILL. The full license text is available at:</span>
+<span class="c1">#  - http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html</span>
+
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This module provides a common basis for computing *advanced* statistics on the network.</span>
+
+<span class="sd">From a network state after a run, this class provides easy means of computing</span>
+<span class="sd">common metrics that are likely to be uses by many measure module. E.g. get the</span>
+<span class="sd">average route length from the node&#39;s routing table.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span><span class="p">,</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">statistics</span> <span class="k">import</span> <span class="n">mean</span>
+
+<span class="kn">from</span> <span class="nn">apart.core.network</span> <span class="k">import</span> <span class="n">NetworkStats</span>
+<span class="kn">from</span> <span class="nn">apart.core.protocol_constants</span> <span class="k">import</span> <span class="n">RtPolicyReason</span><span class="p">,</span> <span class="n">F_NULL</span>
+<span class="kn">from</span> <span class="nn">apart.core.tables</span> <span class="k">import</span> <span class="n">RoutingTable</span> <span class="k">as</span> <span class="n">RT</span><span class="p">,</span> <span class="n">PrevRoutingTable</span> <span class="k">as</span> <span class="n">PRT</span>
+<span class="kn">from</span> <span class="nn">measures.network_statistics</span> <span class="k">import</span> <span class="n">RegularStat</span><span class="p">,</span> <span class="n">RunningStat</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+
+
+<div class="viewcode-block" id="AdvancedNetworkStatsHelper"><a class="viewcode-back" href="../../measures.advanced_stats_helper.html#measures.advanced_stats_helper.AdvancedNetworkStatsHelper">[docs]</a><span class="k">class</span> <span class="nc">AdvancedNetworkStatsHelper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper class to compute advanced stats, given the :obj:`~apart.core.network.NetworkManager` instance of a network run.</span>
+<span class="sd">     </span>
+<span class="sd">    The class implements a form of singleton, but one singleton is created per</span>
+<span class="sd">    network manager instance provided</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_instances</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">net_manager</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">net_manager</span> <span class="ow">in</span> <span class="n">AdvancedNetworkStatsHelper</span><span class="o">.</span><span class="n">_instances</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">AdvancedNetworkStatsHelper</span><span class="o">.</span><span class="n">_instances</span><span class="p">[</span><span class="n">net_manager</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_inst</span> <span class="o">=</span> <span class="n">AdvancedNetworkStatsHelper</span><span class="o">.</span><span class="n">AdvancedNetworkStatsHelperSingleton</span><span class="p">(</span><span class="n">net_manager</span><span class="p">)</span>
+            <span class="n">AdvancedNetworkStatsHelper</span><span class="o">.</span><span class="n">_instances</span><span class="p">[</span><span class="n">net_manager</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_inst</span>
+            <span class="k">return</span> <span class="n">new_inst</span>
+            
+    
+    
+<div class="viewcode-block" id="AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton"><a class="viewcode-back" href="../../measures.advanced_stats_helper.html#measures.advanced_stats_helper.AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton">[docs]</a>    <span class="k">class</span> <span class="nc">AdvancedNetworkStatsHelperSingleton</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">net_manager</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;The singleton class, containing the actual code.</span>
+<span class="sd">            </span>
+<span class="sd">            Given a network manager instance, for a network which run is over,</span>
+<span class="sd">            initilises the class.</span>
+<span class="sd">            </span>
+<span class="sd">            Args:</span>
+<span class="sd">                net_manager (:obj:`~apart.core.network.NetworkManager`): the network manager instance after the network run.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">_net_manager</span> <span class="o">=</span> <span class="n">net_manager</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_net</span> <span class="o">=</span> <span class="n">net_manager</span><span class="o">.</span><span class="n">network</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sqlite_cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">routing_tables_sqlite_db_cursor</span>
+
+        <span class="c1">#----------------------------</span>
+        <span class="c1"># Helper functions</span>
+        <span class="c1">#----------------------------</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span> <span class="nf">nb_routes_btw_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`~measures.network_statistics.RegularStat`: The number of routes between each pairs of nodes at the end of the network run.</span>
+<span class="sd">            </span>
+<span class="sd">            This property gives the average, minimum, and maximum number of</span>
+<span class="sd">            routes between each pair of node (along with a standard deviation).</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_routes_by_pairs</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sqlite_cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT COUNT(*) FROM &quot;</span><span class="o">+</span><span class="n">RT</span><span class="o">.</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot; WHERE &quot;</span><span class="o">+</span><span class="n">RT</span><span class="o">.</span><span class="n">ACTUAL_RCVR</span><span class="o">+</span><span class="s2">&quot; &lt;&gt; &quot;</span><span class="o">+</span><span class="n">RT</span><span class="o">.</span><span class="n">NODE</span><span class="o">+</span><span class="s2">&quot; AND &quot;</span><span class="o">+</span><span class="n">RT</span><span class="o">.</span><span class="n">IN_USE</span><span class="o">+</span><span class="s2">&quot;=1 GROUP BY &quot;</span><span class="o">+</span><span class="n">RT</span><span class="o">.</span><span class="n">NODE</span><span class="o">+</span><span class="s2">&quot;, &quot;</span><span class="o">+</span><span class="n">RT</span><span class="o">.</span><span class="n">ACTUAL_RCVR</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_nb_routes_by_pairs</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sqlite_cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()]</span>
+                
+                <span class="c1"># Complete the list: some pairs of node may not have any route</span>
+                <span class="c1"># between them, but by the way the sql query is made, they will not</span>
+                <span class="c1"># be represented. Thus, add a zero value to fill thi gap</span>
+                <span class="n">nb_pairs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">nb_nodes</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">nb_nodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_pairs</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nb_routes_by_pairs</span><span class="p">)):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_nb_routes_by_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                    
+                <span class="bp">self</span><span class="o">.</span><span class="n">_nb_routes_by_pairs</span> <span class="o">=</span> <span class="n">RegularStat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nb_routes_by_pairs</span><span class="p">)</span>
+    
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_routes_by_pairs</span>
+        
+        <span class="nd">@property</span>
+        <span class="k">def</span> <span class="nf">routes_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;list: The length of all routes at the end of the network run.</span>
+<span class="sd">            </span>
+<span class="sd">            This property is a list of dict, each dict containing keys</span>
+<span class="sd">            `&#39;sender&#39;`, `&#39;receiver&#39;`, and `&#39;length&#39;`. Each element of the list</span>
+<span class="sd">            represents one route.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_routes_length</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sqlite_cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT &quot;</span><span class="o">+</span><span class="n">RT</span><span class="o">.</span><span class="n">NODE</span><span class="o">+</span><span class="s2">&quot;, &quot;</span><span class="o">+</span><span class="n">RT</span><span class="o">.</span><span class="n">ACTUAL_RCVR</span><span class="o">+</span><span class="s2">&quot;, &quot;</span><span class="o">+</span><span class="n">RT</span><span class="o">.</span><span class="n">ACTUAL_LENGTH</span><span class="o">+</span><span class="s2">&quot; FROM &quot;</span><span class="o">+</span><span class="n">RT</span><span class="o">.</span><span class="n">table_name</span><span class="o">+</span><span class="s2">&quot; WHERE &quot;</span><span class="o">+</span><span class="n">RT</span><span class="o">.</span><span class="n">ACTUAL_RCVR</span><span class="o">+</span><span class="s2">&quot; &lt;&gt; &quot;</span><span class="o">+</span><span class="n">RT</span><span class="o">.</span><span class="n">NODE</span><span class="o">+</span><span class="s2">&quot; AND &quot;</span><span class="o">+</span><span class="n">RT</span><span class="o">.</span><span class="n">IN_USE</span><span class="o">+</span><span class="s2">&quot;=1&quot;</span><span class="p">)</span>
+                <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sqlite_cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_routes_length</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;sender&#39;</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="n">RT</span><span class="o">.</span><span class="n">NODE</span><span class="p">],</span> <span class="s1">&#39;receiver&#39;</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="n">RT</span><span class="o">.</span><span class="n">ACTUAL_RCVR</span><span class="p">],</span> <span class="s1">&#39;length&#39;</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="n">RT</span><span class="o">.</span><span class="n">ACTUAL_LENGTH</span><span class="p">]}</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">]</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_routes_length</span>
+    
+        <span class="nd">@property</span>
+        <span class="k">def</span> <span class="nf">nb_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`~measures.network_statistics.RegularStat`: The number of neighbors a node has.</span>
+<span class="sd">            </span>
+<span class="sd">            This property gives the average, minimum, and maximum number of</span>
+<span class="sd">            neighbors that any node in the network has (along with a standard deviation).</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_neighbors</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_nb_neighbors</span> <span class="o">=</span> <span class="n">RegularStat</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">neighbors</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">nodes</span><span class="p">])</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_neighbors</span>
+    
+        <span class="nd">@property</span>
+        <span class="k">def</span> <span class="nf">nb_rt_props</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;dict: The total number of routes proposal at the end of the network run.</span>
+<span class="sd">            </span>
+<span class="sd">            This property gives a dict which values are</span>
+<span class="sd">            :obj:`~measures.network_statistics.RegularStat`</span>
+<span class="sd">            instances. It is indexed by `&#39;received&#39;`, `&#39;accepted&#39;`, and</span>
+<span class="sd">            `&#39;refused&#39;`, respectively giving the number of received route</span>
+<span class="sd">            proposal, the number of accepted ones, and the number of refused</span>
+<span class="sd">            ones.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_rt_props</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_nb_rt_props</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">RegularStat</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())),</span> 
+                                             <span class="bp">self</span><span class="o">.</span><span class="n">_net_manager</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">nb_route_props_per_node</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_nb_rt_props</span><span class="p">[</span><span class="s1">&#39;received&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">RegularStat</span><span class="p">([</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_net_manager</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">nb_route_props_per_node</span><span class="p">[</span><span class="n">reason</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">reason</span> <span class="ow">in</span> <span class="n">RtPolicyReason</span><span class="p">)</span> 
+                                                             <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">nb_nodes</span><span class="p">)])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_nb_rt_props</span><span class="p">[</span><span class="s1">&#39;accepted&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">RegularStat</span><span class="p">([</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_net_manager</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">nb_route_props_per_node</span><span class="p">[</span><span class="n">reason</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">reason</span> <span class="ow">in</span> <span class="n">RtPolicyReason</span> <span class="k">if</span> <span class="n">reason</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;ACCEPT&#39;</span><span class="p">))</span> 
+                                                             <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">nb_nodes</span><span class="p">)])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_nb_rt_props</span><span class="p">[</span><span class="s1">&#39;refused&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">RegularStat</span><span class="p">([</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_net_manager</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">nb_route_props_per_node</span><span class="p">[</span><span class="n">reason</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">reason</span> <span class="ow">in</span> <span class="n">RtPolicyReason</span> <span class="k">if</span> <span class="n">reason</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;REFUSED&#39;</span><span class="p">))</span> 
+                                                             <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">nb_nodes</span><span class="p">)])</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_rt_props</span>
+
+<div class="viewcode-block" id="AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.histogram_routes_length"><a class="viewcode-back" href="../../measures.advanced_stats_helper.html#measures.advanced_stats_helper.AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.histogram_routes_length">[docs]</a>        <span class="k">def</span> <span class="nf">histogram_routes_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;dict: Histogram of the routes length at the end of the network run.</span>
+<span class="sd">            </span>
+<span class="sd">            The dict is indexed by values of routes length, and its values are</span>
+<span class="sd">            the number of routes of such length.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">routes_length</span><span class="p">:</span>
+                <span class="n">res</span><span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">res</span></div>
+
+        <span class="c1"># The the ratio between the length of the routes in the network and the</span>
+        <span class="c1"># length of the shortest corresponding path</span>
+<div class="viewcode-block" id="AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.routes_length_vs_shortest_path"><a class="viewcode-back" href="../../measures.advanced_stats_helper.html#measures.advanced_stats_helper.AdvancedNetworkStatsHelper.AdvancedNetworkStatsHelperSingleton.routes_length_vs_shortest_path">[docs]</a>        <span class="k">def</span> <span class="nf">routes_length_vs_shortest_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`~measures.network_statistics.RunningStat`: Ratio of the routes length over their corresponding shortest paths</span>
+<span class="sd">            </span>
+<span class="sd">            This property computes the ratio `length(rt)/length(sp)` for each</span>
+<span class="sd">            route `rt` existing in the networt, where `sp` is the shortest path</span>
+<span class="sd">            corresponding to `rt`, *i.e.* the shortest path in the network graph</span>
+<span class="sd">            that goes from the end-sender of the route to its end receiver. What</span>
+<span class="sd">            is returned is</span>
+<span class="sd">            :obj:`~measures.network_statistics.RunningStat`</span>
+<span class="sd">            built from these ratios.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">shortest_paths_lengths</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">shortest_path_length</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">topology_graph</span><span class="p">)</span>
+             
+            <span class="n">res</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">routes_length</span><span class="p">:</span>
+                <span class="n">res</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">shortest_paths_lengths</span><span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;sender&#39;</span><span class="p">]][</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;receiver&#39;</span><span class="p">]])</span>
+ 
+                 
+            <span class="k">return</span> <span class="n">res</span></div>
+
+        <span class="nd">@property</span>
+        <span class="k">def</span> <span class="nf">complete_routes_descriptions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;dict: Returns the description of all routes between all pairs of nodes.</span>
+<span class="sd">            </span>
+<span class="sd">            Returns a dict, indexed by (end-sender, end-receiver), which values</span>
+<span class="sd">            are lists of lists. That is, d[s,r] = l, and each element of l is a</span>
+<span class="sd">            list l&#39; such that (l&#39;[0] = index of end-sender, indexes of relay</span>
+<span class="sd">            nodes (and indirection nodes), l&#39;[-1] = index of end-receiver)</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+ 
+            <span class="n">routes</span> <span class="o">=</span> <span class="p">{}</span>
+            
+            <span class="k">for</span> <span class="n">from_node</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">nb_nodes</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">to_node</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">nb_nodes</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">from_node</span> <span class="o">==</span> <span class="n">to_node</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    
+                    <span class="k">def</span> <span class="nf">trace_route</span><span class="p">(</span><span class="n">current_node</span><span class="p">,</span> <span class="n">next_node</span><span class="p">,</span> <span class="n">next_cid</span><span class="p">,</span> <span class="n">previous_node</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">route_accumulator</span><span class="o">=</span><span class="p">[]):</span>
+                        <span class="n">route_accumulator</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">current_node</span><span class="p">,</span> <span class="n">next_cid</span><span class="p">))</span>
+                        
+                        <span class="k">if</span> <span class="n">next_node</span> <span class="o">==</span> <span class="n">F_NULL</span><span class="p">:</span>
+                            <span class="k">return</span> <span class="n">route_accumulator</span>
+                        
+                        <span class="c1"># Retrieve, using the RT+PRTof the &quot;next_node&quot;, the next hop.</span>
+                        <span class="c1"># VERY WRONG : this table lookup triggers a sql query. SQL</span>
+                        <span class="c1"># queries inside loops are wrooooong, and can often be avoided.</span>
+                        <span class="c1"># But this is much simpler, and this function&#39;s efficiency is</span>
+                        <span class="c1"># not critical, since called only for debug</span>
+                        <span class="n">entries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">next_node</span><span class="p">]</span><span class="o">.</span><span class="n">rt</span><span class="o">.</span><span class="n">joint_lookup</span><span class="p">(</span><span class="n">PRT</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="n">RT</span><span class="o">.</span><span class="n">NEXT_NODE</span><span class="p">,</span><span class="n">RT</span><span class="o">.</span><span class="n">NEXT_CID</span><span class="p">],</span> <span class="n">join_on</span><span class="o">=</span><span class="p">(</span><span class="n">RT</span><span class="o">.</span><span class="n">ROWID</span><span class="p">,</span> <span class="n">PRT</span><span class="o">.</span><span class="n">RT_ROWID</span><span class="p">),</span> 
+                                                           <span class="n">constraints</span><span class="o">=</span><span class="p">{</span><span class="n">PRT</span><span class="o">.</span><span class="n">PREV_NODE</span><span class="p">:</span> <span class="n">current_node</span><span class="p">,</span> <span class="n">PRT</span><span class="o">.</span><span class="n">PREV_CID</span><span class="p">:</span> <span class="n">next_cid</span><span class="p">})</span>
+                        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">entries</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> entries returned: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">While tracing from node </span><span class="si">{}</span><span class="s2"> to node </span><span class="si">{}</span><span class="s2">, with current_node = </span><span class="si">{}</span><span class="s2">, next_hop = </span><span class="si">{}</span><span class="s2">. See tables&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">entries</span><span class="p">),</span> <span class="p">[[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">r</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">],</span> <span class="n">from_node</span><span class="p">,</span> <span class="n">to_node</span><span class="p">,</span> <span class="n">current_node</span><span class="p">,</span> <span class="p">(</span><span class="n">next_node</span><span class="p">,</span> <span class="n">next_cid</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">next_node</span><span class="p">]</span><span class="o">.</span><span class="n">display_node_table</span><span class="p">())</span>
+                        <span class="n">next_hop</span> <span class="o">=</span> <span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        
+                        <span class="c1"># There may be several possible next hops that lead to the destination</span>
+                        <span class="c1"># For each possible next hop, call trace_route again (unless the next _node is the destination)</span>
+                        <span class="k">return</span> <span class="n">trace_route</span><span class="p">(</span><span class="n">next_node</span><span class="p">,</span> <span class="n">next_hop</span><span class="p">[</span><span class="n">RT</span><span class="o">.</span><span class="n">NEXT_NODE</span><span class="p">],</span> <span class="n">next_hop</span><span class="p">[</span><span class="n">RT</span><span class="o">.</span><span class="n">NEXT_CID</span><span class="p">],</span> <span class="n">previous_node</span><span class="o">=</span><span class="n">current_node</span><span class="p">,</span> <span class="n">route_accumulator</span><span class="o">=</span><span class="n">route_accumulator</span><span class="p">)</span>
+    
+                    
+                    <span class="n">routes</span><span class="p">[(</span><span class="n">from_node</span><span class="p">,</span> <span class="n">to_node</span><span class="p">)]</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">starts_of_routes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">from_node</span><span class="p">]</span><span class="o">.</span><span class="n">rt</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="n">RT</span><span class="o">.</span><span class="n">NEXT_NODE</span><span class="p">,</span> <span class="n">RT</span><span class="o">.</span><span class="n">NEXT_CID</span><span class="p">],</span> <span class="n">constraints</span><span class="o">=</span><span class="p">{</span><span class="n">RT</span><span class="o">.</span><span class="n">ACTUAL_RCVR</span><span class="p">:</span> <span class="n">to_node</span><span class="p">,</span> <span class="n">RT</span><span class="o">.</span><span class="n">IN_USE</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+                    <span class="k">for</span> <span class="n">route</span> <span class="ow">in</span> <span class="n">starts_of_routes</span><span class="p">:</span>
+                        <span class="n">one_route</span> <span class="o">=</span> <span class="n">trace_route</span><span class="p">(</span><span class="n">from_node</span><span class="p">,</span> <span class="n">route</span><span class="p">[</span><span class="n">RT</span><span class="o">.</span><span class="n">NEXT_NODE</span><span class="p">],</span> <span class="n">route</span><span class="p">[</span><span class="n">RT</span><span class="o">.</span><span class="n">NEXT_CID</span><span class="p">],</span> <span class="n">route_accumulator</span><span class="o">=</span><span class="p">[])</span>
+                        <span class="n">routes</span><span class="p">[(</span><span class="n">from_node</span><span class="p">,</span> <span class="n">to_node</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">one_route</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">routes</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span></div></div>
+    
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

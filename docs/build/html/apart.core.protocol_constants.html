@@ -1,0 +1,327 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>apart.core.protocol_constants — Misc. Constants &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="APART  documentation" href="index.html"/>
+        <link rel="up" title="apart.core — Protocol’s Core Components" href="apart.core.html"/>
+        <link rel="next" title="common — Helper Modules" href="common.html"/>
+        <link rel="prev" title="apart.core.controlled_traffic_rates —- Controlled traffic rates mechanism" href="apart.core.controlled_traffic_rates.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">APART</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="packages.html">Packages</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="apart.crypto.html"><code class="docutils literal"><span class="pre">apart.crypto</span></code> &#8212; Cryptography</a></li>
+<li class="toctree-l3"><a class="reference internal" href="apart.simulation.html"><code class="docutils literal"><span class="pre">apart.simulation</span></code> &#8212; Running simulations</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="apart.core.html"><code class="docutils literal"><span class="pre">apart.core</span></code> &#8212; Protocol&#8217;s Core Components</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="apart.core.network.html"><code class="docutils literal"><span class="pre">apart.core.network</span></code> &#8212; Network and Network Manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.node.html"><code class="docutils literal"><span class="pre">apart.core.node</span></code> &#8212; Node Code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.tables.html"><code class="docutils literal"><span class="pre">apart.core.tables</span></code> &#8212; Routing Tables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.messages.html"><code class="docutils literal"><span class="pre">apart.core.messages</span></code> &#8212; Network Messages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.pools.html"><code class="docutils literal"><span class="pre">apart.core.pools</span></code> &#8212; Message Pools and Batching</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.controlled_traffic_rates.html"><code class="docutils literal"><span class="pre">apart.core.controlled_traffic_rates</span></code> &#8212;- Controlled traffic rates mechanism</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="docutils literal"><span class="pre">apart.core.protocol_constants</span></code> &#8212; Misc. Constants</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html"><code class="docutils literal"><span class="pre">common</span></code> &#8212; Helper Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="measures.html"><code class="docutils literal"><span class="pre">measures</span></code> &#8212; Benchmark &amp; Simulation Framework</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="packages.html">Packages</a> &raquo;</li>
+        
+          <li><a href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a> &raquo;</li>
+        
+          <li><a href="apart.core.html"><code class="docutils literal"><span class="pre">apart.core</span></code> &#8212; Protocol&#8217;s Core Components</a> &raquo;</li>
+        
+      <li><code class="docutils literal"><span class="pre">apart.core.protocol_constants</span></code> &#8212; Misc. Constants</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/apart.core.protocol_constants.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-apart.core.protocol_constants">
+<span id="apart-core-protocol-constants-misc-constants"></span><h1><code class="docutils literal"><span class="pre">apart.core.protocol_constants</span></code> &#8212; Misc. Constants<a class="headerlink" href="#module-apart.core.protocol_constants" title="Permalink to this headline">¶</a></h1>
+<p>This module simply contains constants used throughout the protocol.</p>
+<dl class="docutils">
+<dt>The module defines in particular:</dt>
+<dd><ul class="first last simple">
+<li>GROUP_P and GROUP_G, constants for group operations
+(those are hardcoded to 2 and and 100103).</li>
+<li>A null value (F_NULL = -1).</li>
+<li>An enum class <a class="reference internal" href="#apart.core.protocol_constants.RtPolicyReason" title="apart.core.protocol_constants.RtPolicyReason"><code class="xref py py-class docutils literal"><span class="pre">RtPolicyReason</span></code></a> that codes
+the reasons of acceptation/refusal of route proposals.</li>
+</ul>
+</dd>
+</dl>
+<dl class="class">
+<dt id="apart.core.protocol_constants.RtPolicyReason">
+<em class="property">class </em><code class="descclassname">apart.core.protocol_constants.</code><code class="descname">RtPolicyReason</code><a class="reference internal" href="_modules/apart/core/protocol_constants.html#RtPolicyReason"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.protocol_constants.RtPolicyReason" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">enum.Enum</span></code></p>
+<p>Reasons to accept or refuse a route proposal.</p>
+<p>Refusal reasons <strong>must</strong> begin with <em>REFUSE_</em>, while accept reasons <strong>must</strong>
+begin with <em>ACCEPT_</em>.</p>
+<dl class="staticmethod">
+<dt id="apart.core.protocol_constants.RtPolicyReason.to_human_readable">
+<em class="property">static </em><code class="descname">to_human_readable</code><span class="sig-paren">(</span><em>reason</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/protocol_constants.html#RtPolicyReason.to_human_readable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.protocol_constants.RtPolicyReason.to_human_readable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms an instance of <a class="reference internal" href="#apart.core.protocol_constants.RtPolicyReason" title="apart.core.protocol_constants.RtPolicyReason"><code class="xref py py-class docutils literal"><span class="pre">RtPolicyReason</span></code></a> intro a human-readable string</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.protocol_constants.RtPolicyReason.ACCEPT_FIRST_KNOWN_ROUTE">
+<code class="descname">ACCEPT_FIRST_KNOWN_ROUTE</code><em class="property"> = 4</em><a class="headerlink" href="#apart.core.protocol_constants.RtPolicyReason.ACCEPT_FIRST_KNOWN_ROUTE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Route accepted because the route is the first that the node lears towars the given end-receiver.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.protocol_constants.RtPolicyReason.ACCEPT_REACCEPT_NO_REPLACEMENT">
+<code class="descname">ACCEPT_REACCEPT_NO_REPLACEMENT</code><em class="property"> = 5</em><a class="headerlink" href="#apart.core.protocol_constants.RtPolicyReason.ACCEPT_REACCEPT_NO_REPLACEMENT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Route accepted by random choice, with no replacement of an old entry.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.protocol_constants.RtPolicyReason.ACCEPT_REACCEPT_REPLACEMENT">
+<code class="descname">ACCEPT_REACCEPT_REPLACEMENT</code><em class="property"> = 6</em><a class="headerlink" href="#apart.core.protocol_constants.RtPolicyReason.ACCEPT_REACCEPT_REPLACEMENT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Route accepted by random choice, with replacement of an old entry.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.protocol_constants.RtPolicyReason.REFUSE_ENC_DEC">
+<code class="descname">REFUSE_ENC_DEC</code><em class="property"> = 1</em><a class="headerlink" href="#apart.core.protocol_constants.RtPolicyReason.REFUSE_ENC_DEC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Route refused according the the <em>encrypted decision</em> process</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.protocol_constants.RtPolicyReason.REFUSE_ITSELF">
+<code class="descname">REFUSE_ITSELF</code><em class="property"> = 0</em><a class="headerlink" href="#apart.core.protocol_constants.RtPolicyReason.REFUSE_ITSELF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Route refused because the route is towards the node itself</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.protocol_constants.RtPolicyReason.REFUSE_REACCEPT">
+<code class="descname">REFUSE_REACCEPT</code><em class="property"> = 2</em><a class="headerlink" href="#apart.core.protocol_constants.RtPolicyReason.REFUSE_REACCEPT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Route refused by random choice, and because the node already knows at least one route towards the end-receiver</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.core.protocol_constants.RtPolicyReason.REFUSE_TOO_MANY_ROUTES_NO_REPLACEMENT">
+<code class="descname">REFUSE_TOO_MANY_ROUTES_NO_REPLACEMENT</code><em class="property"> = 3</em><a class="headerlink" href="#apart.core.protocol_constants.RtPolicyReason.REFUSE_TOO_MANY_ROUTES_NO_REPLACEMENT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Route refused because the node already knows enough route towards the related end-receiver, and no replacement is performed.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="common.html" class="btn btn-neutral float-right" title="common — Helper Modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="apart.core.controlled_traffic_rates.html" class="btn btn-neutral" title="apart.core.controlled_traffic_rates —- Controlled traffic rates mechanism" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

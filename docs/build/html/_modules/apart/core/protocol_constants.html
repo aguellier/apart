@@ -1,0 +1,303 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>apart.core.protocol_constants &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="APART  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">APART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../packages.html">Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>apart.core.protocol_constants</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for apart.core.protocol_constants</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Author: Antoine Guellier</span>
+<span class="c1"># Copyright (c) 2017 Université de Rennes 1</span>
+<span class="c1"># License: CeCILL. The full license text is available at:</span>
+<span class="c1">#  - http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html</span>
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This module simply contains constants used throughout the protocol.</span>
+
+<span class="sd">The module defines in particular: </span>
+<span class="sd">    * GROUP_P and GROUP_G, constants for group operations</span>
+<span class="sd">      (those are hardcoded to 2 and and 100103).</span>
+<span class="sd">    * A null value (F_NULL = -1).</span>
+<span class="sd">    * An enum class :class:`.RtPolicyReason` that codes</span>
+<span class="sd">      the reasons of acceptation/refusal of route proposals.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="k">import</span> <span class="n">Enum</span>
+
+<span class="c1"># The parameters of the ElGamal</span>
+<span class="n">GROUP_G</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># Group generator g (that does not need to be a group generator</span>
+<span class="n">GROUP_P</span> <span class="o">=</span> <span class="mi">100103</span>  <span class="c1"># The characteristic of the group (in our case, we simplify : it is also the order)</span>
+
+<span class="c1"># A flag used during the route proposition process, when the destination</span>
+<span class="c1"># gets the RtPropAns message, &quot;decrypts&quot; the MaxHopCount-HopCount value,</span>
+<span class="c1"># and it happens that this value is 0. Instead of sending back the value of</span>
+<span class="c1"># the pseudo, the destination sends back this flag</span>
+<span class="n">F_RT_TOO_LONG</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+<span class="c1"># A flag representing a null value (localid, nexthop, etc)</span>
+<span class="n">F_NULL</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+
+<span class="c1"># Reasons to accept/refuse a rt proposal</span>
+<div class="viewcode-block" id="RtPolicyReason"><a class="viewcode-back" href="../../../apart.core.protocol_constants.html#apart.core.protocol_constants.RtPolicyReason">[docs]</a><span class="k">class</span> <span class="nc">RtPolicyReason</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Reasons to accept or refuse a route proposal.</span>
+<span class="sd">    </span>
+<span class="sd">    Refusal reasons **must** begin with *REFUSE_*, while accept reasons **must**</span>
+<span class="sd">    begin with *ACCEPT_*.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">REFUSE_ITSELF</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="sd">&quot;&quot;&quot;Route refused because the route is towards the node itself&quot;&quot;&quot;</span>
+    <span class="n">REFUSE_ENC_DEC</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="sd">&quot;&quot;&quot;Route refused according the the *encrypted decision* process&quot;&quot;&quot;</span>
+    <span class="n">REFUSE_REACCEPT</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="sd">&quot;&quot;&quot;Route refused by random choice, and because the node already knows at least one route towards the end-receiver&quot;&quot;&quot;</span>
+    <span class="n">REFUSE_TOO_MANY_ROUTES_NO_REPLACEMENT</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="sd">&quot;&quot;&quot;Route refused because the node already knows enough route towards the related end-receiver, and no replacement is performed.&quot;&quot;&quot;</span>
+<span class="c1">#     REFUSE_TOO_MANY_ROUTES = &quot;Too many routes towards pseudo&quot;</span>
+<span class="c1">#     REFUSE_NO_REPLACEMENT = &quot;Enough routes towards pseudo AND no replacement&quot;</span>
+<span class="c1">#     REFUSE_RANDOM = &quot;Random choice: refuse&quot;</span>
+    
+    
+    <span class="n">ACCEPT_FIRST_KNOWN_ROUTE</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="sd">&quot;&quot;&quot;Route accepted because the route is the first that the node lears towars the given end-receiver.&quot;&quot;&quot;</span>
+    <span class="n">ACCEPT_REACCEPT_NO_REPLACEMENT</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="sd">&quot;&quot;&quot;Route accepted by random choice, with no replacement of an old entry.&quot;&quot;&quot;</span>
+    <span class="n">ACCEPT_REACCEPT_REPLACEMENT</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="sd">&quot;&quot;&quot;Route accepted by random choice, with replacement of an old entry.&quot;&quot;&quot;</span>
+<span class="c1">#     ACCEPT_REPLACEMENT = &quot;Enough routes towards pseudo BUT replacement&quot;</span>
+<span class="c1">#     ACCEPT_RANDOM = &quot;Random choice: accept&quot;</span>
+    
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="RtPolicyReason.to_human_readable"><a class="viewcode-back" href="../../../apart.core.protocol_constants.html#apart.core.protocol_constants.RtPolicyReason.to_human_readable">[docs]</a>    <span class="k">def</span> <span class="nf">to_human_readable</span><span class="p">(</span><span class="n">reason</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Transforms an instance of :class:`.RtPolicyReason` intro a human-readable string&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">reason</span> <span class="ow">is</span> <span class="n">RtPolicyReason</span><span class="o">.</span><span class="n">REFUSE_ITSELF</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;Receiver is itself&quot;</span>
+        <span class="k">elif</span> <span class="n">reason</span> <span class="ow">is</span> <span class="n">RtPolicyReason</span><span class="o">.</span><span class="n">REFUSE_ENC_DEC</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;Route too long or presence of loop&quot;</span>
+        <span class="k">elif</span> <span class="n">reason</span> <span class="ow">is</span> <span class="n">RtPolicyReason</span><span class="o">.</span><span class="n">REFUSE_REACCEPT</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;Random choice of refusing a route towards a receiver already known&quot;</span>
+        <span class="k">elif</span> <span class="n">reason</span> <span class="ow">is</span> <span class="n">RtPolicyReason</span><span class="o">.</span><span class="n">REFUSE_TOO_MANY_ROUTES_NO_REPLACEMENT</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;Route was going to be re-accepted, but not by replacement, and max number of route reached&quot;</span>
+        <span class="k">elif</span> <span class="n">reason</span> <span class="ow">is</span> <span class="n">RtPolicyReason</span><span class="o">.</span><span class="n">ACCEPT_FIRST_KNOWN_ROUTE</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;First route learned towards a given proposer&quot;</span>
+        <span class="k">elif</span> <span class="n">reason</span> <span class="ow">is</span> <span class="n">RtPolicyReason</span><span class="o">.</span><span class="n">ACCEPT_REACCEPT_NO_REPLACEMENT</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;Accepting a route towards an already known receiver, without replacement&quot;</span>
+        <span class="k">elif</span> <span class="n">reason</span> <span class="ow">is</span> <span class="n">RtPolicyReason</span><span class="o">.</span><span class="n">ACCEPT_REACCEPT_REPLACEMENT</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;Accepting a route towards an already known receiver, with replacement&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;NotARtPolocyReasons&quot;</span></div>
+    
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

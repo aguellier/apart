@@ -1,0 +1,309 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>common.utilities — Misc. Functions &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="APART  documentation" href="index.html"/>
+        <link rel="up" title="common — Helper Modules" href="common.html"/>
+        <link rel="next" title="common.custom_logging — Adaptation of the std logging module" href="common.custom_logging.html"/>
+        <link rel="prev" title="common — Helper Modules" href="common.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">APART</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="packages.html">Packages</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="common.html"><code class="docutils literal"><span class="pre">common</span></code> &#8212; Helper Modules</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><code class="docutils literal"><span class="pre">common.utilities</span></code> &#8212; Misc. Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.custom_logging.html"><code class="docutils literal"><span class="pre">common.custom_logging</span></code> &#8212; Adaptation of the std <code class="docutils literal"><span class="pre">logging</span></code> module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="measures.html"><code class="docutils literal"><span class="pre">measures</span></code> &#8212; Benchmark &amp; Simulation Framework</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="packages.html">Packages</a> &raquo;</li>
+        
+          <li><a href="common.html"><code class="docutils literal"><span class="pre">common</span></code> &#8212; Helper Modules</a> &raquo;</li>
+        
+      <li><code class="docutils literal"><span class="pre">common.utilities</span></code> &#8212; Misc. Functions</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/common.utilities.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-common.utilities">
+<span id="common-utilities-misc-functions"></span><h1><code class="docutils literal"><span class="pre">common.utilities</span></code> &#8212; Misc. Functions<a class="headerlink" href="#module-common.utilities" title="Permalink to this headline">¶</a></h1>
+<p>This module contains miscellaneous functions such as prime number generation, etc.</p>
+<dl class="function">
+<dt id="common.utilities.comb">
+<code class="descclassname">common.utilities.</code><code class="descname">comb</code><span class="sig-paren">(</span><em>n</em>, <em>k</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/common/utilities.html#comb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#common.utilities.comb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the combination of k elements in n</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="common.utilities.make_hashable">
+<code class="descclassname">common.utilities.</code><code class="descname">make_hashable</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/common/utilities.html#make_hashable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#common.utilities.make_hashable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a recursive structure hashable.</p>
+<p>This function transforms the argument <cite>x</cite> from list to tuples, and from dict
+to tuples of tuples, and set to frozenset</p>
+<p>The function is applied recursively is <cite>x</cite> is a list that contains lists for instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; the structure to make hashable</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the argument <cite>x</cite> transformed to be hashable by python</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">any</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="common.utilities.pprinttable">
+<code class="descclassname">common.utilities.</code><code class="descname">pprinttable</code><span class="sig-paren">(</span><em>headers</em>, <em>rows</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/common/utilities.html#pprinttable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#common.utilities.pprinttable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints a table with headers.</p>
+<p>Used to print nodes&#8217; routing tables, mainly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>headers</strong> (<em>list of str</em>) &#8211; the column titles</li>
+<li><strong>rows</strong> (<em>list of list of any</em>) &#8211; the rows and data they contain
+(must contain lists all of the same size, and of the same size as <cite>header</cite>)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="common.utilities.print_recursive_structure">
+<code class="descclassname">common.utilities.</code><code class="descname">print_recursive_structure</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/common/utilities.html#print_recursive_structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#common.utilities.print_recursive_structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints a recusrsive structure.</p>
+<p>Adds indentations, and handles dict, list, sets, and defaultdict.</p>
+<p>Used for debug purposes.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="common.utilities.range1">
+<code class="descclassname">common.utilities.</code><code class="descname">range1</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/common/utilities.html#range1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#common.utilities.range1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple alias for range, with an inclusive upper bound.</p>
+<p>For instance, <code class="docutils literal"><span class="pre">range1(0,</span> <span class="pre">10)</span></code> is equivalent to <code class="docutils literal"><span class="pre">range(0,</span> <span class="pre">11)</span></code></p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="common.custom_logging.html" class="btn btn-neutral float-right" title="common.custom_logging — Adaptation of the std logging module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="common.html" class="btn btn-neutral" title="common — Helper Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

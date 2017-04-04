@@ -1,0 +1,636 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>measures.plotting &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="APART  documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">APART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../packages.html">Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>measures.plotting</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for measures.plotting</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Author: Antoine Guellier</span>
+<span class="c1"># Copyright (c) 2017 Université de Rennes 1</span>
+<span class="c1"># License: CeCILL. The full license text is available at:</span>
+<span class="c1">#  - http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html</span>
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This module provides helper function to plot graphs constructed from the results</span>
+<span class="sd">of simulations. It uses the :mod:`matplotlib.pyplot` module for all graph creations.</span>
+
+<span class="sd">Note that, for the plotting of complex/custom graphs, the generic functions</span>
+<span class="sd">provided in this module may not be flexible enough. However, the code for custom</span>
+<span class="sd">function plotting can be inspired by the code in this module.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span><span class="p">,</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">statistics</span>
+
+<span class="kn">from</span> <span class="nn">common.utilities</span> <span class="k">import</span> <span class="n">print_recursive_structure</span><span class="p">,</span> <span class="n">make_hashable</span>
+<span class="kn">from</span> <span class="nn">measures.file_handling</span> <span class="k">import</span> <span class="n">save_graphs_simulation_results</span>
+<span class="kn">from</span> <span class="nn">measures.network_statistics</span> <span class="k">import</span> <span class="n">RunningStat</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">dill</span> <span class="k">as</span> <span class="nn">pickle</span>
+
+<div class="viewcode-block" id="plotfunc"><a class="viewcode-back" href="../../measures.plotting.html#measures.plotting.plotfunc">[docs]</a><span class="k">def</span> <span class="nf">plotfunc</span><span class="p">(</span><span class="n">measure_params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Decorator for plotting functions.</span>
+<span class="sd">    </span>
+<span class="sd">    Modifies the behavior of a plotting function in the following way. If no</span>
+<span class="sd">    &#39;x_param&#39; argument is given to the function, then the function is called on</span>
+<span class="sd">    each parameter in `measure_params`.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        measure_params (list of string): the list of the (names of) `x_param` parameters on which to call the decorated plotting function.</span>
+<span class="sd">    &quot;&quot;&quot;</span> 
+    <span class="k">def</span> <span class="nf">actual_decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">new_plotfunc</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s1">&#39;x_param&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;x_param&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">x_param</span> <span class="ow">in</span> <span class="n">measure_params</span><span class="p">:</span>
+                    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;x_param&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_param</span><span class="p">,</span> <span class="n">x_param</span><span class="p">)</span>
+                    <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;x_param&#39;</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">x_param</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;x_param&#39;</span><span class="p">]:</span>
+                    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;x_param&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_param</span>
+                    <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_plotfunc</span>
+    <span class="k">return</span> <span class="n">actual_decorator</span></div>
+
+
+<div class="viewcode-block" id="process_plot_function_inputs"><a class="viewcode-back" href="../../measures.plotting.html#measures.plotting.process_plot_function_inputs">[docs]</a><span class="k">def</span> <span class="nf">process_plot_function_inputs</span><span class="p">(</span><span class="n">x_param</span><span class="p">,</span> <span class="n">y_stat</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Checks and pre-processes inputs to a plotting function.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        x_param (tuple): a tuple of strings, containing the name of the </span>
+<span class="sd">            parameter to put in abscissa of the graph, accompanied with label of</span>
+<span class="sd">            the axis, plus optionally a label for the file name</span>
+<span class="sd">        y_stat (tuple): similarl to `x_param`, but for the ordinate axis</span>
+<span class="sd">        restrict_to_other_params (dict): a dict with parameter names as keys,</span>
+<span class="sd">            and strings or lists of strings as values.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        (tuple, tuple, list): The processed input parameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+        
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x_param</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_param</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">3</span> 
+        <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">x_param</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="n">PlottingException</span><span class="p">(</span><span class="s2">&quot;Error : The function expects a parameter `x_param` as a tuple (&#39;param reference name&#39;, &#39;param text name&#39;[, &#39;param_name_for_file_name&#39;]).&quot;</span><span class="p">)</span> 
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y_stat</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_stat</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">3</span> 
+        <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">y_stat</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="n">PlottingException</span><span class="p">(</span><span class="s2">&quot;Error : The function expects a parameter `y_stat` as a tuple (&#39;stat reference name&#39;, &#39;stat text name&#39;[, &#39;stat_name_for_file_name&#39;]).&quot;</span><span class="p">)</span> 
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_param</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">x_param</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_param</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x_param</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x_param</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_stat</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">y_stat</span> <span class="o">=</span> <span class="p">(</span><span class="n">y_stat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">y_stat</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">y_stat</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">restrict_to_other_params</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">restrict_to_other_params</span><span class="p">[</span><span class="n">p</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">restrict_to_other_params</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">restrict_to_other_params</span><span class="p">[</span><span class="n">p</span><span class="p">]]</span>
+            
+    <span class="k">return</span> <span class="n">x_param</span><span class="p">,</span> <span class="n">y_stat</span><span class="p">,</span> <span class="n">restrict_to_other_params</span></div>
+    
+
+<div class="viewcode-block" id="plot_simple_metric"><a class="viewcode-back" href="../../measures.plotting.html#measures.plotting.plot_simple_metric">[docs]</a><span class="k">def</span> <span class="nf">plot_simple_metric</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">ordered_measure_params_names</span><span class="p">,</span> <span class="n">y_stat</span><span class="p">,</span> <span class="n">x_param</span><span class="p">,</span> <span class="n">several_curves</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="p">{},</span> <span class="n">save_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generic plotting function, producing a bar plot of one or several curves, based on data points.</span>
+<span class="sd">    </span>
+<span class="sd">    Produces a graph and saves it as .png file (or disaplys them on screen).</span>
+<span class="sd">    This function is designed for plotting *simple* data; namely, simple curves</span>
+<span class="sd">    made of data points. It accepts the results of simulations in arguments,</span>
+<span class="sd">    processes these results, and plots them.</span>
+<span class="sd">    </span>
+<span class="sd">    Note that this function actually calls :func:`.do_plot_simple_metric` to</span>
+<span class="sd">    plot the graph. Its main purpose is only to process the data from measures</span>
+<span class="sd">    and simulations into input acceptable by the latter function. </span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        experiment_results (dict): typically, the output of a call to :func:`measures.common_measures.generic_measure`.</span>
+<span class="sd">        ordered_measure_params_names (list of string): the names of the parameters of the measure. </span>
+<span class="sd">            The order of these parameters is preserved, but matters only in case</span>
+<span class="sd">            they are displayed to the user (the function does not rely on that</span>
+<span class="sd">            order to function).</span>
+<span class="sd">        y_stat (tuple): the statistic to plot (i.e. the metric to plot in ordinate axis). Is processed by a call to :func:`.process_plot_function_inputs`.</span>
+<span class="sd">        x_param (tuple): the parameter to use in abscissa. Is processed by a call to :func:`.process_plot_function_inputs`. (Default: None)</span>
+<span class="sd">        several_curves (list of string, optional): if None, then only one curve is drawn in the </span>
+<span class="sd">            graph. If provided as a list of string, draws as many curves as</span>
+<span class="sd">            there are strings in the list, using these strings as the curves labels.</span>
+<span class="sd">        restrict_to_other_params (dict): a dict with parameter names as keys,</span>
+<span class="sd">            and strings or lists of strings as values. This argument is similat</span>
+<span class="sd">            to that of</span>
+<span class="sd">            :func:`~measures.common_measures.generic_measure`,</span>
+<span class="sd">            and allows to include in the graph only results for a certain subset</span>
+<span class="sd">            of results.</span>
+<span class="sd">        save_to (string, optional): path of the folder in which graphs should be saved. If `None`, </span>
+<span class="sd">            the graphs are instead displayed on screen. (Default: None)</span>
+<span class="sd">        overwrite_existing (bool, optional): if graphs are saved and this argument is `True`, then the new graph may erase existing files. </span>
+<span class="sd">            This argument is passed down to :func:`~measures.file_handling.save_graphs_simulation_results`. (Default: False)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">x_param</span><span class="p">,</span> <span class="n">y_stat</span><span class="p">,</span> <span class="n">restrict_to_other_params</span> <span class="o">=</span> <span class="n">process_plot_function_inputs</span><span class="p">(</span><span class="n">x_param</span><span class="p">,</span> <span class="n">y_stat</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="p">)</span>
+    <span class="n">x_param</span><span class="p">,</span> <span class="n">x_param_label</span><span class="p">,</span> <span class="n">x_param_file_name</span> <span class="o">=</span> <span class="n">x_param</span>
+    <span class="n">y_stat</span><span class="p">,</span> <span class="n">y_stat_label</span><span class="p">,</span> <span class="n">y_stat_file_name</span> <span class="o">=</span> <span class="n">y_stat</span>
+    
+    <span class="c1"># Not possible to make a graph with ocom_session as x axis</span>
+    <span class="k">if</span> <span class="n">x_param</span> <span class="o">==</span> <span class="s1">&#39;ocom_sessions&#39;</span><span class="p">:</span>
+        <span class="k">return</span>
+    
+    <span class="k">if</span> <span class="n">save_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">save_to</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_to</span><span class="p">,</span> <span class="s1">&#39;vs_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x_param_file_name</span><span class="p">))</span>
+    
+    
+    <span class="n">graph_description</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x_label&#39;</span><span class="p">:</span> <span class="n">x_param_label</span><span class="p">,</span> <span class="s1">&#39;y_label&#39;</span><span class="p">:</span> <span class="n">y_stat_label</span><span class="p">,</span> 
+                                  <span class="s1">&#39;linestyle&#39;</span><span class="p">:</span> <span class="s1">&#39;-&#39;</span><span class="p">}</span>
+    
+    <span class="k">if</span> <span class="n">several_curves</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">all_possible_graphs_values</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;means&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;variances&#39;</span><span class="p">:</span> <span class="p">[]}))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">all_possible_graphs_values</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;means&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;variances&#39;</span><span class="p">:</span> <span class="p">[]}))</span>  <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">several_curves</span><span class="p">))</span>
+    
+    <span class="k">for</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="n">experiments_results</span><span class="p">:</span>
+        <span class="c1"># Keep the experiment results only if they fit into the asked other parameters</span>
+        <span class="n">skip</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">v_list</span> <span class="ow">in</span> <span class="n">restrict_to_other_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span>  <span class="n">experiment</span><span class="p">[</span><span class="s1">&#39;measure_params&#39;</span><span class="p">][</span><span class="n">p</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">v_list</span><span class="p">:</span>
+                <span class="n">skip</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+        
+        <span class="k">if</span> <span class="n">skip</span><span class="p">:</span>
+            <span class="k">continue</span>
+        
+        <span class="n">x_value</span> <span class="o">=</span> <span class="n">experiment</span><span class="p">[</span><span class="s1">&#39;measure_params&#39;</span><span class="p">][</span><span class="n">x_param</span><span class="p">]</span>
+        <span class="n">x_value</span> <span class="o">=</span> <span class="n">make_hashable</span><span class="p">(</span><span class="n">x_value</span><span class="p">)</span>
+<span class="c1">#         other_measure_params = tuple(sorted(((p, v) for p, v in experiment[&#39;measure_params&#39;].items() if p != x_param and p != &#39;topology_graph&#39;), </span>
+<span class="c1">#                                             key=lambda x: _MEASURE_PARAMS.index(x[0])))</span>
+        <span class="n">other_measure_params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(((</span><span class="n">p</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">[</span><span class="s1">&#39;measure_params&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span> <span class="o">!=</span> <span class="n">x_param</span> <span class="ow">and</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ordered_measure_params_names</span><span class="p">),</span> 
+                                            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">ordered_measure_params_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+        <span class="n">other_measure_params</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;nb_iters&#39;</span><span class="p">,</span> <span class="n">experiment</span><span class="p">[</span><span class="s1">&#39;measure_params&#39;</span><span class="p">][</span><span class="s1">&#39;nb_iters&#39;</span><span class="p">]))</span>
+        <span class="n">other_measure_params</span> <span class="o">=</span> <span class="n">make_hashable</span><span class="p">(</span><span class="n">other_measure_params</span><span class="p">)</span>
+        <span class="n">stat</span> <span class="o">=</span> <span class="n">experiment</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;overall&#39;</span><span class="p">][</span><span class="n">y_stat</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">several_curves</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
+            <span class="n">all_possible_graphs_values</span><span class="p">[</span><span class="n">other_measure_params</span><span class="p">][</span><span class="n">x_value</span><span class="p">][</span><span class="s1">&#39;means&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stat</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+            <span class="n">all_possible_graphs_values</span><span class="p">[</span><span class="n">other_measure_params</span><span class="p">][</span><span class="n">x_value</span><span class="p">][</span><span class="s1">&#39;variances&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stat</span><span class="o">.</span><span class="n">variance</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">curve</span> <span class="ow">in</span> <span class="n">several_curves</span><span class="p">:</span> 
+                <span class="n">all_possible_graphs_values</span><span class="p">[</span><span class="n">other_measure_params</span><span class="p">][</span><span class="n">curve</span><span class="p">][</span><span class="n">x_value</span><span class="p">][</span><span class="s1">&#39;means&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stat</span><span class="p">[</span><span class="n">curve</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+                <span class="n">all_possible_graphs_values</span><span class="p">[</span><span class="n">other_measure_params</span><span class="p">][</span><span class="n">curve</span><span class="p">][</span><span class="n">x_value</span><span class="p">][</span><span class="s1">&#39;variances&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stat</span><span class="p">[</span><span class="n">curve</span><span class="p">]</span><span class="o">.</span><span class="n">variance</span><span class="p">)</span>
+    
+
+    <span class="c1"># Each graph must show a statistic (in y axis) according to a network</span>
+    <span class="c1"># parameter (in x axis), where **only** this network parameter varies. Thus,</span>
+    <span class="c1"># we make one graph per set of other network parameters</span>
+    <span class="n">all_possible_graphs_values</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">all_possible_graphs_values</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="c1">#     print_recursive_structure(all_possible_graphs_values)</span>
+    
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">other_measure_params</span><span class="p">,</span> <span class="n">graph_values</span> <span class="ow">in</span> <span class="n">all_possible_graphs_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+        <span class="k">if</span> <span class="n">several_curves</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sorted_zipped_data</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(((</span><span class="n">k</span><span class="p">,</span> <span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;means&#39;</span><span class="p">]),</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;variances&#39;</span><span class="p">]))</span> <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;variances&#39;</span><span class="p">]))</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">(</span><span class="mi">0</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;means&#39;</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">statistics</span><span class="o">.</span><span class="n">stdev</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;means&#39;</span><span class="p">])))</span> 
+                                        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">graph_values</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+                                        <span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        
+            <span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">stdevs</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">sorted_zipped_data</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x_values</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">y_values</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">stdevs</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">curve</span><span class="p">,</span> <span class="n">curve_values</span> <span class="ow">in</span> <span class="n">graph_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">sorted_zipped_data</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(((</span><span class="n">k</span><span class="p">,</span> <span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;means&#39;</span><span class="p">]),</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;variances&#39;</span><span class="p">])))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">curve_values</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+                                        <span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            
+                <span class="n">x_values</span><span class="p">[</span><span class="n">curve</span><span class="p">],</span> <span class="n">y_values</span><span class="p">[</span><span class="n">curve</span><span class="p">],</span> <span class="n">stdevs</span><span class="p">[</span><span class="n">curve</span><span class="p">]</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">sorted_zipped_data</span><span class="p">))</span>
+        
+        <span class="n">graph_description</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="s2">&quot;: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">other_measure_params</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">save_to</span><span class="p">:</span>
+            <span class="n">graph_description</span><span class="p">[</span><span class="s1">&#39;file_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_vs_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">y_stat_file_name</span><span class="p">,</span> <span class="n">x_param_file_name</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">i</span><span class="o">+=</span><span class="mi">1</span>
+        
+        <span class="c1"># Actually plot the graph</span>
+        <span class="n">do_plot_simple_metric</span><span class="p">(</span><span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">stdevs</span><span class="p">,</span> <span class="n">graph_description</span><span class="p">,</span> <span class="n">several_curves</span><span class="o">=</span><span class="n">several_curves</span><span class="p">,</span> <span class="n">save_to</span><span class="o">=</span><span class="n">save_to</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">save_to</span><span class="p">:</span>
+            <span class="c1"># Additionally, if there is one value only in the grpah, we log that value in a txt file</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x_values</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_values</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x_values</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">x_values</span><span class="o">.</span><span class="n">values</span><span class="p">())))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_to</span><span class="p">,</span> <span class="n">graph_description</span><span class="p">[</span><span class="s1">&#39;file_name&#39;</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;.txt&quot;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Other params : </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">other_measure_params</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x_values</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;For </span><span class="si">{}</span><span class="s2"> = </span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2"> = </span><span class="si">{}</span><span class="s2"> with stdev = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x_param_label</span><span class="p">,</span> <span class="n">x_values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">y_stat_label</span><span class="p">,</span> <span class="n">y_values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">stdevs</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">curve</span> <span class="ow">in</span> <span class="n">several_curves</span><span class="p">:</span>
+                            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Curve </span><span class="si">{}</span><span class="s2"> : for </span><span class="si">{}</span><span class="s2"> = </span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2"> = </span><span class="si">{}</span><span class="s2"> with stdev = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">curve</span><span class="p">,</span> <span class="n">x_param_label</span><span class="p">,</span> <span class="n">x_values</span><span class="p">[</span><span class="n">curve</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">y_stat_label</span><span class="p">,</span> <span class="n">y_values</span><span class="p">[</span><span class="n">curve</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">stdevs</span><span class="p">[</span><span class="n">curve</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span></div>
+        
+        
+<div class="viewcode-block" id="do_plot_simple_metric"><a class="viewcode-back" href="../../measures.plotting.html#measures.plotting.do_plot_simple_metric">[docs]</a><span class="k">def</span> <span class="nf">do_plot_simple_metric</span><span class="p">(</span><span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">stdevs</span><span class="p">,</span> <span class="n">graph_description</span><span class="p">,</span> <span class="n">several_curves</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">marker_size</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">legend_placement</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">,</span> <span class="n">xlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Actually plots a *simple metric*,  producing a bar plot of one or several curves, based on data points.</span>
+<span class="sd">    </span>
+<span class="sd">    This function is called by :func:`.plot_simple_metric`, but provided in a</span>
+<span class="sd">    stand-alone mode for a more fine-grained control of its inputs.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        x_values (list of numbers, or dict): the values in abscissa. If `several_curves` is not None, expected to be a dict indexed by the label of the curves, with lists of numbers in values.</span>
+<span class="sd">        x_values (list of numbers, or dict): the values in ordinate. If `several_curves` is not None, expected to be a dict indexed by the label of the curves, with lists of numbers in values. </span>
+<span class="sd">        several_curves (list of string, optional): if None, then only one curve is drawn in the </span>
+<span class="sd">            graph. If provided as a list of string, draws as many curves as</span>
+<span class="sd">            there are strings in the list, using these strings as the curves labels.</span>
+<span class="sd">        save_to (string, optional): path of the folder in which graphs should be saved. If `None`, </span>
+<span class="sd">            the graphs are instead displayed on screen. (Default: None)</span>
+<span class="sd">        overwrite_existing (bool, optional): if graphs are saved and this argument is `True`, then the new graph may erase existing files. </span>
+<span class="sd">            This argument is passed down to :func:`~measures.file_handling.save_graphs_simulation_results`. (Default: False)</span>
+<span class="sd">        others (color, marker, marker_size, linestyle, linewidth, legend_placement, xlim, ylim): parameters passed down to the :mod:`matplotlib.pyplot` module. </span>
+<span class="sd">            Expected to be simple values when `several_curves` is None, and list of values otherwise.  </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">several_curves</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">stdevs</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyle</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">marker</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">curves_markers</span> <span class="o">=</span> <span class="n">marker</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">marker</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">markers</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">marker</span><span class="p">)</span>
+            <span class="n">curves_markers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">c</span><span class="p">,</span> <span class="nb">next</span><span class="p">(</span><span class="n">markers</span><span class="p">))</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">several_curves</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">curves_markers</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">marker</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">curves_colors</span> <span class="o">=</span> <span class="n">color</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">colors</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+            <span class="n">curves_colors</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">c</span><span class="p">,</span> <span class="nb">next</span><span class="p">(</span><span class="n">colors</span><span class="p">))</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">several_curves</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">curves_colors</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">color</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">linewidth</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">linewidths</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">linewidth</span><span class="p">)</span>
+            <span class="n">curves_linewidth</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">c</span><span class="p">,</span> <span class="nb">next</span><span class="p">(</span><span class="n">linewidths</span><span class="p">))</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">several_curves</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">curves_linewidth</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">linewidth</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">curve</span> <span class="ow">in</span> <span class="n">several_curves</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">x_values</span><span class="p">[</span><span class="n">curve</span><span class="p">],</span> <span class="n">y_values</span><span class="p">[</span><span class="n">curve</span><span class="p">],</span> <span class="n">yerr</span><span class="o">=</span><span class="n">stdevs</span><span class="p">[</span><span class="n">curve</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">curves_colors</span><span class="p">[</span><span class="n">curve</span><span class="p">],</span> <span class="n">linewidth</span><span class="o">=</span><span class="n">curves_linewidth</span><span class="p">[</span><span class="n">curve</span><span class="p">],</span> <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyle</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="n">curves_markers</span><span class="p">[</span><span class="n">curve</span><span class="p">],</span> <span class="n">markersize</span><span class="o">=</span><span class="n">marker_size</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">curve</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">legend_placement</span><span class="p">)</span>
+    
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">graph_description</span><span class="p">[</span><span class="s1">&#39;x_label&#39;</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">graph_description</span><span class="p">[</span><span class="s1">&#39;y_label&#39;</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">graph_description</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">xlim</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">*</span><span class="n">xlim</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">xmin</span> <span class="o">*</span> <span class="mf">0.99</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">*</span> <span class="mf">1.01</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ylim</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">*</span><span class="n">ylim</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">save_to</span><span class="p">:</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="n">graph_description</span><span class="p">[</span><span class="s1">&#39;file_name&#39;</span><span class="p">]</span>
+        <span class="n">save_graphs_simulation_results</span><span class="p">(</span><span class="n">plt</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="n">file_name</span><span class="p">,</span> <span class="n">folder</span><span class="o">=</span><span class="n">save_to</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="plot_histogram"><a class="viewcode-back" href="../../measures.plotting.html#measures.plotting.plot_histogram">[docs]</a><span class="k">def</span> <span class="nf">plot_histogram</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">ordered_measure_params_names</span><span class="p">,</span> <span class="n">y_stat</span><span class="p">,</span> <span class="n">print_yerr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">label_rotation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xticks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_bars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="p">{},</span> <span class="n">save_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Analogous to :func:`.plot_simple_metric`, but for plotting histograms.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        experiment_results (dict): typically, the output of a call to :func:`measures.common_measures.generic_measure`.</span>
+<span class="sd">        ordered_measure_params_names (list of string): the names of the parameters of the measure. </span>
+<span class="sd">            The order of these parameters is preserved, but matters only in case</span>
+<span class="sd">            they are displayed to the user (the function does not rely on that</span>
+<span class="sd">            order to function).</span>
+<span class="sd">        y_stat (tuple): the statistic to plot (i.e. the metric to plot in ordinate axis). Is processed by a call to :func:`.process_plot_function_inputs`.</span>
+<span class="sd">        restrict_to_other_params (dict): a dict with parameter names as keys,</span>
+<span class="sd">            and strings or lists of strings as values. This argument is similat</span>
+<span class="sd">            to that of</span>
+<span class="sd">            :func:`~measures.common_measures.generic_measure`,</span>
+<span class="sd">            and allows to include in the graph only results for a certain subset</span>
+<span class="sd">            of results.</span>
+<span class="sd">        save_to (string, optional): path of the folder in which graphs should be saved. If `None`, </span>
+<span class="sd">            the graphs are instead displayed on screen. (Default: None)</span>
+<span class="sd">        overwrite_existing (bool, optional): if graphs are saved and this argument is `True`, then the new graph may erase existing files. </span>
+<span class="sd">            This argument is passed down to :func:`~measures.file_handling.save_graphs_simulation_results`. (Default: False)</span>
+<span class="sd">        print_yerr (bool, optional): if `True`, the standard deviation of each bar is printed (Default: False)</span>
+<span class="sd">        max_bars (int, optional): if set to `n` and the histogram has more than n different x values, the histogram is cut down to n bars. </span>
+<span class="sd">            And on the last bar are stacked and accumulatged all the remaining values. This avoids huge and unreadable bar plots. </span>
+<span class="sd">        others (label_rotation, xticks): parameters passed down to the :mod:`matplotlib.pyplot` module.   </span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">y_stat</span><span class="p">,</span> <span class="n">restrict_to_other_params</span> <span class="o">=</span> <span class="n">process_plot_function_inputs</span><span class="p">((</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="n">y_stat</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="p">)</span>
+    <span class="n">y_stat</span><span class="p">,</span> <span class="n">y_stat_label</span><span class="p">,</span> <span class="n">y_stat_file_name</span> <span class="o">=</span> <span class="n">y_stat</span>
+    
+    <span class="n">graph_description</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x_label&#39;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s1">&#39;y_label&#39;</span><span class="p">:</span> <span class="n">y_stat_label</span><span class="p">}</span>
+    <span class="n">all_possible_histograms</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;means&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;variances&#39;</span><span class="p">:</span> <span class="p">[]}))</span>
+    <span class="k">for</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="n">experiments_results</span><span class="p">:</span>
+        <span class="c1"># Keep the experiment results only if they fit into the asked other parameters</span>
+        <span class="n">skip</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">v_list</span> <span class="ow">in</span> <span class="n">restrict_to_other_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span>  <span class="n">experiment</span><span class="p">[</span><span class="s1">&#39;measure_params&#39;</span><span class="p">][</span><span class="n">p</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">v_list</span><span class="p">:</span>
+                <span class="n">skip</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+        
+        <span class="k">if</span> <span class="n">skip</span><span class="p">:</span>
+            <span class="k">continue</span>
+        
+        <span class="n">measure_params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(((</span><span class="n">p</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">[</span><span class="s1">&#39;measure_params&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ordered_measure_params_names</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">ordered_measure_params_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+        <span class="n">measure_params</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;nb_iters&#39;</span><span class="p">,</span> <span class="n">experiment</span><span class="p">[</span><span class="s1">&#39;measure_params&#39;</span><span class="p">][</span><span class="s1">&#39;nb_iters&#39;</span><span class="p">]))</span>
+        <span class="n">measure_params</span> <span class="o">=</span> <span class="n">make_hashable</span><span class="p">(</span><span class="n">measure_params</span><span class="p">)</span>
+        <span class="n">hist_dict</span> <span class="o">=</span> <span class="n">experiment</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;overall&#39;</span><span class="p">][</span><span class="n">y_stat</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">hist_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># DEBUG : compatibility with previous way of storing stats</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">RunningStat</span><span class="p">):</span>
+                <span class="n">all_possible_histograms</span><span class="p">[</span><span class="n">measure_params</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="s1">&#39;means&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+                <span class="n">all_possible_histograms</span><span class="p">[</span><span class="n">measure_params</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="s1">&#39;variances&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">variance</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">all_possible_histograms</span><span class="p">[</span><span class="n">measure_params</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="s1">&#39;means&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                <span class="n">all_possible_histograms</span><span class="p">[</span><span class="n">measure_params</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="s1">&#39;variances&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="c1"># Each graph must show a statistic (in y axis) according to a network</span>
+    <span class="c1"># parameter (in x axis), where **only** this network parameter varies. Thus,</span>
+    <span class="c1"># we make one graph per set of other network parameters</span>
+    <span class="n">all_possible_histograms</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">all_possible_histograms</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">measure_params</span><span class="p">,</span> <span class="n">hist_dict</span> <span class="ow">in</span> <span class="n">all_possible_histograms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># Aggregate the results</span>
+        <span class="n">hist_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;mean&#39;</span><span class="p">:</span> <span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;means&#39;</span><span class="p">]),</span> <span class="s1">&#39;variance&#39;</span><span class="p">:</span> <span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;variances&#39;</span><span class="p">])})</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hist_dict</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        
+        <span class="n">normaliser</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">((</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hist_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+        <span class="n">hist_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(((</span><span class="n">k</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;mean&#39;</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">normaliser</span><span class="p">,</span> <span class="s1">&#39;stdev&#39;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;variance&#39;</span><span class="p">])</span><span class="o">/</span><span class="n">normaliser</span><span class="p">})</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hist_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        
+        <span class="c1"># If there is only one histogram to draw, then record it at this point</span>
+        <span class="k">if</span> <span class="n">save_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_possible_histograms</span><span class="p">)</span> <span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">save_to</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">save_to</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o775</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_to</span><span class="p">,</span> <span class="n">y_stat_file_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">+</span><span class="s2">&quot;.pickle&quot;</span><span class="p">),</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">hist_dict</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+            
+        
+        <span class="c1"># Cut the dict if its len is &gt; to max_bars</span>
+        <span class="n">too_many_bars</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">max_bars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">hist_dict</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_bars</span><span class="p">:</span>
+            <span class="n">too_many_bars</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">rest_hist_dict</span> <span class="o">=</span> <span class="n">hist_dict</span>
+            <span class="n">hist_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="n">rest_hist_dict</span><span class="o">.</span><span class="n">popitem</span><span class="p">(</span><span class="n">last</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_bars</span><span class="p">))</span>
+        
+        <span class="k">if</span> <span class="n">print_yerr</span><span class="p">:</span>
+            <span class="n">yerr</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;stdev&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hist_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">yerr</span> <span class="o">=</span> <span class="kc">None</span>
+            
+        <span class="k">if</span> <span class="n">xticks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xticks</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">hist_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>        
+        <span class="k">if</span> <span class="n">too_many_bars</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">(</span><span class="n">xticks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">):</span>
+            <span class="n">xticks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">+&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">xticks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        
+        <span class="n">x_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hist_dict</span><span class="p">)))</span>
+        <span class="n">y_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hist_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        
+        
+        <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">yerr</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">ecolor</span><span class="o">=</span><span class="s1">&#39;#EE1111&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">too_many_bars</span><span class="p">:</span>
+            <span class="n">last_hist_key</span><span class="p">,</span> <span class="n">last_value_height</span> <span class="o">=</span> <span class="n">hist_dict</span><span class="o">.</span><span class="n">popitem</span><span class="p">(</span><span class="n">last</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">last_value_height</span> <span class="o">=</span> <span class="n">last_value_height</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">rest_hist_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="c1">#                 yerr = v[&#39;stdev&#39;] if print_yerr else None</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">([</span><span class="n">last_hist_key</span><span class="p">],</span> <span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">]],</span> <span class="n">align</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="n">last_value_height</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#AAAAFF&#39;</span><span class="p">,</span> <span class="n">ecolor</span><span class="o">=</span><span class="s1">&#39;#FFAAAA&#39;</span><span class="p">)</span>
+                <span class="n">last_value_height</span> <span class="o">+=</span> <span class="n">v</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span>
+
+            
+        
+        <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">x_values</span><span class="p">,</span> <span class="n">xticks</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="n">label_rotation</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">x_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">x_values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">graph_description</span><span class="p">[</span><span class="s1">&#39;y_label&#39;</span><span class="p">])</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span> <span class="s2">&quot;,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="s2">&quot;: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">measure_params</span><span class="p">)))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">save_to</span><span class="p">:</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">y_stat_file_name</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">save_graphs_simulation_results</span><span class="p">(</span><span class="n">plt</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="n">file_name</span><span class="p">,</span> <span class="n">folder</span><span class="o">=</span><span class="n">save_to</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+        
+        
+        
+
+<div class="viewcode-block" id="PlottingException"><a class="viewcode-back" href="../../measures.plotting.html#measures.plotting.PlottingException">[docs]</a><span class="k">class</span> <span class="nc">PlottingException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raised when an error occurs during the formatting of data into a graph&quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

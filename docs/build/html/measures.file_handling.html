@@ -1,0 +1,478 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>measures.file_handling — Saving/Loading Measure Results from Disk &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="APART  documentation" href="index.html"/>
+        <link rel="up" title="measures — Benchmark &amp; Simulation Framework" href="measures.html"/>
+        <link rel="next" title="measures.plotting — Plotting Results into Graphs" href="measures.plotting.html"/>
+        <link rel="prev" title="measures.common_measures — Generic Measure Framework" href="measures.common_measures.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">APART</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="packages.html">Packages</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.html"><code class="docutils literal"><span class="pre">common</span></code> &#8212; Helper Modules</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="measures.html"><code class="docutils literal"><span class="pre">measures</span></code> &#8212; Benchmark &amp; Simulation Framework</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="measures.network_statistics.html"><code class="docutils literal"><span class="pre">measures.network_statistics</span></code> &#8212; <em>Hook</em> Class into Network Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="measures.advanced_stats_helper.html"><code class="docutils literal"><span class="pre">measures.advanced_stats_helper</span></code> &#8211; Helper Class for Computing Statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="measures.common_measures.html"><code class="docutils literal"><span class="pre">measures.common_measures</span></code> &#8212; Generic Measure Framework</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><code class="docutils literal"><span class="pre">measures.file_handling</span></code> &#8212; Saving/Loading Measure Results from Disk</a></li>
+<li class="toctree-l3"><a class="reference internal" href="measures.plotting.html"><code class="docutils literal"><span class="pre">measures.plotting</span></code> &#8212; Plotting Results into Graphs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="packages.html">Packages</a> &raquo;</li>
+        
+          <li><a href="measures.html"><code class="docutils literal"><span class="pre">measures</span></code> &#8212; Benchmark &amp; Simulation Framework</a> &raquo;</li>
+        
+      <li><code class="docutils literal"><span class="pre">measures.file_handling</span></code> &#8212; Saving/Loading Measure Results from Disk</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/measures.file_handling.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-measures.file_handling">
+<span id="measures-file-handling-saving-loading-measure-results-from-disk"></span><h1><code class="docutils literal"><span class="pre">measures.file_handling</span></code> &#8212; Saving/Loading Measure Results from Disk<a class="headerlink" href="#module-measures.file_handling" title="Permalink to this headline">¶</a></h1>
+<p>This module provides helper function to manipulate the files that store
+serialized measure results and graphs. It allows to check the existence of
+folders and to harmonize the file names.</p>
+<dl class="function">
+<dt id="measures.file_handling.format_net_states_file_name">
+<code class="descclassname">measures.file_handling.</code><code class="descname">format_net_states_file_name</code><span class="sig-paren">(</span><em>measure_title</em>, <em>combination_number</em>, <em>iter_number</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/file_handling.html#format_net_states_file_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.file_handling.format_net_states_file_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Formats the file name for the saving of network states.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>measure_title</strong> (<em>string</em>) &#8211; the name of the measure/experimentations</li>
+<li><strong>combination_number</strong> (<em>int</em>) &#8211; the counter of the network simulations (useful when many network simulations are made, with may different parameter combinations)</li>
+<li><strong>iter_number</strong> (<em>int</em>) &#8211; the counter of the specific iteration being saved</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The file name formatted using the provided arguments.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">string</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measures.file_handling.format_results_file_name">
+<code class="descclassname">measures.file_handling.</code><code class="descname">format_results_file_name</code><span class="sig-paren">(</span><em>measure_title</em>, <em>combination_number</em>, <em>nb_iters</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/file_handling.html#format_results_file_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.file_handling.format_results_file_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Formats the file name for the results of simulations</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>measure_title</strong> (<em>string</em>) &#8211; the name of the measure/experimentations</li>
+<li><strong>combination_number</strong> (<em>int</em>) &#8211; the counter of the network simulations (useful when many network simulations are made, with may different parameter combinations)</li>
+<li><strong>nb_iters</strong> (<em>int</em>) &#8211; the number of iterations that were run for each combination</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The file name formatted using the provided arguments.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">string</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measures.file_handling.load_measures_results">
+<code class="descclassname">measures.file_handling.</code><code class="descname">load_measures_results</code><span class="sig-paren">(</span><em>folder</em>, <em>file_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/file_handling.html#load_measures_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.file_handling.load_measures_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load simulation results previously saved (pickled) into a file and returns the contents.</p>
+<p>It is allowed to specify the absolute path, file name included, in the
+file_name argument (that is, folder may be an empty string). The converse is
+also true: the file name argument can be empty if provided in the folder
+one.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>folder</strong> (<em>string</em>) &#8211; the folder in which to search for the binary files of the pickled.</li>
+<li><strong>file_name</strong> (<em>string</em>) &#8211; the name of the file to load (typically, a .pickle).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the unpickled contents of the file(s) specified</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">any</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measures.file_handling.matchstring_net_states_file_name">
+<code class="descclassname">measures.file_handling.</code><code class="descname">matchstring_net_states_file_name</code><span class="sig-paren">(</span><em>measure_title</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/file_handling.html#matchstring_net_states_file_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.file_handling.matchstring_net_states_file_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives the regex string of the file name for simulation results.</p>
+<p>This function is analogous to <a class="reference internal" href="#measures.file_handling.matchstring_results_file_name" title="measures.file_handling.matchstring_results_file_name"><code class="xref py py-func docutils literal"><span class="pre">matchstring_results_file_name()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>measure_title</strong> (<em>string</em>) &#8211; the name of the measure/experimentations</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The regex string where the combination counter and iteration counter are left as <cite>(d+)</cite> allowing to catch them in a Python <code class="xref py py-obj docutils literal"><span class="pre">match</span></code> object.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measures.file_handling.matchstring_results_file_name">
+<code class="descclassname">measures.file_handling.</code><code class="descname">matchstring_results_file_name</code><span class="sig-paren">(</span><em>measure_title</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/file_handling.html#matchstring_results_file_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.file_handling.matchstring_results_file_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives the regex string of the file name for simulation results.</p>
+<p>This function is useful to allow the search of files on the disk, and at the
+same time get information on which parameter combination these results refer
+to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>measure_title</strong> (<em>string</em>) &#8211; the name of the measure/experimentations</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The regex string where the combination counter and number of iterations are left as <cite>(d+)</cite> allowing to catch them in a Python <code class="xref py py-obj docutils literal"><span class="pre">match</span></code> object.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measures.file_handling.prepare_file_name">
+<code class="descclassname">measures.file_handling.</code><code class="descname">prepare_file_name</code><span class="sig-paren">(</span><em>folder</em>, <em>file_name</em>, <em>default_folder='/tmp/'</em>, <em>default_file_name='unknown'</em>, <em>extension='.pickle'</em>, <em>overwrite_existing=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/file_handling.html#prepare_file_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.file_handling.prepare_file_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes a file name and folder and outputs a canonic absolute path.</p>
+<p>This function takes an absolute path, under the form of a folder and a file
+name (note: the full path can be in one of the two, the other one being an
+empty string or None), and processes this path so that: if no file name is
+provided, the default file name is used; if no folder is provided, the
+default one is used; if the file name does not have an extension (or an
+invalid one), append the provided extension to the file name; if the new
+file should not overwrite and existing one, then append a random string to
+the file name.</p>
+<p>This function is meant to process the file names of files for graphs,
+simulation results, and network states alike.</p>
+<p>This function also creates the folder(s) if necessary.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>folder</strong> (<em>string</em>) &#8211; the folder in which the file should be saved.</li>
+<li><strong>file_name</strong> (<em>string</em>) &#8211; the name of the file that must be saved.</li>
+<li><strong>default_folder</strong> (<em>string</em><em>, </em><em>option</em>) &#8211; The default folder, if no folder is provided in argument (Default: /tmp)</li>
+<li><strong>default_file_name</strong> (<em>string</em><em>, </em><em>option</em>) &#8211; The default file name, if no folder is provided in argument (Default: unknown)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a well formated full absolute path, where it is ensured that the folders in the basename all exist.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">string</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measures.file_handling.save_graphs_simulation_results">
+<code class="descclassname">measures.file_handling.</code><code class="descname">save_graphs_simulation_results</code><span class="sig-paren">(</span><em>plot_object</em>, <em>folder=None</em>, <em>file_name=None</em>, <em>overwrite_existing=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/file_handling.html#save_graphs_simulation_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.file_handling.save_graphs_simulation_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save a generated graphs in a png file.</p>
+<p>The folder and file_name arguments are passed on to
+<a class="reference internal" href="#measures.file_handling.prepare_file_name" title="measures.file_handling.prepare_file_name"><code class="xref py py-func docutils literal"><span class="pre">prepare_file_name()</span></code></a>, with default folder /tmp/protocol_graphs/.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>plot_object</strong> &#8211; a matplotlib object on which savefig() can be called, and containing the graph to save</li>
+<li><strong>folder</strong> (<em>string</em><em>, </em><em>optional</em>) &#8211; the folder in which to save the graph (Default: None)</li>
+<li><strong></strong><strong>(</strong><strong>string</strong><strong>, </strong><strong>optional</strong> (<em>file_name</em>) &#8211; the name of the file to save the graph to (Default: None)</li>
+<li><strong>overwrite_existing</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; whether, if the file_name provided already exists in the specified folder, it should be overwritten or not (default: False)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measures.file_handling.save_measures_results">
+<code class="descclassname">measures.file_handling.</code><code class="descname">save_measures_results</code><span class="sig-paren">(</span><em>sims_outputs</em>, <em>folder=None</em>, <em>file_name=None</em>, <em>overwrite_existing=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/file_handling.html#save_measures_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.file_handling.save_measures_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function saves the output produced by measures by pickling the results into a file on the disk.</p>
+<p>The folder and file_name arguments are passed on to
+<a class="reference internal" href="#measures.file_handling.prepare_file_name" title="measures.file_handling.prepare_file_name"><code class="xref py py-func docutils literal"><span class="pre">prepare_file_name()</span></code></a>, with default folder /tmp/protocol_stats/.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sims_outputs</strong> (<em>any</em>) &#8211; the results of the measures and simulations. Must be serializable with the <cite>:mod:`dill</cite> package.</li>
+<li><strong>folder</strong> (<em>string</em><em>, </em><em>optional</em>) &#8211; the folder in which to place the binary files of the pickled object (Default: None)</li>
+<li><strong>file_name</strong> (<em>string</em><em>, </em><em>optional</em>) &#8211; the name of the file to save the data to (Default: None)</li>
+<li><strong>overwrite_existing</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; whether, if the file_name provided already exists in the specified folder, it should be overwritten or not (default: False)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>Returns</dt>
+<dd>sim_outputs</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="measures.file_handling.save_network_state">
+<code class="descclassname">measures.file_handling.</code><code class="descname">save_network_state</code><span class="sig-paren">(</span><em>network_manager</em>, <em>folder=None</em>, <em>file_name=None</em>, <em>overwrite_existing=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/file_handling.html#save_network_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.file_handling.save_network_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pickle and save on disk a <a class="reference internal" href="apart.core.network.html#apart.core.network.NetworkManager" title="apart.core.network.NetworkManager"><code class="xref py py-obj docutils literal"><span class="pre">NetworkManager</span></code></a> instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>network_manager</strong> (<a class="reference internal" href="apart.core.network.html#apart.core.network.NetworkManager" title="apart.core.network.NetworkManager"><code class="xref py py-obj docutils literal"><span class="pre">NetworkManager</span></code></a>) &#8211; the network manager object, containing all the network state.</li>
+<li><strong>folder</strong> (<em>string</em><em>, </em><em>optional</em>) &#8211; the folder in which to save the network state (Default: None)</li>
+<li><strong></strong><strong>(</strong><strong>string</strong><strong>, </strong><strong>optional</strong> (<em>file_name</em>) &#8211; the name of the file to save the network state to (Default: None)</li>
+<li><strong>overwrite_existing</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; whether, if the file_name provided already exists in the specified folder, it should be overwritten or not (default: False)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">network_manager</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="measures.plotting.html" class="btn btn-neutral float-right" title="measures.plotting — Plotting Results into Graphs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="measures.common_measures.html" class="btn btn-neutral" title="measures.common_measures — Generic Measure Framework" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,579 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>apart.simulation &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="APART  documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">APART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../packages.html">Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>apart.simulation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for apart.simulation</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Author: Antoine Guellier</span>
+<span class="c1"># Copyright (c) 2017 Université de Rennes 1</span>
+<span class="c1"># License: CeCILL. The full license text is available at:</span>
+<span class="c1">#  - http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html</span>
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This module defines the material to run network simulations.</span>
+
+<span class="sd">It makes use of the elements defined in modules :mod:`~apart.core.network` and</span>
+<span class="sd">:mod:`~apart.core.node`. This module defines :class:`~.SimulationParams`, the</span>
+<span class="sd">class that regroups all simulation parameters, and the module function</span>
+<span class="sd">:func:`.run_simulation` that effectively runs a simulation.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">time</span> 
+
+<span class="kn">from</span> <span class="nn">common.custom_logging</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">apart.core.network</span> <span class="k">import</span> <span class="n">NetworkParams</span><span class="p">,</span> <span class="n">NetworkManager</span>
+
+
+<div class="viewcode-block" id="SimulationParams"><a class="viewcode-back" href="../../apart.simulation.html#apart.simulation.SimulationParams">[docs]</a><span class="k">class</span> <span class="nc">SimulationParams</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class grouping all the parameters of the simulation</span>
+<span class="sd">        </span>
+<span class="sd">        When running a simulation, an instance of this class is used to specify the simulation parameters. </span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            **kwargs: keyword arguments corresponding to the simulation parameters</span>
+<span class="sd">        </span>
+<span class="sd">        </span>
+<span class="sd">        .. note:: The value of (most of) the booleans in this class have an incidence on</span>
+<span class="sd">                    the *attributes* that the instance of </span>
+<span class="sd">                    :obj:`~measures.network_statistics.NetworkStats` </span>
+<span class="sd">                    will have after the network run. For instance, if </span>
+<span class="sd">                    :attr:`.log_route_props` is `True`, then </span>
+<span class="sd">                    :obj:`~measures.network_statistics.NetworkStats` </span>
+<span class="sd">                    will have the attribute</span>
+<span class="sd">                    :obj:`~measures.network_statistics.NetworkStats.nb_route_props_per_node`. </span>
+<span class="sd">                    Otherwise, accessing this attribute will trigger an </span>
+<span class="sd">                    :exc:`AttributeError`.</span>
+<span class="sd">            </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging_level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span>
+        <span class="sd">&quot;&quot;&quot;:mod:`logging` level: The logging level of events in the network. </span>
+<span class="sd">        </span>
+<span class="sd">        Default: `logging.INFO`.</span>
+<span class="sd">        </span>
+<span class="sd">        The ``INFO`` level basically gives information on the beginning and end</span>
+<span class="sd">        of the two main phases of the simulation: topology dissemination and</span>
+<span class="sd">        oriented communications. The ``DEBUG`` level gives information on the routes</span>
+<span class="sd">        proposed (and accepted/refused), and on oriented communication messages</span>
+<span class="sd">        sent. Further levels ``DEBUG2`` and ``DEBUG3`` give more detailed</span>
+<span class="sd">        information are extremely verbose.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># Debug feature</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">print_nodes_tables</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot;bool: Should the network manager display the node&#39;s tables at the end of the topology dissemination ?</span>
+<span class="sd">        </span>
+<span class="sd">        Default: `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># Debug feature</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw_topology_graph</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot;bool: Should the network topology graph be displayed at the beginning of the simulation</span>
+<span class="sd">        </span>
+<span class="sd">        Default: `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># Debug feature: whether or not to draw routes at the end of the</span>
+        <span class="c1"># simulation. This parameters is either None, or a list of 2-tuples</span>
+        <span class="c1"># specifying as many  (from_node, to_node) as desired.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw_routes</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&quot;&quot;&quot;list of 2-tuples: Routes to draw at the end of the simulation.</span>
+<span class="sd">        </span>
+<span class="sd">        This parameter is specified under the form of a list of 2-tuples (n1,</span>
+<span class="sd">        n2), asking to draw the route between node n1 and node n2.</span>
+<span class="sd">        </span>
+<span class="sd">        Default: `None`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># How long should the simulation last (in discrete time). If this value is</span>
+        <span class="c1"># set to 0, the simulation stops when all nodes are idle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_of_simulation</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="sd">&quot;&quot;&quot;int: Force the stop of the simulation after a certain amount of simulated time.</span>
+<span class="sd">        </span>
+<span class="sd">        Default: `0`, meaning that the simulation should stop *by itself*.</span>
+<span class="sd">        </span>
+<span class="sd">        The value of this attribute must represents a simulation time in the SimPy simulation. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    
+        <span class="c1"># The simulation can stop after network topology dissemination, or try to</span>
+        <span class="c1"># send payload messages. This parameter controls this.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">automatic_oriented_comm_phase</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot;bool: Whether the oriented communication phase should be triggered automatically by the network manager or not</span>
+<span class="sd">        </span>
+<span class="sd">        Default: `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># The oriented communication sessions must be specified as a dict  dict</span>
+        <span class="c1"># {sender1: {receiver1: [data1, ...}, {receiver2: [data1&#39;, ...]},</span>
+        <span class="c1"># sender2: ...} If set to None, then random communication sessions will</span>
+        <span class="c1"># be generated by nodes.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oriented_communication_sessions</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+        <span class="sd">&quot;&quot;&quot;dict: The oriented communication sessions to run.</span>
+<span class="sd">        </span>
+<span class="sd">        Default: `defaultdict(lambda: (12, 5))`.</span>
+<span class="sd">        </span>
+<span class="sd">        The value of this parameter can be </span>
+<span class="sd">            * None: let node choose a random number of random communication partners</span>
+<span class="sd">            * `dict[s] = list((r, list(data))` indicating that sender s must send the list of data to all receivers r in list</span>
+<span class="sd">            * `dict[s] = list((r,n))` indicating that sender s must send the  n random pieces of data to all receivers r in list</span>
+<span class="sd">            * `dict[s] = (n_r, n_data [, ndata_2])` indicating that sender s must choose n_r random receivers, </span>
+<span class="sd">              and send them n_data random messages each. If n_data2 is provided, the sender</span>
+<span class="sd">              will choose a random number of messages to send in [n_data, n_data2], </span>
+<span class="sd">              different for each receiver </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        
+        <span class="c1"># All the attributes that follow govern what statistics and metrics are</span>
+        <span class="c1">#gathered on the network run</span>
+        
+        <span class="c1"># General efficiency metrics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_ocom_latency</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot;bool: Whether the latency (in rounds) of the oriented communication should be measured and logged or not</span>
+<span class="sd">        </span>
+<span class="sd">        Default: `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_end_topo_diss</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="sd">&quot;&quot;&quot;bool: Whether the round at which the topology dissemination terminates should be logged</span>
+<span class="sd">        </span>
+<span class="sd">        Default: `True`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_end_ocom_phase</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="sd">&quot;&quot;&quot;bool: Whether the round at which the oriented communication terminate should be logged</span>
+<span class="sd">        </span>
+<span class="sd">        Default: `True`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        
+        <span class="c1"># Messages</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_and_store_all_real_msgs</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot;bool: Whether the(real) messages going through the network should be recorded or not. </span>
+<span class="sd">        </span>
+<span class="sd">        Default: `False`.</span>
+<span class="sd">        </span>
+<span class="sd">        .. warning:: Possibility of very heavy memory consumption.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_dummy_link_msgs</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot;bool: Whether the number of dummy messages sent by nodes at each rounds should be logged or not. </span>
+<span class="sd">        </span>
+<span class="sd">        Default: `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_real_link_msgs</span> <span class="o">=</span> <span class="kc">False</span> 
+        <span class="sd">&quot;&quot;&quot;bool: Whether the number of real, end sent real, and ocom end sent real messages sent by nodes at each rounds should be logged or not. </span>
+<span class="sd">        </span>
+<span class="sd">        Default: `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+                
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_real_e2e_msgs</span> <span class="o">=</span> <span class="kc">False</span> 
+        <span class="sd">&quot;&quot;&quot;bool: Whether the number of end sent real, and ocom end sent real messages sent by nodes at each rounds should be logged or not. Same for end received msgs. </span>
+<span class="sd">        </span>
+<span class="sd">        Default: `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_histogram_real_msgs_per_round</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot;bool: Log the *exact discrete probability distribution* of the number of messages (real, and dummy separately) sent and received in a round by a node. High memory consumption. </span>
+<span class="sd">        </span>
+<span class="sd">        Default: `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span> 
+        
+        
+        <span class="c1"># Batching, traffic rates and dummies</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_traffic_rates_equilibrium</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot;bool: Whether traffic rate equilibrium of nodes should be logged. </span>
+<span class="sd">        </span>
+<span class="sd">        Default: `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_real_msgs_waiting_time</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot;bool: Whether the number of rounds that each real message passes waiting in the node&#39;s message pool should be recorded. </span>
+<span class="sd">        </span>
+<span class="sd">        Default: `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_histogram_real_msgs_waiting_time</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot;bool: A more detailed logging than :attr:`.log_real_msgs_waiting_time`, that does not only give the mean and stdev, but the discrete probability distribution. </span>
+<span class="sd">        </span>
+<span class="sd">        Default: `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_e2e_dummies</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot;bool: Whether the number of e2e dummies, and the frequency at which a node must &quot;intervene&quot; manually on a batch must be logged or not. </span>
+<span class="sd">        </span>
+<span class="sd">        Default: `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_frequency_batch_intervention</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot;bool: Log the number of times that nodes had to manually modify the sampled batch</span>
+<span class="sd">                </span>
+<span class="sd">        Default: `False`.</span>
+<span class="sd">        </span>
+<span class="sd">        The *batch interventions* are separated according to the nature of the</span>
+<span class="sd">        intervention: removing real messages, replacing a dummy with an e2e</span>
+<span class="sd">        dummy, adding an e2e dummy plus dummies, by adding many dummies</span>
+<span class="sd">        (because no e2e are possible), or resorting to the default dummy</span>
+<span class="sd">        broadcast.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_sent_link_msgs_per_round</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot;bool: Log a histogram (prob distrib) of the total number of link messages (real or dummies) that a node sends in a round. </span>
+<span class="sd">        </span>
+<span class="sd">        Default: `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        
+        <span class="c1"># Routes, Routes proposals, and Route proposal policy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_route_props</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot;bool: Whether the number of route proposition (received, accepted and refused ones) should be counted, and their reason of acceptation/refusal. </span>
+<span class="sd">        </span>
+<span class="sd">        Default: `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_rt_props_latency</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot;bool: Log the latency between the creation of a route proposal, and its finalization. </span>
+<span class="sd">        </span>
+<span class="sd">        Default: `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+        <span class="c1"># Privacy: logging the ocom routes will allow to see how many and where</span>
+        <span class="c1"># are the corrupted nodes on these routes, and the chance of the</span>
+        <span class="c1"># adversary to de-anonymize senders and receivers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_ocom_routes</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot;bool: Log all the oriented communication routes used in the network. </span>
+<span class="sd">        </span>
+<span class="sd">        Default: `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_params</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+<div class="viewcode-block" id="SimulationParams.update_params"><a class="viewcode-back" href="../../apart.simulation.html#apart.simulation.SimulationParams.update_params">[docs]</a>    <span class="k">def</span> <span class="nf">update_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Accepts keyword arguments, corresponding to the simulation parameters, and updates the instances&#39;  attributes</span>
+<span class="sd">        </span>
+<span class="sd">        Only keyword arguments that match a valid attribute of the class are</span>
+<span class="sd">        taken into accounts. Others are simply ignored silently.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># Above are the default argument values. If kwargs is not empty,</span>
+        <span class="c1"># override these values</span>
+        <span class="k">for</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_value</span><span class="p">)</span></div>
+        
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">p_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;upgrade_params&#39;</span><span class="p">:</span> <span class="k">continue</span>
+            <span class="n">p_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="s2">&quot;=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">(</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">p_list</span><span class="p">)))</span></div>
+
+
+
+<div class="viewcode-block" id="run_simulation"><a class="viewcode-back" href="../../apart.simulation.html#apart.simulation.run_simulation">[docs]</a><span class="k">def</span> <span class="nf">run_simulation</span><span class="p">(</span><span class="n">sim_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">net_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Runs the network simulation, and returns the :obj:`~apart.core.network.NetworkManager` instance, describing the network in its final state.</span>
+<span class="sd">    </span>
+<span class="sd">    This function creates a :obj:`~apart.core.network.NetworkManager` instance,</span>
+<span class="sd">    calls :meth:`~apart.core.network.NetworkManager.start` on it, and waits for</span>
+<span class="sd">    the simulation to end. During the simulation, and depending on the loggin</span>
+<span class="sd">    level parameter (:attr:`.SimulationParams.logging_level`), outputs various</span>
+<span class="sd">    information on the events happening in the network.</span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    Unless they are specified in argument, simulation and network parameters are</span>
+<span class="sd">    the default defined values in the classes :class:`.SimulationParams` and</span>
+<span class="sd">    :class:`~apart.core.network.Networkparams`. There are two ways to provide</span>
+<span class="sd">    custom arguments: by providing custom :class:`.SimulationParams` and</span>
+<span class="sd">    :class:`~apart.core.network.Networkparams` instances, or by providing the</span>
+<span class="sd">    parameters in keyword arguments. However, instances have precedence over</span>
+<span class="sd">    keyword arguments. For instance, if a `sim_params` argument is provided,</span>
+<span class="sd">    keyword arguments containing simulation parameters are ignored.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        sim_params (:obj:`.SimulationParams`, default): specifies specific parameters </span>
+<span class="sd">            for the simulation, within a custom :obj:`.SimulationParams` instance.</span>
+<span class="sd">            (Default: None)</span>
+<span class="sd">        net_params (:obj:`~apart.core.network.Networkparams`): specifies specific </span>
+<span class="sd">            parameters for the network, within a custom :obj:`~apart.core.network.Networkparams` </span>
+<span class="sd">            instance. (Default: None)</span>
+<span class="sd">        **kwargs (dict): specifies simulation or network parameters indistinctly. </span>
+<span class="sd">            If the `sim_params` parameter is `None`, the simulation parameters are generated as </span>
+<span class="sd">            `SimulationParams(**kwargs)`. Likewise for the `net_params` argument.</span>
+<span class="sd">   </span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`~apart.core.network.NetworkManager`: The network manager instance at the end of the network run. </span>
+<span class="sd">        Note that this object contains in particular a :attr:`~apart.core.network.NetworkManager.net_stats` </span>
+<span class="sd">        attribute, which contains valuable information on the simulated network run.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># If they were not passed in argument, get the parameters of the</span>
+    <span class="c1"># simulation, and the sim_stats structures</span>
+    <span class="k">if</span> <span class="n">sim_params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sim_params</span><span class="p">,</span> <span class="n">SimulationParams</span><span class="p">):</span>
+        <span class="n">sim_params</span> <span class="o">=</span> <span class="n">sim_params</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sim_params</span> <span class="o">=</span> <span class="n">SimulationParams</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">net_params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">net_params</span><span class="p">,</span> <span class="n">NetworkParams</span><span class="p">):</span>
+        <span class="n">net_params</span> <span class="o">=</span> <span class="n">net_params</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">net_params</span> <span class="o">=</span> <span class="n">NetworkParams</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+
+    <span class="c1"># Init randomness (Note: randomness may have been intitialized before. Doesn&#39;t matter)</span>
+    <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">10000</span><span class="p">))</span>
+
+    <span class="c1"># Configure the logging level</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">sim_params</span><span class="o">.</span><span class="n">logging_level</span><span class="p">)</span>
+   
+
+    <span class="c1"># Launch the simulation, which in a first phase will only disseminate the</span>
+    <span class="c1"># network topology among the nodes</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting network simulation.&quot;</span><span class="p">)</span>
+    
+    
+    <span class="c1"># Instantiate the network</span>
+    <span class="n">net_mngr</span> <span class="o">=</span> <span class="n">NetworkManager</span><span class="p">(</span><span class="n">sim_params</span><span class="p">,</span> <span class="n">net_params</span><span class="p">)</span>
+    <span class="n">net_mngr</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;-&#39;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;End of simulation reached. Elapsed time: </span><span class="si">{}</span><span class="s2"> sec. End simulation time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">net_mngr</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">timestamp</span><span class="p">))</span>
+    
+    <span class="c1"># If as parameter of the simulation, it was asked to print some routes in the network, do it now</span>
+    <span class="k">if</span> <span class="n">sim_params</span><span class="o">.</span><span class="n">draw_routes</span><span class="p">:</span>
+        <span class="n">net_mngr</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">draw_routes</span><span class="p">(</span><span class="o">*</span><span class="n">sim_params</span><span class="o">.</span><span class="n">draw_routes</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">net_mngr</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">run_simulation</span><span class="p">(</span><span class="n">nb_nodes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">corruption_ratio</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> 
+                   <span class="n">automatic_oriented_comm_phase</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+                   <span class="n">logging_level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> 
+                   <span class="n">log_histogram_real_msgs_waiting_time</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+        
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

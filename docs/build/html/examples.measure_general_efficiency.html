@@ -1,0 +1,731 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>measure_general_efficiency — Measure Performances &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="APART  documentation" href="index.html"/>
+        <link rel="up" title="Examples" href="examples.html"/>
+        <link rel="next" title="measure_route_prop — Study the route proposal mechanism" href="examples.measure_route_prop.html"/>
+        <link rel="prev" title="Examples" href="examples.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">APART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packages.html">Packages</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="examples.html">Examples</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#"><code class="docutils literal"><span class="pre">measure_general_efficiency</span></code> &#8212; Measure Performances</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#source-code">Source Code</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="examples.measure_route_prop.html"><code class="docutils literal"><span class="pre">measure_route_prop</span></code> &#8212; Study the route proposal mechanism</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.measure_privacy.html"><code class="docutils literal"><span class="pre">measure_privacy</span></code> &#8212; Measure Privacy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.measure_all.html"><code class="docutils literal"><span class="pre">measure_all</span></code> &#8212; Perform all three measures at once</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="examples.html">Examples</a> &raquo;</li>
+        
+      <li><code class="docutils literal"><span class="pre">measure_general_efficiency</span></code> &#8212; Measure Performances</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/examples.measure_general_efficiency.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-measure_general_efficiency">
+<span id="measure-general-efficiency-measure-performances"></span><h1><code class="docutils literal"><span class="pre">measure_general_efficiency</span></code> &#8212; Measure Performances<a class="headerlink" href="#module-measure_general_efficiency" title="Permalink to this headline">¶</a></h1>
+<p>Example module to makes simulations and measures on the APART protocol. This
+module provides a base to measure the efficiency of the protocol.</p>
+<p>More specifically, this module measures the following metrics (non exhaustive list):</p>
+<ul class="simple">
+<li>Time taken for topology dissemination</li>
+<li>Latency in communications</li>
+<li>Number of rounds each real message is delayed in a message pool, as per the message re-ordering mechanism</li>
+<li>The equilibrium and values of traffic rates constraints.</li>
+</ul>
+<p>All these metrics are computed with a combination of different parameters range. Namely,</p>
+<ul class="simple">
+<li>Number of nodes</li>
+<li>Dummy policy and controlled traffic rates parameters : delta r and fraction of pools filled with a dummy message at each round</li>
+<li>Message re-ordering parameters : nmin and f</li>
+</ul>
+<p>The module contains functions for running the measures, and plotting graphs from
+network runs saved on disk.</p>
+<div class="section" id="source-code">
+<h2>Source Code<a class="headerlink" href="#source-code" title="Permalink to this headline">¶</a></h2>
+<p>Refer to the source code for more detail. It is depicted below, and can be
+downloaded <a class="reference download internal" href="_downloads/measure_general_efficiency.py" download=""><code class="xref download docutils literal"><span class="pre">here</span></code></a>.</p>
+<p>The code is outlined as follows:</p>
+<ul>
+<li><p class="first">Definitions of constants:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">The metrics (statistics names) that the module computes
+(<code class="xref py py-attr docutils literal"><span class="pre">MEASURE_STATS</span></code>).</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The value for each constant listed in <code class="xref py py-attr docutils literal"><span class="pre">MEASURE_STATS</span></code> is a
+string (with spelling mistakes, I know). However, it can be
+anything as long as it is serialisable data, and ensures
+uniqueness of values. We chose strings for it makes its easy to
+identify metrics during debug, or when printing results out on
+stdout.</p>
+</div>
+</li>
+<li><p class="first">The name of the measure defined in this module
+(<code class="xref py py-attr docutils literal"><span class="pre">MEASURE_TITLE</span></code>).</p>
+</li>
+<li><p class="first">The parameters relevant for this measure module
+(<code class="xref py py-attr docutils literal"><span class="pre">MEASURE_PARAMS</span></code>), <em>i.e.</em> network and  simulation
+parameters (see <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams" title="apart.simulation.SimulationParams"><code class="xref py py-class docutils literal"><span class="pre">SimulationParams</span></code></a> and
+<a class="reference internal" href="apart.core.network.html#apart.core.network.NetworkParams" title="apart.core.network.NetworkParams"><code class="xref py py-class docutils literal"><span class="pre">NetworkParams</span></code></a>).</p>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">The function <a class="reference internal" href="#module-measure_general_efficiency" title="measure_general_efficiency"><code class="xref py py-func docutils literal"><span class="pre">measure_general_efficiency()</span></code></a>, which basically calls
+<a class="reference internal" href="measures.common_measures.html#measures.common_measures.generic_measure" title="measures.common_measures.generic_measure"><code class="xref py py-func docutils literal"><span class="pre">measures.common_measures.generic_measure()</span></code></a>. Prior to this calls, it
+performs checks on the simulation and network parameters.</p>
+</li>
+<li><p class="first">The <code class="xref py py-func docutils literal"><span class="pre">get_sim_params()</span></code> function, returning an instance of
+<a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams" title="apart.simulation.SimulationParams"><code class="xref py py-obj docutils literal"><span class="pre">SimulationParams</span></code></a> with custom parameter values.</p>
+</li>
+<li><p class="first">The <code class="xref py py-func docutils literal"><span class="pre">compute_metrics_one_network_run()</span></code> function, which is the callback
+function to provide as <code class="docutils literal"><span class="pre">metric_computer_callback</span></code> to
+<a class="reference internal" href="measures.common_measures.html#measures.common_measures.generic_measure" title="measures.common_measures.generic_measure"><code class="xref py py-func docutils literal"><span class="pre">measures.common_measures.generic_measure()</span></code></a>.</p>
+</li>
+<li><p class="first">One plotting function for each metric computed by the module. Each such
+function is named by prepending <cite>plot_</cite> to the metric name, is decorated
+with <a class="reference internal" href="measures.plotting.html#measures.plotting.plotfunc" title="measures.plotting.plotfunc"><code class="xref py py-func docutils literal"><span class="pre">measures.plotting.plotfunc()</span></code></a>, and basically consists in calling
+<a class="reference internal" href="measures.plotting.html#measures.plotting.plot_simple_metric" title="measures.plotting.plot_simple_metric"><code class="xref py py-func docutils literal"><span class="pre">measures.plotting.plot_simple_metric()</span></code></a> or
+<a class="reference internal" href="measures.plotting.html#measures.plotting.plot_histogram" title="measures.plotting.plot_histogram"><code class="xref py py-func docutils literal"><span class="pre">measures.plotting.plot_histogram()</span></code></a>.</p>
+<ul class="simple">
+<li>The function <code class="xref py py-func docutils literal"><span class="pre">plot_HIST_NB_LINK_MSGS_SENT_PER_ROUND()</span></code> is not decorated,
+because it is not a <em>simple metric</em> but an histogram.</li>
+</ul>
+</li>
+<li><p class="first">A <em>main</em> part, allowing to perform measures and/or plot previously acquired
+measure results.</p>
+</li>
+</ul>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Author: Antoine Guellier</span>
+<span class="c1"># Copyright (c) 2017 Université de Rennes 1</span>
+<span class="c1"># License: CeCILL. The full license text is available at:</span>
+<span class="c1">#  - http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html</span>
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Example module to makes simulations and measures on the APART protocol. This</span>
+<span class="sd">module provides a base to measure the efficiency of the protocol.</span>
+
+<span class="sd">More specifically, this module measures the following metrics (non exhaustive list):</span>
+
+<span class="sd">* Time taken for topology dissemination</span>
+<span class="sd">* Latency in communications</span>
+<span class="sd">* Number of rounds each real message is delayed in a message pool, as per the message re-ordering mechanism</span>
+<span class="sd">* The equilibrium and values of traffic rates constraints.</span>
+<span class="sd">          </span>
+<span class="sd">All these metrics are computed with a combination of different parameters range. Namely,</span>
+
+<span class="sd">* Number of nodes </span>
+<span class="sd">* Dummy policy and controlled traffic rates parameters : delta r and fraction of pools filled with a dummy message at each round</span>
+<span class="sd">* Message re-ordering parameters : nmin and f</span>
+<span class="sd">    </span>
+<span class="sd">The module contains functions for running the measures, and plotting graphs from</span>
+<span class="sd">network runs saved on disk.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span><span class="p">,</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;src&#39;</span><span class="p">)))</span>
+
+<span class="kn">from</span> <span class="nn">common.custom_logging</span> <span class="k">import</span> <span class="o">*</span> 
+<span class="kn">from</span> <span class="nn">apart.core.network</span> <span class="k">import</span> <span class="n">Network</span><span class="p">,</span> <span class="n">NetworkParams</span>
+<span class="kn">from</span> <span class="nn">apart.simulation</span> <span class="k">import</span>  <span class="n">SimulationParams</span>
+<span class="kn">from</span> <span class="nn">common.utilities</span> <span class="k">import</span> <span class="n">print_recursive_structure</span><span class="p">,</span> <span class="n">range1</span>
+<span class="kn">from</span> <span class="nn">measures.advanced_stats_helper</span> <span class="k">import</span> <span class="n">AdvancedNetworkStatsHelper</span>
+<span class="kn">from</span> <span class="nn">measures.file_handling</span> <span class="k">import</span> <span class="n">load_measures_results</span>
+<span class="kn">from</span> <span class="nn">measures.common_measures</span> <span class="k">import</span> <span class="n">MeasureException</span><span class="p">,</span> <span class="n">generic_measure</span><span class="p">,</span> \
+    <span class="n">preprocess_measure_input_params</span><span class="p">,</span> \
+    <span class="n">make_params_combinations</span><span class="p">,</span> <span class="n">merge_measures_outputs_with_prefix</span>
+<span class="kn">from</span> <span class="nn">measures.plotting</span> <span class="k">import</span> <span class="n">plotfunc</span><span class="p">,</span> <span class="n">plot_simple_metric</span><span class="p">,</span> \
+    <span class="n">plot_histogram</span>
+<span class="kn">from</span> <span class="nn">measures.network_statistics</span> <span class="k">import</span> <span class="n">RunningStat</span>
+
+
+<span class="n">_TOPO_DISS_TIME</span> <span class="o">=</span> <span class="s2">&quot;Number of rounds for topology dissemination (general efficiency)&quot;</span>
+<span class="n">_OCOM_PHASE_TIME</span> <span class="o">=</span> <span class="s2">&quot;Number of rounds needed for the oriented communication phase, in total&quot;</span>
+<span class="n">_OCOM_MSG_TIME</span> <span class="o">=</span> <span class="s2">&quot;Number of rounds needed for an oriented communication, brought down to the time for 1 message&quot;</span>
+<span class="n">_OCOM_MSG_TIME_WITHOUT_INIT</span> <span class="o">=</span> <span class="s2">&quot;Number of rounds needed for an oriented communication, brought down to the time for 1 message, without ocom init&quot;</span>
+<span class="n">_HIST_WAITING_TIME_REAL_MSGS</span> <span class="o">=</span> <span class="s2">&quot;Number of rounds a real message stays in pools in average&quot;</span>
+<span class="n">_MEAN_WAITING_TIME_REAL_MSGS</span> <span class="o">=</span> <span class="s2">&quot;Number of rounds a real message stays in pools in average, but not a histogram&quot;</span>
+<span class="n">_RATIO_REAL_OVER_DUMMY_MSGS</span> <span class="o">=</span> <span class="s2">&quot;Ratio of number of real messages sent over number of dummies sent (both link messages), on the whole network&quot;</span>
+<span class="n">_EQUILIBRIUM_PER_ROUND</span> <span class="o">=</span> <span class="s2">&quot;Traffic rate equilibrium per round&quot;</span>
+<span class="n">_RATIO_E2E_DUMMY</span> <span class="o">=</span> <span class="s2">&quot;Ratio: number of times one particular node resorts to adding e2e dummies, over the total number of rounds&quot;</span>
+<span class="n">_RATIO_DUMMY_BCAST</span> <span class="o">=</span> <span class="s2">&quot;Ratio: number of times one particular node resorts to the defaut dummy broadcast, over the total number of rounds&quot;</span>
+<span class="n">_HIST_NB_LINK_MSGS_SENT_PER_ROUND</span> <span class="o">=</span> <span class="s2">&quot;A prob distrib of the number of link messages a node sends per round (reals and dummies confunded)&quot;</span>
+
+
+<span class="n">MEASURE_STATS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;_TOPO_DISS_TIME&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;_OCOM_PHASE_TIME&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;_OCOM_MSG_TIME&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;_OCOM_MSG_TIME_WITHOUT_INIT&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;_HIST_WAITING_TIME_REAL_MSGS&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;_MEAN_WAITING_TIME_REAL_MSGS&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;_RATIO_REAL_OVER_DUMMY_MSGS&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;_EQUILIBRIUM_PER_ROUND&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;_RATIO_E2E_DUMMY&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;_RATIO_DUMMY_BCAST&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;_HIST_NB_LINK_MSGS_SENT_PER_ROUND&#39;</span><span class="p">]</span>
+
+
+<span class="c1"># Title of the measures performed in this module</span>
+<span class="n">MEASURE_TITLE</span> <span class="o">=</span> <span class="s1">&#39;GeneralEfficiency&#39;</span>
+
+
+<span class="c1"># Network parameters that vary for the measures uin this module</span>
+<span class="n">_MEASURE_PARAMS_DEFAULT</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([(</span><span class="s1">&#39;nb_nodes&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="mi">30</span><span class="p">)),</span> 
+                                       <span class="p">(</span><span class="s1">&#39;ocom_sessions&#39;</span><span class="p">,</span> <span class="p">((</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">),</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">))),</span>
+                                       <span class="p">(</span><span class="s1">&#39;batching_t_interval&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span>  <span class="mi">1</span><span class="o">*</span><span class="mi">60</span><span class="o">*</span><span class="mi">1000</span><span class="p">)),</span>
+                                       <span class="p">(</span><span class="s1">&#39;batching_nmin&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
+                                       <span class="p">(</span><span class="s1">&#39;batching_f&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">)),</span>
+                                       <span class="p">(</span><span class="s1">&#39;dummypol_fdum&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">)),</span>
+                                       <span class="p">(</span><span class="s1">&#39;dummypol_deltar&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+                                       <span class="p">])</span>
+<span class="n">MEASURE_PARAMS</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_MEASURE_PARAMS_DEFAULT</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+
+<span class="c1"># Default folder where to save the results and graphs</span>
+<span class="n">_DEFAULT_SAVING_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;Measures/&#39;</span><span class="p">))</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">_DEFAULT_SAVING_FOLDER</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">_DEFAULT_SAVING_FOLDER</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o775</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">measure_general_efficiency</span><span class="p">(</span><span class="n">save_results_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_network_states</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">restrict_to_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">force_recomputation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">measure_params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calls :func:`measures.common_measures.generic_measure` after some pre-processing.&quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="n">save_results_to</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">save_results_to</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_DEFAULT_SAVING_FOLDER</span><span class="p">,</span> <span class="n">MEASURE_TITLE</span><span class="p">)</span>
+    
+    <span class="n">preprocess_measure_input_params</span><span class="p">(</span><span class="n">_MEASURE_PARAMS_DEFAULT</span><span class="p">,</span> <span class="n">measure_params</span><span class="p">)</span>
+    
+    
+
+    <span class="c1"># Custom check for the &#39;ocom_session&#39; parameter</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">measure_params</span><span class="p">[</span><span class="s1">&#39;ocom_sessions&#39;</span><span class="p">])):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">measure_params</span><span class="p">[</span><span class="s1">&#39;ocom_sessions&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">measure_params</span><span class="p">[</span><span class="s1">&#39;ocom_sessions&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="n">measure_params</span><span class="p">[</span><span class="s1">&#39;ocom_sessions&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">measure_params</span><span class="p">[</span><span class="s1">&#39;ocom_sessions&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">defaultdict</span><span class="p">):</span>
+            <span class="n">measure_params</span><span class="p">[</span><span class="s1">&#39;ocom_sessions&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">measure_params</span><span class="p">[</span><span class="s1">&#39;ocom_sessions&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">nb_iters</span><span class="o">=</span> <span class="n">measure_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;nb_iters&#39;</span><span class="p">)</span>
+    <span class="n">nb_iters_same_topo_graph</span><span class="o">=</span> <span class="n">measure_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;nb_iters_same_topo_graph&#39;</span><span class="p">)</span>
+    <span class="n">net_params_combinations</span> <span class="o">=</span> <span class="n">make_params_combinations</span><span class="p">(</span><span class="n">nb_iters</span><span class="p">,</span> <span class="n">nb_iters_same_topo_graph</span><span class="p">,</span> <span class="n">MEASURE_PARAMS</span><span class="p">,</span> <span class="n">measure_params</span><span class="p">)</span>
+    
+    <span class="n">sim_params</span> <span class="o">=</span> <span class="n">get_sim_params</span><span class="p">()</span>
+    
+    <span class="n">net_params</span> <span class="o">=</span> <span class="n">NetworkParams</span><span class="p">(</span><span class="n">dummypol_deltar</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
+                               <span class="n">rtprop_policy_max_routes</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+                               <span class="n">rtprop_policy_p_reaccept</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">,</span>
+                               <span class="n">rtprop_policy_p_replace</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+                               <span class="n">batching_t_interval</span> <span class="o">=</span> <span class="mi">1</span><span class="o">*</span><span class="mi">60</span><span class="o">*</span><span class="mi">1000</span><span class="p">,</span>
+                               <span class="n">batching_nmin</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+                               <span class="n">batching_f</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
+                               <span class="n">dummypol_fdum</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">generic_measure</span><span class="p">(</span><span class="n">MEASURE_TITLE</span><span class="p">,</span> <span class="n">save_results_to</span><span class="p">,</span> 
+                           <span class="n">net_params_combinations</span><span class="p">,</span> 
+                           <span class="n">metrics_computer_callback</span><span class="o">=</span><span class="n">compute_metrics_one_network_run</span><span class="p">,</span>
+                           <span class="n">sim_params</span><span class="o">=</span><span class="n">sim_params</span><span class="p">,</span>
+                           <span class="n">net_params</span><span class="o">=</span><span class="n">net_params</span><span class="p">,</span>
+                           <span class="n">save_network_states</span><span class="o">=</span><span class="n">save_network_states</span><span class="p">,</span>
+                           <span class="n">restrict_to_params</span><span class="o">=</span><span class="n">restrict_to_params</span><span class="p">,</span>
+                           <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">,</span>
+                           <span class="n">force_recomputation</span><span class="o">=</span><span class="n">force_recomputation</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">get_sim_params</span><span class="p">():</span>
+    <span class="n">sim_params</span> <span class="o">=</span> <span class="n">SimulationParams</span><span class="p">()</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">logging_level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span>  <span class="c1"># Display only Warnings or errors</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">print_nodes_tables</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># In general, no one will be there to see the stdout or graphs, so don&#39;t draw them</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">draw_topology_graph</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">draw_routes</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">time_of_simulation</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Go until the end of the simulation</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">automatic_oriented_comm_phase</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># Oriented communication will be measured, so yes !</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">oriented_communication_sessions</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="c1"># Put all the logging to False by default</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_ocom_latency</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_end_topo_diss</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_end_ocom_phase</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_and_store_all_real_msgs</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_dummy_link_msgs</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_real_link_msgs</span> <span class="o">=</span> <span class="kc">True</span>      
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_real_e2e_msgs</span> <span class="o">=</span> <span class="kc">False</span>          
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_histogram_real_msgs_per_round</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_traffic_rates_equilibrium</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_real_msgs_waiting_time</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_histogram_real_msgs_waiting_time</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_e2e_dummies</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_frequency_batch_intervention</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_sent_link_msgs_per_round</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_route_props</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_rt_props_latency</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_ocom_routes</span> <span class="o">=</span> <span class="kc">False</span>
+    
+    <span class="k">return</span> <span class="n">sim_params</span>
+
+<span class="k">def</span> <span class="nf">compute_metrics_one_network_run</span><span class="p">(</span><span class="n">aggregated_metrics</span><span class="p">,</span> <span class="n">net_mngr</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Callback function for this measure module.</span>
+<span class="sd">    </span>
+<span class="sd">    Computes the statistics on the network state at the end of a run, and</span>
+<span class="sd">    aggregates the statistics over several network runs.</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        aggregated_metrics</span>
+<span class="sd">        net_mngr(:obj:`apart.core.networtk.NetworkManager`): the network </span>
+<span class="sd">            manager, containing in particular the network state after the run. </span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict, dict: The resulting statistics</span>
+
+<span class="sd">        The first dict contains the *aggregated statistics. That is, d[k] = v,</span>
+<span class="sd">        where k is the metric measure_name, and v is *aggregated* metric value over all</span>
+<span class="sd">        iterations (of a particular parameters combination) that happened so far</span>
+
+<span class="sd">        The second dict contains the statistics for the one network unr. That</span>
+<span class="sd">        is, dict: d[k] = v, where k is the metric measure_name, and v is the metric</span>
+<span class="sd">        value. This value can be an int, a float, a dict, etc.</span>
+<span class="sd">    &quot;&quot;&quot;</span> 
+
+
+    <span class="k">if</span> <span class="n">aggregated_metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">aggregated_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_TOPO_DISS_TIME</span><span class="p">]</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span>
+        <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_OCOM_PHASE_TIME</span><span class="p">]</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span>
+        <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_OCOM_MSG_TIME</span><span class="p">]</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span>
+        <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_OCOM_MSG_TIME_WITHOUT_INIT</span><span class="p">]</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span>
+        <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_HIST_WAITING_TIME_REAL_MSGS</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">RunningStat</span><span class="p">())</span>
+        <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_RATIO_REAL_OVER_DUMMY_MSGS</span><span class="p">]</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span>
+        <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_RATIO_E2E_DUMMY</span><span class="p">]</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span>
+        <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_EQUILIBRIUM_PER_ROUND</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;equilibrium&#39;</span><span class="p">:</span> <span class="n">RunningStat</span><span class="p">(),</span>
+                                                      <span class="s1">&#39;lbound&#39;</span><span class="p">:</span> <span class="n">RunningStat</span><span class="p">(),</span>
+                                                      <span class="s1">&#39;ubound&#39;</span><span class="p">:</span> <span class="n">RunningStat</span><span class="p">()}</span>
+        <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_RATIO_DUMMY_BCAST</span><span class="p">]</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span>
+        <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_HIST_NB_LINK_MSGS_SENT_PER_ROUND</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">RunningStat</span><span class="p">())</span>
+        
+    <span class="c1"># Not needed here</span>
+    <span class="c1"># stats_helper = AdvancedNetworkStatsHelper(net_mngr)</span>
+    
+    <span class="n">this_iteration_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="c1">#Time for topo diss to complete in number of rounds</span>
+    <span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_TOPO_DISS_TIME</span><span class="p">]</span> <span class="o">=</span> <span class="n">net_mngr</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">end_topo_diss</span>
+    <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_TOPO_DISS_TIME</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_TOPO_DISS_TIME</span><span class="p">])</span>
+    
+    <span class="c1"># Time for ocom to complete</span>
+    <span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_OCOM_PHASE_TIME</span><span class="p">]</span> <span class="o">=</span> <span class="n">net_mngr</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">end_ocom_phase</span><span class="o">-</span><span class="n">net_mngr</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">end_topo_diss</span> 
+    <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_OCOM_PHASE_TIME</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_OCOM_PHASE_TIME</span><span class="p">])</span>
+    
+    <span class="c1"># Time needed for 1 ocom payload message to be delivered, in average</span>
+    <span class="n">nb_payload_msgs_in_each_ocom</span> <span class="o">=</span> <span class="n">net_mngr</span><span class="o">.</span><span class="n">sim_params</span><span class="o">.</span><span class="n">oriented_communication_sessions</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_OCOM_MSG_TIME</span><span class="p">]</span> <span class="o">=</span> <span class="n">net_mngr</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">ocom_latency</span><span class="o">.</span><span class="n">mean</span><span class="o">/</span><span class="n">nb_payload_msgs_in_each_ocom</span>
+    <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_OCOM_MSG_TIME</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_OCOM_MSG_TIME</span><span class="p">])</span>
+    
+    <span class="c1"># The same, but without taking ocom init into account</span>
+    <span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_OCOM_MSG_TIME_WITHOUT_INIT</span><span class="p">]</span> <span class="o">=</span> <span class="n">net_mngr</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">ocom_latency_after_init</span><span class="o">.</span><span class="n">mean</span><span class="o">/</span><span class="n">nb_payload_msgs_in_each_ocom</span>
+    <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_OCOM_MSG_TIME_WITHOUT_INIT</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_OCOM_MSG_TIME_WITHOUT_INIT</span><span class="p">])</span>
+    
+    <span class="c1"># The time a real message spends waiting in pools before being forwarded/sent</span>
+    <span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_HIST_WAITING_TIME_REAL_MSGS</span><span class="p">]</span> <span class="o">=</span> <span class="n">net_mngr</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">histogram_real_msg_waiting_time</span>
+    <span class="k">for</span> <span class="n">waiting_time</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_HIST_WAITING_TIME_REAL_MSGS</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_HIST_WAITING_TIME_REAL_MSGS</span><span class="p">][</span><span class="n">waiting_time</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    
+    <span class="c1"># The number of real messages compared to dummy ones</span>
+    <span class="n">nb_sent_real_link_msgs</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">total</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">net_mngr</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">nb_sent_real_msgs_per_node</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">nb_sent_dummy_link_msgs</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">total</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">net_mngr</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">nb_sent_dummy_link_msgs_per_node</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_RATIO_REAL_OVER_DUMMY_MSGS</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_sent_real_link_msgs</span><span class="o">/</span><span class="n">nb_sent_dummy_link_msgs</span>
+    <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_RATIO_REAL_OVER_DUMMY_MSGS</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_RATIO_REAL_OVER_DUMMY_MSGS</span><span class="p">])</span>
+    
+    <span class="c1"># The traffic rate equilibrium</span>
+    <span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_EQUILIBRIUM_PER_ROUND</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;equilibrium&#39;</span><span class="p">:</span> <span class="n">net_mngr</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">traffic_rate_status</span><span class="p">[</span><span class="s1">&#39;equilibrium&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span>
+                                                       <span class="s1">&#39;lbound&#39;</span><span class="p">:</span> <span class="n">net_mngr</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">traffic_rate_status</span><span class="p">[</span><span class="s1">&#39;lbound&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span>
+                                                       <span class="s1">&#39;ubound&#39;</span><span class="p">:</span> <span class="n">net_mngr</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">traffic_rate_status</span><span class="p">[</span><span class="s1">&#39;ubound&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">}</span> 
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_EQUILIBRIUM_PER_ROUND</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_EQUILIBRIUM_PER_ROUND</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    
+    <span class="c1"># The number of sent e2e dummy per rounds</span>
+    <span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_RATIO_E2E_DUMMY</span><span class="p">]</span> <span class="o">=</span> <span class="n">net_mngr</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">nb_batch_intervention_add_e2e_dummy</span><span class="o">.</span><span class="n">mean</span>
+    <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_RATIO_E2E_DUMMY</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_RATIO_E2E_DUMMY</span><span class="p">])</span>
+    
+    
+    <span class="c1"># The number of sent e2e dummy per rounds</span>
+    <span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_RATIO_DUMMY_BCAST</span><span class="p">]</span> <span class="o">=</span> <span class="n">net_mngr</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">nb_batch_intervention_default_dummy_bcast</span><span class="o">.</span><span class="n">mean</span>
+    <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_RATIO_DUMMY_BCAST</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_RATIO_DUMMY_BCAST</span><span class="p">])</span>
+     
+    <span class="c1"># The number of link messages sent per neighbor at each round (real and dummies confounded)</span>
+    <span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_HIST_NB_LINK_MSGS_SENT_PER_ROUND</span><span class="p">]</span> <span class="o">=</span> <span class="n">net_mngr</span><span class="o">.</span><span class="n">net_stats</span><span class="o">.</span><span class="n">histogram_nb_sent_link_msgs_per_round_per_neighbor</span>
+    <span class="k">for</span> <span class="n">nb_msgs</span><span class="p">,</span> <span class="n">occurences</span> <span class="ow">in</span> <span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">_HIST_NB_LINK_MSGS_SENT_PER_ROUND</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">_HIST_NB_LINK_MSGS_SENT_PER_ROUND</span><span class="p">][</span><span class="n">nb_msgs</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">occurences</span><span class="p">)</span>
+     
+    <span class="k">return</span> <span class="n">aggregated_metrics</span><span class="p">,</span> <span class="n">this_iteration_metrics</span>
+
+
+
+<span class="c1"># #################################</span>
+<span class="c1"># Plotting functions ############## </span>
+<span class="c1"># #################################</span>
+
+
+
+<span class="nd">@plotfunc</span><span class="p">(</span><span class="n">MEASURE_PARAMS</span><span class="p">)</span>    
+<span class="k">def</span> <span class="nf">plot_TOPO_DISS_TIME</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="p">{},</span> <span class="n">save_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">save_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">save_to</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_to</span><span class="p">,</span> <span class="s1">&#39;topo_diss_latency/&#39;</span><span class="p">)</span>
+    <span class="n">y_stat</span> <span class="o">=</span> <span class="p">(</span><span class="n">_TOPO_DISS_TIME</span><span class="p">,</span> <span class="s1">&#39;topo.diss. latency&#39;</span><span class="p">,</span> <span class="s1">&#39;topo_diss_latency&#39;</span><span class="p">)</span>
+    
+    <span class="n">plot_simple_metric</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">MEASURE_PARAMS</span><span class="p">,</span> <span class="n">y_stat</span><span class="o">=</span><span class="n">y_stat</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="n">x_param</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="n">restrict_to_other_params</span><span class="p">,</span> <span class="n">save_to</span><span class="o">=</span><span class="n">save_to</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">)</span>
+
+
+<span class="nd">@plotfunc</span><span class="p">(</span><span class="n">MEASURE_PARAMS</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">plot_OCOM_PHASE_TIME</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="p">{},</span> <span class="n">save_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">save_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">save_to</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_to</span><span class="p">,</span> <span class="s1">&#39;ocom_phase_latency/&#39;</span><span class="p">)</span>
+    <span class="n">y_stat</span> <span class="o">=</span> <span class="p">(</span><span class="n">_OCOM_PHASE_TIME</span><span class="p">,</span> <span class="s1">&#39;ocom. phase latency&#39;</span><span class="p">,</span> <span class="s1">&#39;ocom_phase_latency&#39;</span><span class="p">)</span>
+     
+    <span class="n">plot_simple_metric</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">MEASURE_PARAMS</span><span class="p">,</span> <span class="n">y_stat</span><span class="o">=</span><span class="n">y_stat</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="n">x_param</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="n">restrict_to_other_params</span><span class="p">,</span> <span class="n">save_to</span><span class="o">=</span><span class="n">save_to</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">)</span>
+
+
+<span class="nd">@plotfunc</span><span class="p">(</span><span class="n">MEASURE_PARAMS</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">plot_OCOM_MSG_TIME</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="p">{},</span> <span class="n">save_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">save_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">save_to</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_to</span><span class="p">,</span> <span class="s1">&#39;ocom_one_msg_latency_with_init/&#39;</span><span class="p">)</span>
+    <span class="n">y_stat</span> <span class="o">=</span> <span class="p">(</span><span class="n">_OCOM_MSG_TIME</span><span class="p">,</span> <span class="s1">&#39;ocom. one msg latency w/ init&#39;</span><span class="p">,</span> <span class="s1">&#39;ocom_one_msg_latency_with_init&#39;</span><span class="p">)</span>
+     
+    <span class="n">plot_simple_metric</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">MEASURE_PARAMS</span><span class="p">,</span> <span class="n">y_stat</span><span class="o">=</span><span class="n">y_stat</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="n">x_param</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="n">restrict_to_other_params</span><span class="p">,</span> <span class="n">save_to</span><span class="o">=</span><span class="n">save_to</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">)</span>
+
+<span class="nd">@plotfunc</span><span class="p">(</span><span class="n">MEASURE_PARAMS</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">plot_OCOM_MSG_TIME_WITHOUT_INIT</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="p">{},</span> <span class="n">save_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">save_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">save_to</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_to</span><span class="p">,</span> <span class="s1">&#39;ocom_one_msg_latency_no_init/&#39;</span><span class="p">)</span>
+    <span class="n">y_stat</span> <span class="o">=</span> <span class="p">(</span><span class="n">_OCOM_MSG_TIME_WITHOUT_INIT</span><span class="p">,</span> <span class="s1">&#39;ocom. one msg latency w/o init&#39;</span><span class="p">,</span> <span class="s1">&#39;ocom_one_msg_latency_no_init&#39;</span><span class="p">)</span>
+     
+    <span class="n">plot_simple_metric</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">MEASURE_PARAMS</span><span class="p">,</span> <span class="n">y_stat</span><span class="o">=</span><span class="n">y_stat</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="n">x_param</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="n">restrict_to_other_params</span><span class="p">,</span> <span class="n">save_to</span><span class="o">=</span><span class="n">save_to</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">)</span>
+
+<span class="nd">@plotfunc</span><span class="p">(</span><span class="n">MEASURE_PARAMS</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">plot_RATIO_REAL_OVER_DUMMY_MSGS</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="p">{},</span> <span class="n">save_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">save_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">save_to</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_to</span><span class="p">,</span> <span class="s1">&#39;ratio_reals_over_dummies/&#39;</span><span class="p">)</span>
+    <span class="n">y_stat</span> <span class="o">=</span> <span class="p">(</span><span class="n">_RATIO_REAL_OVER_DUMMY_MSGS</span><span class="p">,</span> <span class="s1">&#39;# reals / # dummies&#39;</span><span class="p">,</span> <span class="s1">&#39;ratio_reals_over_dummies&#39;</span><span class="p">)</span>
+     
+    <span class="n">plot_simple_metric</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">MEASURE_PARAMS</span><span class="p">,</span> <span class="n">y_stat</span><span class="o">=</span><span class="n">y_stat</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="n">x_param</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="n">restrict_to_other_params</span><span class="p">,</span> <span class="n">save_to</span><span class="o">=</span><span class="n">save_to</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">)</span>
+
+<span class="nd">@plotfunc</span><span class="p">(</span><span class="n">MEASURE_PARAMS</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">plot_RATIO_E2E_DUMMY</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="p">{},</span> <span class="n">save_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">save_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">save_to</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_to</span><span class="p">,</span> <span class="s1">&#39;ratio_round_with_e2edum/&#39;</span><span class="p">)</span>
+    <span class="n">y_stat</span> <span class="o">=</span> <span class="p">(</span><span class="n">_RATIO_E2E_DUMMY</span><span class="p">,</span> <span class="s1">&#39;# rounds w/ e2edum / # rounds&#39;</span><span class="p">,</span> <span class="s1">&#39;ratio_round_with_e2edum&#39;</span><span class="p">)</span>
+     
+    <span class="n">plot_simple_metric</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">MEASURE_PARAMS</span><span class="p">,</span> <span class="n">y_stat</span><span class="o">=</span><span class="n">y_stat</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="n">x_param</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="n">restrict_to_other_params</span><span class="p">,</span> <span class="n">save_to</span><span class="o">=</span><span class="n">save_to</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">)</span>
+
+<span class="nd">@plotfunc</span><span class="p">(</span><span class="n">MEASURE_PARAMS</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">plot_RATIO_DUMMY_BCAST</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="p">{},</span> <span class="n">save_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">save_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">save_to</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_to</span><span class="p">,</span> <span class="s1">&#39;ratio_round_with_dumbcast/&#39;</span><span class="p">)</span>
+    <span class="n">y_stat</span> <span class="o">=</span> <span class="p">(</span><span class="n">_RATIO_DUMMY_BCAST</span><span class="p">,</span> <span class="s1">&#39;# rounds w/ dum. bcast. / # rounds&#39;</span><span class="p">,</span> <span class="s1">&#39;ratio_round_with_dumbcast&#39;</span><span class="p">)</span>
+     
+    <span class="n">plot_simple_metric</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">MEASURE_PARAMS</span><span class="p">,</span> <span class="n">y_stat</span><span class="o">=</span><span class="n">y_stat</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="n">x_param</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="n">restrict_to_other_params</span><span class="p">,</span> <span class="n">save_to</span><span class="o">=</span><span class="n">save_to</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">plot_HIST_WAITING_TIME_REAL_MSGS</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="p">{},</span> <span class="n">save_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">save_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">save_to</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_to</span><span class="p">,</span> <span class="s1">&#39;real_msgs_waiting_time_hist/&#39;</span><span class="p">)</span>
+    <span class="n">y_stat</span> <span class="o">=</span> <span class="p">(</span><span class="n">_HIST_WAITING_TIME_REAL_MSGS</span><span class="p">,</span> <span class="s1">&#39;%&#39;</span><span class="p">,</span> <span class="s1">&#39;real_msgs_waiting_time_hist&#39;</span><span class="p">)</span>
+    
+    <span class="n">plot_histogram</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">MEASURE_PARAMS</span><span class="p">,</span> <span class="n">y_stat</span><span class="o">=</span><span class="n">y_stat</span><span class="p">,</span> <span class="n">max_bars</span><span class="o">=</span><span class="mi">21</span><span class="p">,</span> <span class="n">print_yerr</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="n">restrict_to_other_params</span><span class="p">,</span> <span class="n">save_to</span><span class="o">=</span><span class="n">save_to</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">)</span>
+    
+    
+
+<span class="nd">@plotfunc</span><span class="p">(</span><span class="n">MEASURE_PARAMS</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">plot_MEAN_WAITING_TIME_REAL_MSGS</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="p">{},</span> <span class="n">save_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">save_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">save_to</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_to</span><span class="p">,</span> <span class="s1">&#39;real_msgs_waiting_time_mean/&#39;</span><span class="p">)</span>
+    <span class="n">y_stat</span> <span class="o">=</span> <span class="p">(</span><span class="n">_MEAN_WAITING_TIME_REAL_MSGS</span><span class="p">,</span> <span class="s1">&#39;# rounds&#39;</span><span class="p">,</span> <span class="s1">&#39;real_msgs_waiting_time_mean&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># The man waiting time of real messages is not computed during simulation.</span>
+    <span class="c1"># But it can be deduced from the histogram of real message waiting time.</span>
+    <span class="c1"># This data is processed here, thus computing the mean waiting time of real</span>
+    <span class="c1"># messages</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">experiments_results</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_MEAN_WAITING_TIME_REAL_MSGS</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;overall&#39;</span><span class="p">]:</span>
+            <span class="k">break</span>
+        <span class="n">r</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;overall&#39;</span><span class="p">][</span><span class="n">_MEAN_WAITING_TIME_REAL_MSGS</span><span class="p">]</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">n_rounds</span><span class="p">,</span> <span class="n">n_occurences</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;overall&#39;</span><span class="p">][</span><span class="n">_HIST_WAITING_TIME_REAL_MSGS</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">n_occurences</span><span class="o">.</span><span class="n">total</span><span class="p">)):</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;overall&#39;</span><span class="p">][</span><span class="n">_MEAN_WAITING_TIME_REAL_MSGS</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">n_rounds</span><span class="p">)</span>
+<span class="c1">#         r[&#39;results&#39;][&#39;overall&#39;][_MEAN_WAITING_TIME_REAL_MSGS] /= sum(n.total for n in r[&#39;results&#39;][&#39;overall&#39;][_HIST_WAITING_TIME_REAL_MSGS].values())</span>
+     
+    <span class="n">plot_simple_metric</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">MEASURE_PARAMS</span><span class="p">,</span> <span class="n">y_stat</span><span class="o">=</span><span class="n">y_stat</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="n">x_param</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="n">restrict_to_other_params</span><span class="p">,</span> <span class="n">save_to</span><span class="o">=</span><span class="n">save_to</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">)</span>
+    
+    
+    
+
+<span class="nd">@plotfunc</span><span class="p">(</span><span class="n">MEASURE_PARAMS</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">plot_EQUILIBRIUM_PER_ROUND</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="p">{},</span> <span class="n">save_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">save_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">save_to</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_to</span><span class="p">,</span> <span class="s1">&#39;equilibirum_per_round/&#39;</span><span class="p">)</span>
+    <span class="n">y_stat</span> <span class="o">=</span> <span class="p">(</span><span class="n">_EQUILIBRIUM_PER_ROUND</span><span class="p">,</span> <span class="s1">&#39;avg. equilibrium of each node at each round&#39;</span><span class="p">,</span> <span class="s1">&#39;equilibirum_per_round&#39;</span><span class="p">)</span>
+    
+    <span class="n">plot_simple_metric</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">MEASURE_PARAMS</span><span class="p">,</span> <span class="n">y_stat</span><span class="o">=</span><span class="n">y_stat</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="n">x_param</span><span class="p">,</span> <span class="n">several_curves</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;lbound&#39;</span><span class="p">,</span> <span class="s1">&#39;equilibrium&#39;</span><span class="p">,</span> <span class="s1">&#39;ubound&#39;</span><span class="p">],</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="n">restrict_to_other_params</span><span class="p">,</span> <span class="n">save_to</span><span class="o">=</span><span class="n">save_to</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">plot_HIST_NB_LINK_MSGS_SENT_PER_ROUND</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="p">{},</span> <span class="n">save_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">save_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">save_to</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_to</span><span class="p">,</span> <span class="s1">&#39;link_msgs_per_round_per_neighbor/&#39;</span><span class="p">)</span>
+    <span class="n">y_stat</span> <span class="o">=</span> <span class="p">(</span><span class="n">_HIST_NB_LINK_MSGS_SENT_PER_ROUND</span><span class="p">,</span> <span class="s1">&#39;%&#39;</span><span class="p">,</span> <span class="s1">&#39;link_msgs_per_round_per_neighbor&#39;</span><span class="p">)</span>
+    
+    <span class="n">plot_histogram</span><span class="p">(</span><span class="n">experiments_results</span><span class="p">,</span> <span class="n">MEASURE_PARAMS</span><span class="p">,</span> <span class="n">y_stat</span><span class="o">=</span><span class="n">y_stat</span><span class="p">,</span> <span class="n">print_yerr</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">restrict_to_other_params</span><span class="o">=</span><span class="n">restrict_to_other_params</span><span class="p">,</span> <span class="n">save_to</span><span class="o">=</span><span class="n">save_to</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">)</span>
+
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_DEFAULT_SAVING_FOLDER</span><span class="p">,</span> <span class="s1">&#39;measure_&#39;</span><span class="o">+</span><span class="n">MEASURE_TITLE</span><span class="p">)</span>
+    
+    <span class="n">do_measures</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">do_plot</span> <span class="o">=</span> <span class="kc">True</span>
+    
+    <span class="k">if</span> <span class="n">do_measures</span><span class="p">:</span>
+        <span class="n">measure_general_efficiency</span><span class="p">(</span><span class="n">nb_nodes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                                    <span class="n">nb_iters</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                    <span class="n">nb_iters_same_topo_graph</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                                    <span class="n">batching_nmin</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span>
+                                    <span class="n">batching_f</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">],</span>
+                                    <span class="n">dummypol_fdum</span><span class="o">=</span><span class="p">[</span><span class="mf">0.8</span><span class="p">],</span>
+                                    <span class="n">dummypol_deltar</span><span class="o">=</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span>
+                                    <span class="n">save_results_to</span><span class="o">=</span><span class="n">folder</span><span class="p">,</span>
+                                    <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">do_plot</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">load_measures_results</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">MEASURE_TITLE</span><span class="o">+</span><span class="s2">&quot;.pickle&quot;</span><span class="p">)</span>
+        <span class="n">folder_graphs</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="s2">&quot;graphs&quot;</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Plotting graphs...&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span>  <span class="n">MEASURE_STATS</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Plotting metric </span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">MEASURE_TITLE</span><span class="p">,</span> <span class="n">stat</span><span class="p">))</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="vm">__name__</span><span class="p">]</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;plot&quot;</span><span class="o">+</span><span class="n">stat</span><span class="p">](</span><span class="n">results</span><span class="p">,</span> <span class="n">x_param</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;nb_nodes&#39;</span><span class="p">,</span> <span class="s1">&#39;# nodes&#39;</span><span class="p">),</span> <span class="n">save_to</span><span class="o">=</span><span class="n">folder_graphs</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    
+    
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="examples.measure_route_prop.html" class="btn btn-neutral float-right" title="measure_route_prop — Study the route proposal mechanism" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="examples.html" class="btn btn-neutral" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

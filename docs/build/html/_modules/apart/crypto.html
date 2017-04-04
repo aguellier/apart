@@ -1,0 +1,637 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>apart.crypto &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="APART  documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">APART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../packages.html">Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>apart.crypto</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for apart.crypto</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Author: Antoine Guellier</span>
+<span class="c1"># Copyright (c) 2017 Université de Rennes 1</span>
+<span class="c1"># License: CeCILL. The full license text is available at:</span>
+<span class="c1">#  - http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html</span>
+
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This module provides an emulated implementation of the Elgamal scheme, along with its homomohpic operations.</span>
+
+<span class="sd">The implementation is *emulated*, in the sense that plaintexts are not actually</span>
+<span class="sd">encrypted. See the description of class :class:`.Ctxt`. However, the product of</span>
+<span class="sd">public keys, a mechanism used in the protocol, is reflected in the</span>
+<span class="sd">implementation.</span>
+
+<span class="sd">It also provides an emulation of the :func:`.SHA3_hash` hash function.</span>
+
+<span class="sd">This module defines the :exc:`.DecryptionError` and :exc:`.ReencryptionError` exception.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="kn">from</span> <span class="nn">apart.core.protocol_constants</span> <span class="k">import</span> <span class="n">GROUP_G</span><span class="p">,</span> <span class="n">GROUP_P</span>
+
+
+<div class="viewcode-block" id="Ctxt"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.Ctxt">[docs]</a><span class="k">class</span> <span class="nc">Ctxt</span><span class="p">(</span><span class="nb">tuple</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class emulating a ciphertext of the Elgamal scheme.</span>
+<span class="sd">    </span>
+<span class="sd">    Ciphertexts and cryptographic operations are not actually implemented. Here,</span>
+<span class="sd">    a ciphertext is represented by a 2-tuple, containing the plaintext (in</span>
+<span class="sd">    clear) in the first element, and the (product of) keys in the second</span>
+<span class="sd">    element. This second element allows to check that e.g. decryption is done</span>
+<span class="sd">    with the righteous public key (thus avoiding the code of the protocol to</span>
+<span class="sd">    &quot;cheat&quot; and decrypt ciphertext it should not).</span>
+<span class="sd">    </span>
+<span class="sd">    The module constants GROUP_P and GROUP_G of the</span>
+<span class="sd">    :mod:`~apart.core.protocol_constants` are used for group operations.</span>
+<span class="sd">    However, it is not a schnorr group that is used, but simply the group Zp*</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Ctxt</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">memo</span><span class="p">),</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">memo</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Elgamal_keygen"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.Elgamal_keygen">[docs]</a><span class="k">def</span> <span class="nf">Elgamal_keygen</span><span class="p">(</span><span class="n">secparam</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Emulates the key generation of the Elgamal scheme.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        secparam (int): this argument is there for compatibility, but is not used.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        (int, int): a key pair. Here, (pk, sk) = (r, r), for r a random group element.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">GROUP_P</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Elgamal_enc"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.Elgamal_enc">[docs]</a><span class="k">def</span> <span class="nf">Elgamal_enc</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Emulates the encryption operation of the Elgamal scheme.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        pk (int): the public key to use</span>
+<span class="sd">        m (*): the plaintext to encrypt (can be type of data)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`.Ctxt`: an (emulated) ciphertext ``Ctxt(m, pk)``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Ctxt</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">pk</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Elgamal_dec"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.Elgamal_dec">[docs]</a><span class="k">def</span> <span class="nf">Elgamal_dec</span><span class="p">(</span><span class="n">sk</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Emulates the decryption operation of the Elgamal scheme.</span>
+<span class="sd">    </span>
+<span class="sd">    Checks whether the second element of ``c`` is equal to ``sk``. If so,</span>
+<span class="sd">    outputs the first element of ``c`` (i.e. the plaintext). Otherwise, raises a</span>
+<span class="sd">    :exc:`.DecryptionError`.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        sk (int): the secret key to use in the decryption operation</span>
+<span class="sd">        c (:obj:`.Ctxt`): the ciphertext to decrypt</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        any: the plaintext, that can be of any type</span>
+<span class="sd">    </span>
+<span class="sd">    Raises:</span>
+<span class="sd">        :exc:`.DecryptionError` if the ciphertext ``c`` is not encrypted under ``sk``</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>  
+    <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">sk</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">DecryptionError</span><span class="p">(</span><span class="s2">&quot;Attempt to decrypt with the wrong secret key: </span><span class="si">{}</span><span class="s2"> provided, while </span><span class="si">{}</span><span class="s2"> expected&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sk</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span></div>
+
+<div class="viewcode-block" id="Elgamal_ctxt_mult"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.Elgamal_ctxt_mult">[docs]</a><span class="k">def</span> <span class="nf">Elgamal_ctxt_mult</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Emulates the homomorphic multiplication of the Elgamal scheme.</span>
+<span class="sd">    </span>
+<span class="sd">    Performs an assertion check, to ensure that ``c1`` and ``c2`` are encrypted</span>
+<span class="sd">    under the same (product of) key(s). If this verification passes, the group</span>
+<span class="sd">    multiplication modulo GROUP_P of the fist element of both ciphertexts (i;e.</span>
+<span class="sd">    their plaintext) is manually performed, and a new ciphertext is constructed</span>
+<span class="sd">    and returned.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        c1 (:obj:`.Ctxt`): the first ciphertext, encrypting a group element</span>
+<span class="sd">        c2 (:obj:`.Ctxt`): the second ciphertext, also encrypting a group element</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`.Ctxt`: the ciphertext encrypting the product of ``c1`` and ``c2``&#39;s plaintexts  </span>
+<span class="sd">    </span>
+<span class="sd">    Raises:</span>
+<span class="sd">        AssertionError: if ``c1`` and ``c2`` are not encrypted under the same (product of) key(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">c1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">c2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;Impossible to multiply two ciphertexts not encrypted under the same public key(s)&quot;</span>
+    <span class="k">return</span> <span class="n">Ctxt</span><span class="p">(</span><span class="n">c1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">c2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">%</span> <span class="n">GROUP_P</span><span class="p">,</span> <span class="n">c1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Elgamal_ctxt_div"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.Elgamal_ctxt_div">[docs]</a><span class="k">def</span> <span class="nf">Elgamal_ctxt_div</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Emulates the homomorphic division of the Elgamal scheme.</span>
+<span class="sd">    </span>
+<span class="sd">    This function is similar to :func:`.Elgamal_ctxt_mult`, except that the</span>
+<span class="sd">    plaintext of ``c1`` is multiplied by the group inverse of ``c2``&#39;s plaintext.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        c1 (:obj:`.Ctxt`): the first ciphertext, encrypting a group element</span>
+<span class="sd">        c2 (:obj:`.Ctxt`): the second ciphertext, encrypting a group element</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`.Ctxt`: the ciphertext encrypting the product of ``c1`` and ``c2``&#39;s plaintexts  </span>
+<span class="sd">    </span>
+<span class="sd">    Raises:</span>
+<span class="sd">        AssertionError: if ``c1`` and ``c2`` are not encrypted under the same (product of) key(s)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">c1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">c2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;Impossible to divide two ciphertexts not encrypted under the same public key(s): ciphertexts have keys </span><span class="si">{}</span><span class="s2"> != </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">c1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">%</span> <span class="n">GROUP_P</span><span class="p">,</span> <span class="n">c2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">%</span> <span class="n">GROUP_P</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ctxt</span><span class="p">(</span><span class="n">c1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">group_inverse</span><span class="p">(</span><span class="n">c2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">%</span> <span class="n">GROUP_P</span><span class="p">,</span> <span class="n">c1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Elgamal_plain_mult"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.Elgamal_plain_mult">[docs]</a><span class="k">def</span> <span class="nf">Elgamal_plain_mult</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Emulates the homomorphic plaintext multiplication of the Elgamal scheme.</span>
+<span class="sd">    </span>
+<span class="sd">    This function performs the group multiplication modulo GROUP_P of the fist</span>
+<span class="sd">    element of ``c`` with ``m`` creates a new ciphertext for the result (under</span>
+<span class="sd">    the same key as ``c``), and returns it.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        c (:obj:`.Ctxt`): a ciphertext, encrypting a group element</span>
+<span class="sd">        m (int): a group element</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`.Ctxt`: the ciphertext encrypting the product of ``c``&#39;s plaintext and ``m``  </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">return</span> <span class="n">Ctxt</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span> <span class="n">m</span> <span class="o">%</span> <span class="n">GROUP_P</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Elgamal_scalar_exp"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.Elgamal_scalar_exp">[docs]</a><span class="k">def</span> <span class="nf">Elgamal_scalar_exp</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">e</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Emulates the homomorphic scalar exponentiation of the Elgamal scheme.</span>
+<span class="sd">    </span>
+<span class="sd">    This function performs the modular exponentiation modulo GROUP_P of the first</span>
+<span class="sd">    element of ``c`` with ``e``, creates a new ciphertext for the result (under</span>
+<span class="sd">    the same key as ``c``), and returns it.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        c (:obj:`.Ctxt`): a ciphertext, encrypting a group element</span>
+<span class="sd">        e (int): any integer</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`.Ctxt`: the ciphertext encrypting the exponentiation of ``c``&#39;s plaintext by ``e``  </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Ctxt</span><span class="p">(</span><span class="nb">pow</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">e</span><span class="p">,</span> <span class="n">GROUP_P</span><span class="p">),</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Elgamal_key_mult"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.Elgamal_key_mult">[docs]</a><span class="k">def</span> <span class="nf">Elgamal_key_mult</span><span class="p">(</span><span class="n">sk</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Emulates the homomorphic key multiplication of the Elgamal scheme.</span>
+<span class="sd">    </span>
+<span class="sd">    This function performs the group multiplication modulo GROUP_P of the second</span>
+<span class="sd">    element of ``c1`` with ``sk``, creates a ciphertext with the same plaintext</span>
+<span class="sd">    as ``c``, but for the new key, and returns it.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        sk (int): a group element </span>
+<span class="sd">        c (:obj:`.Ctxt`): a ciphertext, encrypting any kind of data</span>
+<span class="sd">        </span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`.Ctxt`: the ciphertext encrypting the same plaintext as of ``c``&#39;s, </span>
+<span class="sd">        but under a ``sk*sk&#39;`` (where ``sk&#39;`` is the original key under which ``c`` was encrypted)  </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Ctxt</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">sk</span> <span class="o">%</span> <span class="n">GROUP_P</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Elgamal_key_div"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.Elgamal_key_div">[docs]</a><span class="k">def</span> <span class="nf">Elgamal_key_div</span><span class="p">(</span><span class="n">sk</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Emulates the homomorphic key multiplication of the Elgamal scheme.</span>
+<span class="sd">    </span>
+<span class="sd">    This function is the inverse of :func:`.Elgamal_key_mult`, and functions in</span>
+<span class="sd">    the same way. Note that no check is performed: the modular division of the</span>
+<span class="sd">    keys is performed, even if ``sk`` is not a factor of ``sk&#39;``, the key under</span>
+<span class="sd">    which ``c`` is encrypted.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        sk (int): a group element </span>
+<span class="sd">        c (:obj:`.Ctxt`): a ciphertext, encrypting any kind of data</span>
+<span class="sd">        </span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`.Ctxt`: the ciphertext encrypting the same plaintext as of ``c``&#39;s, </span>
+<span class="sd">        but under a ``sk&#39;/sk`` (where ``sk&#39;`` is the original key under which ``c`` was encrypted)  </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">new_sk</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">group_inverse</span><span class="p">(</span><span class="n">sk</span><span class="p">)</span> <span class="o">%</span> <span class="n">GROUP_P</span>
+<span class="c1">#     if not new_sk.is_integer():</span>
+<span class="c1">#         raise DecryptionError(&quot;Attempt to partially decrypt with an invalid secret: expected factor of {}, got {}&quot;.format(c[1], sk))</span>
+    <span class="k">return</span> <span class="n">Ctxt</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">new_sk</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Elgamal_enc_nopk"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.Elgamal_enc_nopk">[docs]</a><span class="k">def</span> <span class="nf">Elgamal_enc_nopk</span><span class="p">(</span><span class="n">cone</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Emulates the encryption without public key in the Elgamal scheme.</span>
+<span class="sd">    </span>
+<span class="sd">    This function performs simply returns a ciphertexts contructed with ``m`` in</span>
+<span class="sd">    first element, and the same second element as ``cone`` Args:. In the</span>
+<span class="sd">    considered representation of ciphertexts (see :class:`.Ctxt`, this yields a</span>
+<span class="sd">    a ciphertext for ``m`` encrypted under the same key as ``cone``).</span>
+<span class="sd">    </span>
+<span class="sd">    Note: before the encryption, ``cone`` is re-encrypted using :func:`.Reenc_one`.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        cone (:obj:`.Ctxt`): the encryptions of one, to perform the encryption</span>
+<span class="sd">        m (any): the plaintext to encrypt (can be any data)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`.Ctxt`: the ciphertext encrypting ``m`` under the same key as ``cone``  </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cone</span> <span class="o">=</span> <span class="n">Reenc_one</span><span class="p">(</span><span class="n">cone</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ctxt</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">cone</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+<span class="c1"># The two following operations are actually not directly implementable with</span>
+<span class="c1"># Elgamal: there is no actual homomorphic operations that could replace it</span>
+<div class="viewcode-block" id="Elgamal_accumulator_add"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.Elgamal_accumulator_add">[docs]</a><span class="k">def</span> <span class="nf">Elgamal_accumulator_add</span><span class="p">(</span><span class="n">caccumulator</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This function abusively implements the homomorphic addition of an element in an Elgamal encrypted accumulator</span>
+<span class="sd">    </span>
+<span class="sd">    This function works on plaintexts that are strings, and performs string</span>
+<span class="sd">    concatenation to add value ``v`` into the accumulator (a string) encrypted</span>
+<span class="sd">    into the ciphertext ``caccumulator``. This is *cheating*, since, in an</span>
+<span class="sd">    actual Elgamal implementation, this homomorphic operation would not be</span>
+<span class="sd">    possible, at least not in this form.(it would require several ciphertexts</span>
+<span class="sd">    actually...).</span>
+<span class="sd">    </span>
+<span class="sd">    This function goes along with the function :func:`.Elgamal_accumulator_check`.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        caccumulator (:obj:`.Ctxt`): the ciphertext encrypting an accumulator, respresented here by a string</span>
+<span class="sd">        v (string): the value to homomorphically add to the encrypted accumulator (by string concatenation)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`.Ctxt`: the encrypted accumulator updated with the new value ``v`` </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Ctxt</span><span class="p">(</span><span class="n">caccumulator</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">v</span><span class="p">,</span> <span class="n">caccumulator</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+    
+<div class="viewcode-block" id="Elgamal_accumulator_check"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.Elgamal_accumulator_check">[docs]</a><span class="k">def</span> <span class="nf">Elgamal_accumulator_check</span><span class="p">(</span><span class="n">caccumulator</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This function abusively implements the homomorphic membership test on an Elgamal encrypted accumulator</span>
+<span class="sd">    </span>
+<span class="sd">    This function works on plaintexts that are strings, and performs string</span>
+<span class="sd">    string lookups to check if ``v`` is contained into the accumulator (a</span>
+<span class="sd">    string) encrypted into the ciphertext ``caccumulator``. This is *cheating*,</span>
+<span class="sd">    since, in an actual Elgamal implementation, this homomorphic operation would</span>
+<span class="sd">    not be possible, at least not in this form.(it would require several</span>
+<span class="sd">    ciphertexts actually...). The result is an encrypted boolean.</span>
+<span class="sd">    </span>
+<span class="sd">    This function goes along with the function :func:`.Elgamal_accumulator_add`.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        caccumulator (:obj:`.Ctxt`): the ciphertext encrypting an accumulator, respresented here by a string</span>
+<span class="sd">        v (string): the value which presence must be tested in the encrypted accumulator (by string lookup)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`.Ctxt`: an encrypted boolean, equal to True if the value ``v`` is in the encrypted accumulator </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Ctxt</span><span class="p">(</span><span class="n">v</span> <span class="ow">in</span> <span class="n">caccumulator</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">caccumulator</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Reenc_pk"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.Reenc_pk">[docs]</a><span class="k">def</span> <span class="nf">Reenc_pk</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Emulates the re-encryption **with** public key in the Elgamal scheme.</span>
+<span class="sd">    </span>
+<span class="sd">    This function checks if ``c`` is indeed encrypted under ``pk``, and simply</span>
+<span class="sd">    returns ``c`` unmodified. In the considered representation of ciphertexts</span>
+<span class="sd">    (see :class:`.Ctxt`), this is what re-encryption boils down to.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        pk (int): a public key (a group element)</span>
+<span class="sd">        c (:obj:`.Ctxt`): the ciphertext to re-encrypt</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`.Ctxt`: a re-encryption of ``c``</span>
+<span class="sd">        </span>
+<span class="sd">    Raises:</span>
+<span class="sd">        :exc:`.ReencryptionError`: if ``c`` is not encrypted under ``pk``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">pk</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ReencryptionError</span><span class="p">(</span><span class="s2">&quot;Attempt to re-encrypt a ciphertext with the wrong public key: expected </span><span class="si">{}</span><span class="s2"> ,received </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pk</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">c</span></div>
+
+<div class="viewcode-block" id="Reenc_nopk"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.Reenc_nopk">[docs]</a><span class="k">def</span> <span class="nf">Reenc_nopk</span><span class="p">(</span><span class="n">cone</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Emulates the re-encryption **without** public key in the Elgamal scheme.</span>
+<span class="sd">    </span>
+<span class="sd">    This function checks if ``c`` and ``cone`` are indeed encrypted under the</span>
+<span class="sd">    same public key, then re-encrypts ``cone`` by calling :func:`.Reenc_one`,</span>
+<span class="sd">    and simply returns ``c`` unmodified. In the considered representation of</span>
+<span class="sd">    ciphertexts (see :class:`.Ctxt`), this is what re-encryption boils down to.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        cone (:obj:`.Ctxt`): an encryption of one, to perform the re-encryption</span>
+<span class="sd">        c (:obj:`.Ctxt`): the ciphertext to re-encrypt</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`.Ctxt`: a re-encryption of ``c``</span>
+<span class="sd">        </span>
+<span class="sd">    Raises:</span>
+<span class="sd">        :exc:`.ReencryptionError`: if ``c`` and ``cone`` are not encrypted under the same public key</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">cone</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="n">ReencryptionError</span><span class="p">(</span><span class="s2">&quot;Attempt to re-encrypt a ciphertext with a cone not encrypted under the same key: expected </span><span class="si">{}</span><span class="s2">, received </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">cone</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">cone</span> <span class="o">=</span> <span class="n">Reenc_one</span><span class="p">(</span><span class="n">cone</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">c</span></div>
+
+<div class="viewcode-block" id="Reenc_one"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.Reenc_one">[docs]</a><span class="k">def</span> <span class="nf">Reenc_one</span><span class="p">(</span><span class="n">cone</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Emulates the re-encryption of an encryption of one in the Elgamal scheme.</span>
+<span class="sd">    </span>
+<span class="sd">    This function simply returns ``cone`` unmodified. In the considered representation of</span>
+<span class="sd">    ciphertexts (see :class:`.Ctxt`), this is what re-encryption boils down to.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        cone (:obj:`.Ctxt`): an encryption of one to reencrypt</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`.Ctxt`: a re-encryption of ``cone``</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">return</span> <span class="n">cone</span></div>
+
+<div class="viewcode-block" id="SHA3_hash"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.SHA3_hash">[docs]</a><span class="k">def</span> <span class="nf">SHA3_hash</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Emulates the SHA3 hash function.</span>
+<span class="sd">    </span>
+<span class="sd">    Here, the message ``m`` to be hashed is simply returned unmodified.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        m (*): the message to hash</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bitstring: the hashed message ``m``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">m</span></div>
+
+<div class="viewcode-block" id="group_inverse"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.group_inverse">[docs]</a><span class="k">def</span> <span class="nf">group_inverse</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Computes a group inverse modulo GROUP_P (constant defined in :mod:`~apart.core.protocol_constants`)&quot;&quot;&quot;</span>
+    
+    <span class="k">return</span> <span class="nb">pow</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">GROUP_P</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="n">GROUP_P</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DecryptionError"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.DecryptionError">[docs]</a><span class="k">class</span> <span class="nc">DecryptionError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raised when a decryption error occurs, e.g. when trying to decrypt with the wrong secret key.&quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="ReencryptionError"><a class="viewcode-back" href="../../apart.crypto.html#apart.crypto.ReencryptionError">[docs]</a><span class="k">class</span> <span class="nc">ReencryptionError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raised when a re-encryption error occurs, e.g. when trying to re-encrypt with the inadequate public key or encryption of one&quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c1"># Some very basic unit tests</span>
+    
+    <span class="p">(</span><span class="n">pk1</span><span class="p">,</span> <span class="n">sk1</span><span class="p">)</span> <span class="o">=</span> <span class="n">Elgamal_keygen</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">pk2</span><span class="p">,</span> <span class="n">sk2</span><span class="p">)</span> <span class="o">=</span> <span class="n">Elgamal_keygen</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Trying basic enc/dec&quot;</span><span class="p">)</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">Elgamal_enc</span><span class="p">(</span><span class="n">pk1</span><span class="p">,</span> <span class="mi">42</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">Elgamal_dec</span><span class="p">(</span><span class="n">sk1</span><span class="p">,</span> <span class="n">c1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">42</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">Elgamal_dec</span><span class="p">(</span><span class="n">sk2</span><span class="p">,</span> <span class="n">c1</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="n">DecryptionError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;OK&#39;</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Trying Keymult&quot;</span><span class="p">)</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">Elgamal_enc</span><span class="p">(</span><span class="n">pk1</span><span class="p">,</span> <span class="mi">42</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">Elgamal_key_mult</span><span class="p">(</span><span class="n">sk2</span><span class="p">,</span> <span class="n">c1</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s2">&quot; - &quot;</span><span class="p">,</span> <span class="n">pk1</span><span class="p">,</span> <span class="n">sk2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">Elgamal_dec</span><span class="p">(</span><span class="n">sk1</span><span class="p">,</span> <span class="n">Elgamal_key_div</span><span class="p">(</span><span class="n">sk2</span><span class="p">,</span> <span class="n">c</span><span class="p">))</span> <span class="o">==</span> <span class="mi">42</span>
+    <span class="k">assert</span> <span class="n">Elgamal_dec</span><span class="p">(</span><span class="n">sk2</span><span class="p">,</span> <span class="n">Elgamal_key_div</span><span class="p">(</span><span class="n">sk1</span><span class="p">,</span> <span class="n">c</span><span class="p">))</span> <span class="o">==</span> <span class="mi">42</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;OK&quot;</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Trying ctxt mult&quot;</span><span class="p">)</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">Elgamal_enc</span><span class="p">(</span><span class="n">pk1</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">Elgamal_enc</span><span class="p">(</span><span class="n">pk1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">Elgamal_dec</span><span class="p">(</span><span class="n">sk1</span><span class="p">,</span> <span class="n">Elgamal_ctxt_mult</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">))</span> <span class="o">==</span> <span class="mi">60</span>
+    
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">Elgamal_enc</span><span class="p">(</span><span class="n">pk1</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">GROUP_G</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">Elgamal_enc</span><span class="p">(</span><span class="n">pk1</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">GROUP_G</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="n">Elgamal_dec</span><span class="p">(</span><span class="n">sk1</span><span class="p">,</span> <span class="n">Elgamal_ctxt_mult</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">))</span> <span class="o">==</span> <span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">GROUP_G</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;OK&quot;</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Trying ctxt div&quot;</span><span class="p">)</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">Elgamal_enc</span><span class="p">(</span><span class="n">pk1</span><span class="p">,</span> <span class="nb">pow</span><span class="p">(</span><span class="n">GROUP_G</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">GROUP_P</span><span class="p">))</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">Elgamal_enc</span><span class="p">(</span><span class="n">pk1</span><span class="p">,</span> <span class="nb">pow</span><span class="p">(</span><span class="n">GROUP_G</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">GROUP_P</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="n">Elgamal_dec</span><span class="p">(</span><span class="n">sk1</span><span class="p">,</span> <span class="n">Elgamal_ctxt_div</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">))</span> <span class="o">==</span> <span class="nb">pow</span><span class="p">(</span><span class="n">GROUP_G</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;OK&quot;</span><span class="p">)</span>
+    
+    
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Trying encrypted pk and sk&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">pk_tmp_1</span><span class="p">,</span> <span class="n">sk_tmp_1</span><span class="p">)</span> <span class="o">=</span> <span class="n">Elgamal_keygen</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">pk_tmp_2</span><span class="p">,</span> <span class="n">sk_tmp_2</span><span class="p">)</span> <span class="o">=</span> <span class="n">Elgamal_keygen</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">pk_tmp_3</span><span class="p">,</span> <span class="n">sk_tmp_3</span><span class="p">)</span> <span class="o">=</span> <span class="n">Elgamal_keygen</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">Elgamal_enc</span><span class="p">(</span><span class="n">pk1</span><span class="p">,</span> <span class="n">pk_tmp_1</span><span class="p">)</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">Elgamal_plain_mult</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">pk_tmp_2</span><span class="p">)</span>
+    <span class="n">c3</span> <span class="o">=</span> <span class="n">Elgamal_plain_mult</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span> <span class="n">pk_tmp_3</span><span class="p">)</span>
+    <span class="n">pk_tmp</span> <span class="o">=</span> <span class="n">Elgamal_dec</span><span class="p">(</span><span class="n">sk1</span><span class="p">,</span> <span class="n">c3</span><span class="p">)</span>
+    <span class="n">c3</span> <span class="o">=</span> <span class="n">Elgamal_enc</span><span class="p">(</span><span class="n">pk_tmp</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">)</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">Elgamal_key_div</span><span class="p">(</span><span class="n">sk_tmp_3</span><span class="p">,</span> <span class="n">c3</span><span class="p">)</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">Elgamal_key_div</span><span class="p">(</span><span class="n">sk_tmp_2</span><span class="p">,</span> <span class="n">c2</span><span class="p">)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">Elgamal_dec</span><span class="p">(</span><span class="n">sk_tmp_1</span><span class="p">,</span> <span class="n">c1</span><span class="p">)</span>
+    
+    <span class="k">assert</span> <span class="n">m</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;OK&quot;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

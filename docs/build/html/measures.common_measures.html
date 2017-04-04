@@ -1,0 +1,547 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>measures.common_measures — Generic Measure Framework &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="APART  documentation" href="index.html"/>
+        <link rel="up" title="measures — Benchmark &amp; Simulation Framework" href="measures.html"/>
+        <link rel="next" title="measures.file_handling — Saving/Loading Measure Results from Disk" href="measures.file_handling.html"/>
+        <link rel="prev" title="measures.advanced_stats_helper – Helper Class for Computing Statistics" href="measures.advanced_stats_helper.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">APART</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="packages.html">Packages</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.html"><code class="docutils literal"><span class="pre">common</span></code> &#8212; Helper Modules</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="measures.html"><code class="docutils literal"><span class="pre">measures</span></code> &#8212; Benchmark &amp; Simulation Framework</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="measures.network_statistics.html"><code class="docutils literal"><span class="pre">measures.network_statistics</span></code> &#8212; <em>Hook</em> Class into Network Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="measures.advanced_stats_helper.html"><code class="docutils literal"><span class="pre">measures.advanced_stats_helper</span></code> &#8211; Helper Class for Computing Statistics</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><code class="docutils literal"><span class="pre">measures.common_measures</span></code> &#8212; Generic Measure Framework</a></li>
+<li class="toctree-l3"><a class="reference internal" href="measures.file_handling.html"><code class="docutils literal"><span class="pre">measures.file_handling</span></code> &#8212; Saving/Loading Measure Results from Disk</a></li>
+<li class="toctree-l3"><a class="reference internal" href="measures.plotting.html"><code class="docutils literal"><span class="pre">measures.plotting</span></code> &#8212; Plotting Results into Graphs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="packages.html">Packages</a> &raquo;</li>
+        
+          <li><a href="measures.html"><code class="docutils literal"><span class="pre">measures</span></code> &#8212; Benchmark &amp; Simulation Framework</a> &raquo;</li>
+        
+      <li><code class="docutils literal"><span class="pre">measures.common_measures</span></code> &#8212; Generic Measure Framework</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/measures.common_measures.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-measures.common_measures">
+<span id="measures-common-measures-generic-measure-framework"></span><h1><code class="docutils literal"><span class="pre">measures.common_measures</span></code> &#8212; Generic Measure Framework<a class="headerlink" href="#module-measures.common_measures" title="Permalink to this headline">¶</a></h1>
+<p>This module provides helper function to make simulations, experimentations and
+measures. It in particular provides the function <a class="reference internal" href="#measures.common_measures.generic_measure" title="measures.common_measures.generic_measure"><code class="xref py py-func docutils literal"><span class="pre">generic_measure()</span></code></a>, which
+allows to run many network runs, and gather statistics on them.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last">See the examples measure modules that make use of the
+<a class="reference internal" href="#measures.common_measures.generic_measure" title="measures.common_measures.generic_measure"><code class="xref py py-func docutils literal"><span class="pre">measures.common_measures.generic_measure()</span></code></a> function. These may be
+found in the the <cite>examples/</cite> folder, or in the <em>Example</em> topic of the
+documentation.</p>
+</div>
+<dl class="exception">
+<dt id="measures.common_measures.MeasureException">
+<em class="property">exception </em><code class="descclassname">measures.common_measures.</code><code class="descname">MeasureException</code><a class="reference internal" href="_modules/measures/common_measures.html#MeasureException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.common_measures.MeasureException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
+<p>Raised when an error occurs during a measure or network run, or when measure parameters are not well-formed</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measures.common_measures.generic_measure">
+<code class="descclassname">measures.common_measures.</code><code class="descname">generic_measure</code><span class="sig-paren">(</span><em>measure_title</em>, <em>save_results_to</em>, <em>net_params_combinations</em>, <em>metrics_computer_callback</em>, <em>sim_params=None</em>, <em>net_params=None</em>, <em>save_network_states=True</em>, <em>overwrite_existing=False</em>, <em>force_recomputation=False</em>, <em>restrict_to_params=None</em>, <em>log_to_file=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/common_measures.html#generic_measure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.common_measures.generic_measure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic function to run a series of network simulations, and gather statistics about them.</p>
+<p>For each parameter combination provided in net_params_combinations, this
+function runs  series of network simulations, computes statistics about them
+using the callback given in metrics_computer_callback (which also aggregates
+the results over several network runs).</p>
+<p>More exactly, for each parameter combination (provided as dict) in the
+net_params_combinations list, one or several network simulations are
+launched (this depends on the value of the nb_iters parameter, given in this
+dict).</p>
+<p>Because measures may take a very long time, and may fail or be interrupted
+(<em>e.g.</em> because of a system shutdown), by default, the function checks if
+there are already some results saved for this series of measure. If so, it
+resumes to the next missing parameter combination. However, this behavior
+can be modified, by specifying force_recomputation to <cite>True</cite>.</p>
+<p>Finally, this function does <em>not</em> run several network simulations in
+parallel, and uses only one core. It is however theoretically possible to
+parallelize this work, since each parameter combination can be processed
+independently. To allow a form of parallelism, the python program must be
+launched several times. This is where the restrict_to_params argument
+becomes useful. It allows to restrict the set of parameters combinations to
+compute, and thus partition the measures, allowing to launch them in
+parallel. An example of this partition can be found in the
+<code class="xref py py-mod docutils literal"><span class="pre">measure_campains</span></code>.</p>
+<p>The function can be further tweaked:</p>
+<blockquote>
+<div><ul class="simple">
+<li>For each parameter combination, a certain number of iterations <em>on the
+same topology graph</em> can be ran. And several runs for different
+topology graphs can also be run, for a given parameter set. See
+<a class="reference internal" href="#measures.common_measures.make_params_combinations" title="measures.common_measures.make_params_combinations"><code class="xref py py-func docutils literal"><span class="pre">make_params_combinations()</span></code></a> for more information.</li>
+<li>The function allows the specification of sim_params and net_param
+(respectively instances of <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams" title="apart.simulation.SimulationParams"><code class="xref py py-class docutils literal"><span class="pre">SimulationParams</span></code></a>
+and <a class="reference internal" href="apart.core.network.html#apart.core.network.NetworkParams" title="apart.core.network.NetworkParams"><code class="xref py py-class docutils literal"><span class="pre">NetworkParams</span></code></a>), common to all
+simulation that will be run. Of course, some of these parameters will
+be overridden by the parameters specified in net_params_combinations.
+That is, sim_params and net_params specify the <em>default</em> parameters.</li>
+<li>If save_network_states is <cite>True</cite>, then the
+<a class="reference internal" href="apart.core.network.html#apart.core.network.NetworkManager" title="apart.core.network.NetworkManager"><code class="xref py py-obj docutils literal"><span class="pre">NetworkManager</span></code></a> instance after each network
+simulation is saved in the sub-folder net_states/&nbsp; within the folder
+specified by save_results_to.</li>
+<li>If overwrite_existing is set to <cite>True</cite>, then when the simulation resulsts
+(and network states) are saved, previous measure results may be erased.</li>
+<li>The log_to_file argument modifies the standard /O behavior of the function.
+By default, all information that is logged as per the network simulation
+(mainly by the code in the class <a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a>), allowing
+browsing of the log after the measures are finished. However, if log_to_file
+is set to <cite>False</cite>, these logging messages are made on the standard output.</li>
+</ul>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>measure_title</strong> (<em>string</em>) &#8211; the name of the measure (user-defined, can be anything)</li>
+<li><strong>save_results_to</strong> (<em>string</em>) &#8211; folder in which to save the simulation results (and possibly the network states)</li>
+<li><strong>net_params_combinations</strong> (<em>list of dict</em>) &#8211; the set of parameter combinations. Should be the output of a call to <a class="reference internal" href="#measures.common_measures.make_params_combinations" title="measures.common_measures.make_params_combinations"><code class="xref py py-func docutils literal"><span class="pre">make_params_combinations()</span></code></a>.</li>
+<li><strong>metrics_computer_callback</strong> (<em>function</em>) &#8211; the function computing and aggregating (averaging) the statistics between each network run.
+Must accept two arguments: one that is passed on in between every network run over the same combination parameters,
+and one corresponding to the <a class="reference internal" href="apart.core.network.html#apart.core.network.NetworkManager" title="apart.core.network.NetworkManager"><code class="xref py py-obj docutils literal"><span class="pre">NetworkManager</span></code></a> instance.</li>
+<li><strong>sim_params</strong> (<a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams" title="apart.simulation.SimulationParams"><code class="xref py py-obj docutils literal"><span class="pre">SimulationParams</span></code></a>, optional) &#8211; the simulation parameters for all network runs. (Default: None)</li>
+<li><strong>net_params</strong> (<a class="reference internal" href="apart.core.network.html#apart.core.network.NetworkParams" title="apart.core.network.NetworkParams"><code class="xref py py-obj docutils literal"><span class="pre">NetworkParams</span></code></a>, optional) &#8211; the (default) network parameters for all network runs. Overridden by the parameter combinations from the net_params_combinations argument. (Default: None)</li>
+<li><strong>save_network_states</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; if <cite>True</cite> the network state (<em>i.e.</em> <a class="reference internal" href="apart.core.network.html#apart.core.network.NetworkManager" title="apart.core.network.NetworkManager"><code class="xref py py-obj docutils literal"><span class="pre">NetworkManager</span></code></a> instance) of each and every network run is saved to the disk. Can consume several gigabytes of disk memory. (Default: True)</li>
+<li><strong>overwrite_existing</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; if <cite>True</cite>, then the simulation results (and possibly the network states) that are saved are allowed to erase existing files.  (Default: False)</li>
+<li><strong>force_recomputation</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; if <cite>False</cite>, resumes a measure starting from where it was stopped previously. Otherwise, process <em>all</em> parameter combinations, even if measures for these parameters were already carried out (Default: False)</li>
+<li><strong>restrict_to_params</strong> (<em>dict</em><em>, </em><em>optional</em>) &#8211; a dict indexed by the names of parameters (given as strings), with values specifying lists of values to process (parameter combinations with values not in these lists are skipped). These restrictions can be used along with the resuming of computations. When this argument is <cite>None</cite>, no restrictions are applied. (Default: None)</li>
+<li><strong>log_to_file</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; if <cite>True</cite>, redirects all logging output from the network run into a the file which name is based on the measure_tile argument (Default: True)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>a list in which each element gives the results for one parameter combinations. Each element of the list is a dict of the form:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+ <span class="s1">&#39;measure_params&#39;</span><span class="p">:</span> <span class="c1">#the parameter combination</span>
+ <span class="s1">&#39;sim_params&#39;</span><span class="p">:</span> <span class="n">sim_params</span><span class="p">,</span> <span class="s1">&#39;net_params&#39;</span><span class="p">:</span> <span class="n">net_params</span><span class="p">,</span>
+ <span class="s1">&#39;results&#39;</span><span class="p">:</span>
+     <span class="p">{</span>
+     <span class="s1">&#39;overall&#39;</span><span class="p">:</span> <span class="c1"># The final results of the measure. Usually these are the only that matter.</span>
+         <span class="p">{</span><span class="s1">&#39;stat1&#39;</span><span class="p">:</span> <span class="n">stat1_value</span><span class="p">,</span> <span class="s1">&#39;stat2&#39;</span><span class="p">:</span> <span class="o">...</span><span class="p">},</span>
+     <span class="s1">&#39;by_ite&#39;</span><span class="p">:</span> <span class="c1"># Result by iteration (there may be several iterations for a given parameter combination)</span>
+         <span class="p">[{</span><span class="s1">&#39;stat1&#39;</span><span class="p">:</span> <span class="n">stat1_val</span><span class="p">,</span> <span class="s1">&#39;stat2&#39;</span><span class="p">:</span> <span class="o">...</span><span class="p">},</span> <span class="o">...</span><span class="p">]</span>
+     <span class="p">},</span>
+ <span class="p">}</span>
+</pre></div>
+</div>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measures.common_measures.make_params_combinations">
+<code class="descclassname">measures.common_measures.</code><code class="descname">make_params_combinations</code><span class="sig-paren">(</span><em>nb_iters</em>, <em>nb_iters_same_topo_graph</em>, <em>measure_params_order</em>, <em>measure_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/common_measures.html#make_params_combinations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.common_measures.make_params_combinations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function that creates the parameter combination structure.</p>
+<p>To make the generation of parameter combinations easy and dynamic, this
+function takes as input a dict (in measure_params) containing an entry for
+each parameters of the measure, and specifying for each of them a list of
+values. The function then creates a list of dict, by recursively generating
+all possible combinations of parameters, based on these list of values.</p>
+<p>The number of iterations per set of parameter, and the number of iteration
+for a same topology graph are handled independently to the rest of the
+parameters, and must be the of a specific form. See the function
+<a class="reference internal" href="#measures.common_measures.preprocess_measure_input_params" title="measures.common_measures.preprocess_measure_input_params"><code class="xref py py-func docutils literal"><span class="pre">preprocess_measure_input_params()</span></code></a> for details on the form of each
+parameter. Any call to <cite>make_params_combinations</cite> should be preceded by a
+call to <a class="reference internal" href="#measures.common_measures.preprocess_measure_input_params" title="measures.common_measures.preprocess_measure_input_params"><code class="xref py py-func docutils literal"><span class="pre">preprocess_measure_input_params()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>nb_iters</strong> (<em>list of dict</em>) &#8211; a dict indexed by the values of the parameter
+<cite>&#8216;nb_nodes&#8217;</cite>, representing the number of network simulations that
+must be run over each parameter combinations. This argument is made
+to depend on the value(s) of <cite>&#8216;nb_nodes&#8217;</cite> because the time taken by
+a simulation largely depends on the number of nodes in the
+simulation. It is advised to greatly decrease the number of
+iterations as the number of nodes in the network to be simulated
+increases. This parameter can also be a:obj:<cite>collections.defaultdict</cite>.</li>
+<li><strong>nb_iters</strong> &#8211; this parameter is similar to nb_iters, except
+that it allows to specify how many runs should be made on any given
+topology graph. It must be provided as a list that contains dict of
+the same form as the nb_iters argument. Each element of this list
+will yield different combination(s) of parameters. On the contrary,
+the nb_iters parameter does not make the number of parameter
+combinations augment.</li>
+<li><strong>measure_params_order</strong> (<em>list of string</em>) &#8211; the names of the measure
+parameters, in order (the order is only to be user-friendly in the
+printing of results, and does not actually matter)</li>
+<li><strong>measure_params</strong> (<em>dict</em>) &#8211; the desired measure parameters (should be
+processed and checked by a call to
+<a class="reference internal" href="#measures.common_measures.preprocess_measure_input_params" title="measures.common_measures.preprocess_measure_input_params"><code class="xref py py-func docutils literal"><span class="pre">preprocess_measure_input_params()</span></code></a>). This dict (in
+measure_params) <em>must</em> contain an entry for each parameters of the
+measure (those present in measreu_params_order, plus <cite>&#8216;nb_iters&#8217;</cite>
+and <cite>&#8216;nb_iters_same_topo_graph&#8217;</cite>), and specify for each of them a
+list of values.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>the list of parameter combinations, which is of the following form:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span><span class="s1">&#39;param1&#39;</span><span class="p">:</span> <span class="n">p1_value</span><span class="p">,</span>
+     <span class="s1">&#39;param2&#39;</span><span class="p">:</span> <span class="n">p2_value</span><span class="p">,</span>
+     <span class="o">...</span>
+    <span class="p">},</span>
+    <span class="o">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measures.common_measures.merge_measures_outputs">
+<code class="descclassname">measures.common_measures.</code><code class="descname">merge_measures_outputs</code><span class="sig-paren">(</span><em>folder</em>, <em>files_list</em>, <em>new_folder=None</em>, <em>new_file_name=None</em>, <em>restrict_to_params={}</em>, <em>sort_key=None</em>, <em>overwrite_existing=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/common_measures.html#merge_measures_outputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.common_measures.merge_measures_outputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge several files, each containing one or several serialized simulation results, and put them together in one big file.</p>
+<p>This function merges simulation results, saves them to a new file, and also returns the result.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>folder</strong> (<em>string</em>) &#8211; the folder in which to search for the binary files of the serialized simulation results</li>
+<li><strong>files_list</strong> (<em>string</em>) &#8211; the files to merge together</li>
+<li><strong>new_folder</strong> (<em>string</em><em>, </em><em>optional</em>) &#8211; folder where to save the merged data. By default, the result file is saved in the specified folder argument (Default: None).</li>
+<li><strong>new_file_name</strong> (<em>string</em><em>, </em><em>optional</em>) &#8211; name of the file to save the merged data. A random default name is used if none is provided. (Default: None)</li>
+<li><strong>restrict_to_params</strong> (<em>dict</em><em>, </em><em>optional</em>) &#8211; of a similar form the to argument of <a class="reference internal" href="#measures.common_measures.generic_measure" title="measures.common_measures.generic_measure"><code class="xref py py-func docutils literal"><span class="pre">generic_measure()</span></code></a> of the same name. Allows to filter out some parameter combinations from the results. By default, no filtering is applied. (Default: None).</li>
+<li><strong>sort_key</strong> (<em>function</em><em>, </em><em>optional</em>) &#8211; function used to sort the measure results (Default: None).</li>
+<li><strong>overwirte_existing</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; whether, if the file_path provided already exists, it should be overwritten or not (Default: False)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the merged results, in a structure of the same form as the output of <a class="reference internal" href="#measures.common_measures.generic_measure" title="measures.common_measures.generic_measure"><code class="xref py py-func docutils literal"><span class="pre">generic_measure()</span></code></a>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">list of dict</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#measures.common_measures.MeasureException" title="measures.common_measures.MeasureException"><code class="xref py py-exc docutils literal"><span class="pre">MeasureException</span></code></a> &#8211; if at least one of the files merged does not contain the expected data (a list or a dict)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measures.common_measures.merge_measures_outputs_with_prefix">
+<code class="descclassname">measures.common_measures.</code><code class="descname">merge_measures_outputs_with_prefix</code><span class="sig-paren">(</span><em>folder</em>, <em>file_prefix</em>, <em>new_folder=None</em>, <em>new_file_name=None</em>, <em>restrict_to_params={}</em>, <em>sort_key=None</em>, <em>overwrite_existing=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/common_measures.html#merge_measures_outputs_with_prefix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.common_measures.merge_measures_outputs_with_prefix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Variant of <a class="reference internal" href="#measures.common_measures.merge_measures_outputs" title="measures.common_measures.merge_measures_outputs"><code class="xref py py-func docutils literal"><span class="pre">merge_measures_outputs()</span></code></a> where files sharing a common prefix in their name are merged.</p>
+<p>The only difference with <a class="reference internal" href="#measures.common_measures.merge_measures_outputs" title="measures.common_measures.merge_measures_outputs"><code class="xref py py-func docutils literal"><span class="pre">merge_measures_outputs()</span></code></a> is the second
+argument: based on a prefix, the file list is built automatically.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>folder</strong> (<em>string</em>) &#8211; the folder in which to search for the binary files of the serialized simulation results</li>
+<li><strong>file_prefix</strong> (<em>string</em>) &#8211; the common prefix of files from the specified folder that must be merged</li>
+<li><strong>new_folder</strong> (<em>string</em><em>, </em><em>optional</em>) &#8211; folder where to save the merged data. By default, the result file is saved in the specified folder argument (Default: None).</li>
+<li><strong>new_file_name</strong> (<em>string</em><em>, </em><em>optional</em>) &#8211; name of the file to save the merged data. A random default name is used if none is provided. (Default: None)</li>
+<li><strong>restrict_to_params</strong> (<em>dict</em><em>, </em><em>optional</em>) &#8211; of a similar form the to argument of <a class="reference internal" href="#measures.common_measures.generic_measure" title="measures.common_measures.generic_measure"><code class="xref py py-func docutils literal"><span class="pre">generic_measure()</span></code></a> of the same name. Allows to filter out some parameter combinations from the results. By default, no filtering is applied. (Default: None).</li>
+<li><strong>sort_key</strong> (<em>function</em><em>, </em><em>optional</em>) &#8211; function used to sort the measure results (Default: None).</li>
+<li><strong>overwirte_existing</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; whether, if the file_path provided already exists, it should be overwritten or not (Default: False)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the merged results, in a structure of the same form as the output of <a class="reference internal" href="#measures.common_measures.generic_measure" title="measures.common_measures.generic_measure"><code class="xref py py-func docutils literal"><span class="pre">generic_measure()</span></code></a>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">list of dict</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#measures.common_measures.MeasureException" title="measures.common_measures.MeasureException"><code class="xref py py-exc docutils literal"><span class="pre">MeasureException</span></code></a> &#8211; if at least one of the files merged does not contain the expected data (a list or a dict)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measures.common_measures.preprocess_measure_input_params">
+<code class="descclassname">measures.common_measures.</code><code class="descname">preprocess_measure_input_params</code><span class="sig-paren">(</span><em>accepted_measure_parameters</em>, <em>supplied_measure_parameters</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/common_measures.html#preprocess_measure_input_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.common_measures.preprocess_measure_input_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pre-processes and checks the validity of measure parameters.</p>
+<p>This function checks, that the supplied parameters (second argument) respect
+the specification given in first argument. The function does not return any
+data, but modifies the supplied_measure_parameters argument in-place. It
+processes the measure parameters so that they fulfill the following
+constraints:</p>
+<blockquote>
+<div><ul class="simple">
+<li>For each parameter that is not supplied, the default value is used
+(as specified in accepted_measure_parameters)</li>
+<li>For each supplied parameter, verify the type (specified in
+accepted_measure_parameters). If a single value was provided, create a
+one-element list from it.</li>
+<li>Special case for the <cite>&#8216;nb_iters&#8217;</cite> parameter: if it is not present, a
+default one is created (a dict indexed by values of the <cite>&#8216;nb_nodes</cite>&#8216;
+parameter, with number of iterations in values). It if exists, its
+type is checked (should be a dict).</li>
+<li>Special case for the <cite>&#8216;nb_iters_same_topo_graph&#8217;</cite> parameter: if it is not present, a
+default one is created (a list containing dicts indexed by values of
+the <cite>&#8216;nb_nodes</cite>&#8216; parameter, with number of iterations in values). It
+if exists, its type is checked (should be a list of dict).</li>
+</ul>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>accepted_measure_parameters</strong> (<em>dict</em>) &#8211; a dict specifying in keys the name of the accepted parameters (in the form of strings),
+and in value a 2-tuple (type, value) representing the expected type and default value of the parameter. The first element
+of the tuple can be an iterable, containing several types, meaning that the parameter is allowed to have several types.</li>
+<li><strong>supplied_measure_parameters</strong> (<em>dict</em>) &#8211; a dict with parameter names as keys (in the form of strings), and any data in values.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference internal" href="#measures.common_measures.MeasureException" title="measures.common_measures.MeasureException"><code class="xref py py-exc docutils literal"><span class="pre">MeasureException</span></code></a> &#8211; if supplied_measure_parameters contains a</li>
+<li>paramter not allowed according to accepted_measure_parameters, or if a</li>
+<li>parameter is not of the expected type</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="measures.file_handling.html" class="btn btn-neutral float-right" title="measures.file_handling — Saving/Loading Measure Results from Disk" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="measures.advanced_stats_helper.html" class="btn btn-neutral" title="measures.advanced_stats_helper – Helper Class for Computing Statistics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

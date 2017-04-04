@@ -1,0 +1,1024 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>measures.network_statistics — Hook Class into Network Simulations &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="APART  documentation" href="index.html"/>
+        <link rel="up" title="measures — Benchmark &amp; Simulation Framework" href="measures.html"/>
+        <link rel="next" title="measures.advanced_stats_helper – Helper Class for Computing Statistics" href="measures.advanced_stats_helper.html"/>
+        <link rel="prev" title="measures — Benchmark &amp; Simulation Framework" href="measures.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">APART</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="packages.html">Packages</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.html"><code class="docutils literal"><span class="pre">common</span></code> &#8212; Helper Modules</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="measures.html"><code class="docutils literal"><span class="pre">measures</span></code> &#8212; Benchmark &amp; Simulation Framework</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><code class="docutils literal"><span class="pre">measures.network_statistics</span></code> &#8212; <em>Hook</em> Class into Network Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="measures.advanced_stats_helper.html"><code class="docutils literal"><span class="pre">measures.advanced_stats_helper</span></code> &#8211; Helper Class for Computing Statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="measures.common_measures.html"><code class="docutils literal"><span class="pre">measures.common_measures</span></code> &#8212; Generic Measure Framework</a></li>
+<li class="toctree-l3"><a class="reference internal" href="measures.file_handling.html"><code class="docutils literal"><span class="pre">measures.file_handling</span></code> &#8212; Saving/Loading Measure Results from Disk</a></li>
+<li class="toctree-l3"><a class="reference internal" href="measures.plotting.html"><code class="docutils literal"><span class="pre">measures.plotting</span></code> &#8212; Plotting Results into Graphs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="packages.html">Packages</a> &raquo;</li>
+        
+          <li><a href="measures.html"><code class="docutils literal"><span class="pre">measures</span></code> &#8212; Benchmark &amp; Simulation Framework</a> &raquo;</li>
+        
+      <li><code class="docutils literal"><span class="pre">measures.network_statistics</span></code> &#8212; <em>Hook</em> Class into Network Simulations</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/measures.network_statistics.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-measures.network_statistics">
+<span id="measures-network-statistics-hook-class-into-network-simulations"></span><h1><code class="docutils literal"><span class="pre">measures.network_statistics</span></code> &#8212; <em>Hook</em> Class into Network Simulations<a class="headerlink" href="#module-measures.network_statistics" title="Permalink to this headline">¶</a></h1>
+<p>This module represents the <em>hook</em> of the <a class="reference internal" href="measures.html#module-measures" title="measures"><code class="xref py py-mod docutils literal"><span class="pre">measures</span></code></a> package into the
+simulation. Indeed, the class <a class="reference internal" href="#measures.network_statistics.NetworkStats" title="measures.network_statistics.NetworkStats"><code class="xref py py-class docutils literal"><span class="pre">NetworkStats</span></code></a> that it provides is used by
+the network manager and the nodes during the simulation. More accurately, the
+latter store information in a <a class="reference internal" href="#measures.network_statistics.NetworkStats" title="measures.network_statistics.NetworkStats"><code class="xref py py-class docutils literal"><span class="pre">NetworkStats</span></code></a> instance.</p>
+<p>This module also provides two classes to ease the computation of means and
+standard deviations, <a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-class docutils literal"><span class="pre">RunningStat</span></code></a> and <code class="xref py py-class docutils literal"><span class="pre">RegulatStat</span></code>.</p>
+<dl class="class">
+<dt id="measures.network_statistics.NetworkStats">
+<em class="property">class </em><code class="descclassname">measures.network_statistics.</code><code class="descname">NetworkStats</code><span class="sig-paren">(</span><em>net_manager</em>, <em>nb_nodes</em>, <em>sim_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/network_statistics.html#NetworkStats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.network_statistics.NetworkStats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>An instance of this class gathers all statistics and information about a given network run.</p>
+<p>Each simulation/network run is associated with one instance of this
+class. More accurately, a <a class="reference internal" href="apart.core.network.html#apart.core.network.NetworkManager" title="apart.core.network.NetworkManager"><code class="xref py py-obj docutils literal"><span class="pre">NetworkManager</span></code></a>
+always has a <a class="reference internal" href="#measures.network_statistics.NetworkStats" title="measures.network_statistics.NetworkStats"><code class="xref py py-obj docutils literal"><span class="pre">NetworkStats</span></code></a> instance as attribute, that it gives
+to the network and to nodes so that the latter fills it up with
+information and statistics about the network run.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This class defines attributes dynamically, depending one the values of
+the booleans in the <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams" title="apart.simulation.SimulationParams"><code class="xref py py-obj docutils literal"><span class="pre">SimulationParams</span></code></a> instance
+related to the network run. For instance, if
+<a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_route_props" title="apart.simulation.SimulationParams.log_route_props"><code class="xref py py-attr docutils literal"><span class="pre">log_route_props</span></code></a> is <cite>True</cite>,
+then <code class="xref py py-obj docutils literal"><span class="pre">NetworkStats</span></code>
+will have the attribute
+<code class="xref py py-obj docutils literal"><span class="pre">nb_route_props_per_node</span></code>.
+Otherwise, accessing this attribute will trigger an <code class="xref py py-exc docutils literal"><span class="pre">AttributeError</span></code>.</p>
+</div>
+<p>In practice, this class contains attributes that are filled up by the
+network manager, the network, and nodes. These includes, <em>e.g.</em> the
+number of messages sent/received by nodes, the number of route
+proposals, the total delay of oriented communications, etc. To avoid too
+heavy memory consumption, these pieces of information are often gathered
+and average <em>on the fly</em>, using a <a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a> instance. Average
+often happens on nodes on the network, on on rounds. See each attribute
+for details.</p>
+<p>The methods of these class are the entry points for the network and the
+nodes to input information about the network into a <a class="reference internal" href="#measures.network_statistics.NetworkStats" title="measures.network_statistics.NetworkStats"><code class="xref py py-obj docutils literal"><span class="pre">NetworkStats</span></code></a>
+instance. The functions only logs information in existing attributes.</p>
+<dl class="method">
+<dt id="measures.network_statistics.NetworkStats.log_end_ocom_phase">
+<code class="descname">log_end_ocom_phase</code><span class="sig-paren">(</span><em>round</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/network_statistics.html#NetworkStats.log_end_ocom_phase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.network_statistics.NetworkStats.log_end_ocom_phase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function logging the end of the oriented communication phase.</p>
+<p>Function called by the network manager
+(<a class="reference internal" href="apart.core.network.html#apart.core.network.NetworkManager" title="apart.core.network.NetworkManager"><code class="xref py py-obj docutils literal"><span class="pre">NetworkManager</span></code></a>). Modifies attribute
+<a class="reference internal" href="#measures.network_statistics.NetworkStats.end_ocom_phase" title="measures.network_statistics.NetworkStats.end_ocom_phase"><code class="xref py py-attr docutils literal"><span class="pre">end_ocom_phase</span></code></a> if it exists.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>round</strong> (<em>int</em>) &#8211; the round number at which the oriented communications finished.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="measures.network_statistics.NetworkStats.log_end_topo_diss">
+<code class="descname">log_end_topo_diss</code><span class="sig-paren">(</span><em>round</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/network_statistics.html#NetworkStats.log_end_topo_diss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.network_statistics.NetworkStats.log_end_topo_diss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function logging the end of the topology dissemination phase.</p>
+<p>Function called by the network manager
+(<a class="reference internal" href="apart.core.network.html#apart.core.network.NetworkManager" title="apart.core.network.NetworkManager"><code class="xref py py-obj docutils literal"><span class="pre">NetworkManager</span></code></a>). Modifies attribute
+<a class="reference internal" href="#measures.network_statistics.NetworkStats.end_topo_diss" title="measures.network_statistics.NetworkStats.end_topo_diss"><code class="xref py py-attr docutils literal"><span class="pre">end_topo_diss</span></code></a> if it exists.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>round</strong> (<em>int</em>) &#8211; the round number at which the topology dissemination finished.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="measures.network_statistics.NetworkStats.log_msg_placed_in_pool">
+<code class="descname">log_msg_placed_in_pool</code><span class="sig-paren">(</span><em>node</em>, <em>neighbor</em>, <em>msgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/network_statistics.html#NetworkStats.log_msg_placed_in_pool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.network_statistics.NetworkStats.log_msg_placed_in_pool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function logging the insertion of a message in the pools.</p>
+<p>Function called by a node (<a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-obj docutils literal"><span class="pre">Node</span></code></a>).Modifies only
+protected/private attributes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>node</strong> (<a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-obj docutils literal"><span class="pre">Node</span></code></a>) &#8211; the node that is inserting the message in its pools.</li>
+<li><strong>neighbor</strong> (<em>int</em>) &#8211; the index of the node&#8217;s neighbor, specifying in which pool the message is inserted</li>
+<li><strong>msg</strong> (<a class="reference internal" href="apart.core.messages.html#apart.core.messages.LinkMsg" title="apart.core.messages.LinkMsg"><code class="xref py py-obj docutils literal"><span class="pre">LinkMsg</span></code></a>) &#8211; the message inserted in the pool</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="measures.network_statistics.NetworkStats.log_ocom_latency">
+<code class="descname">log_ocom_latency</code><span class="sig-paren">(</span><em>node</em>, <em>end_sender_id</em>, <em>ocom_init_started_at_round</em>, <em>first_payload_sent_at_round</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/network_statistics.html#NetworkStats.log_ocom_latency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.network_statistics.NetworkStats.log_ocom_latency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function logging the latency of an oriented communication.</p>
+<p>Function called by a node (<a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-obj docutils literal"><span class="pre">Node</span></code></a>). Modifies the
+following attributes if they exist:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.ocom_latency" title="measures.network_statistics.NetworkStats.ocom_latency"><code class="xref py py-attr docutils literal"><span class="pre">ocom_latency</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.ocom_latency_after_init" title="measures.network_statistics.NetworkStats.ocom_latency_after_init"><code class="xref py py-attr docutils literal"><span class="pre">ocom_latency_after_init</span></code></a>.</li>
+</ul>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>node</strong> (<a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-obj docutils literal"><span class="pre">Node</span></code></a>) &#8211; the node that is concerned by the oriented communication (typically, the end-receiver)</li>
+<li><strong>end_sender_id</strong> (<em>int</em>) &#8211; index of the end-sender node</li>
+<li><strong>ocom_init_started_at_round</strong> (<em>int</em>) &#8211; the round at which the initialisation of the oriented communication in question was started.</li>
+<li><strong>first_payload_sent_at_round</strong> (<em>int</em>) &#8211; the round at which the end-sender started sending payload data in the oriented communication in question.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="measures.network_statistics.NetworkStats.log_ocom_route">
+<code class="descname">log_ocom_route</code><span class="sig-paren">(</span><em>node</em>, <em>ocomid</em>, <em>end_sender</em>, <em>helper</em>, <em>end_rcvr</em>, <em>first_hop_end_sender=None</em>, <em>first_hop_helper=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/network_statistics.html#NetworkStats.log_ocom_route"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.network_statistics.NetworkStats.log_ocom_route" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function logging the oriented communication routes</p>
+<p>Function called by a node (<a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-obj docutils literal"><span class="pre">Node</span></code></a>). Modifies the
+<a class="reference internal" href="#measures.network_statistics.NetworkStats.ocom_routes" title="measures.network_statistics.NetworkStats.ocom_routes"><code class="xref py py-attr docutils literal"><span class="pre">ocom_routes</span></code></a> attribute if it exists.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>node</strong> (<a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-obj docutils literal"><span class="pre">Node</span></code></a>) &#8211; the node that is concerned by the oriented communication</li>
+<li><strong>end_sender</strong> (<em>int</em>) &#8211; index of the end-sender of the oriented communication</li>
+<li><strong>helper</strong> (<em>int</em>) &#8211; index of the indirection node/helper of the oriented communication</li>
+<li><strong>end_rcvr</strong> (<em>int</em>) &#8211; index of the end-receiver of the oriented communication</li>
+<li><strong>first_hop_end_sender</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; Index of the first hop node or the route chosen by the end-sender, along with the circuit identifier of the first hop. To be supplied when the  <cite>node</cite> calling the function is the end-sender. (Default: None).</li>
+<li><strong>first_hop_helper</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; Index of the first hop node or the route chosen by the idirection node/helper, along with the circuit identifier of the first hop. To be supplied when the  <cite>node</cite> calling the function is the helper. (Default: None).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="measures.network_statistics.NetworkStats.log_round_rcvd_msgs">
+<code class="descname">log_round_rcvd_msgs</code><span class="sig-paren">(</span><em>node</em>, <em>real_messages</em>, <em>nb_reals</em>, <em>nb_dummies</em>, <em>nb_e2e_dummies</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/network_statistics.html#NetworkStats.log_round_rcvd_msgs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.network_statistics.NetworkStats.log_round_rcvd_msgs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function logging the receiving of messages in a round.</p>
+<p>Function called by a node (<a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-obj docutils literal"><span class="pre">Node</span></code></a>). Modifies the
+following attributes if they exist:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.nb_rcvd_real_msgs_per_node" title="measures.network_statistics.NetworkStats.nb_rcvd_real_msgs_per_node"><code class="xref py py-attr docutils literal"><span class="pre">nb_rcvd_real_msgs_per_node</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.nb_end_rcvd_real_msgs_per_node" title="measures.network_statistics.NetworkStats.nb_end_rcvd_real_msgs_per_node"><code class="xref py py-attr docutils literal"><span class="pre">nb_end_rcvd_real_msgs_per_node</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.nb_end_rcvd_ocom_msgs_per_node" title="measures.network_statistics.NetworkStats.nb_end_rcvd_ocom_msgs_per_node"><code class="xref py py-attr docutils literal"><span class="pre">nb_end_rcvd_ocom_msgs_per_node</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.nb_end_rcvd_ocom_payload_msgs_per_node" title="measures.network_statistics.NetworkStats.nb_end_rcvd_ocom_payload_msgs_per_node"><code class="xref py py-attr docutils literal"><span class="pre">nb_end_rcvd_ocom_payload_msgs_per_node</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.rcvd_link_msgs_per_node_per_round" title="measures.network_statistics.NetworkStats.rcvd_link_msgs_per_node_per_round"><code class="xref py py-attr docutils literal"><span class="pre">rcvd_link_msgs_per_node_per_round</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.nb_rcvd_dummy_link_msgs_per_node" title="measures.network_statistics.NetworkStats.nb_rcvd_dummy_link_msgs_per_node"><code class="xref py py-attr docutils literal"><span class="pre">nb_rcvd_dummy_link_msgs_per_node</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.nb_rcvd_e2e_dummy_msgs" title="measures.network_statistics.NetworkStats.nb_rcvd_e2e_dummy_msgs"><code class="xref py py-attr docutils literal"><span class="pre">nb_rcvd_e2e_dummy_msgs</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.histogram_nb_real_link_msgs_rcvd_per_round" title="measures.network_statistics.NetworkStats.histogram_nb_real_link_msgs_rcvd_per_round"><code class="xref py py-attr docutils literal"><span class="pre">histogram_nb_real_link_msgs_rcvd_per_round</span></code></a>.</li>
+</ul>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>node</strong> (<a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-obj docutils literal"><span class="pre">Node</span></code></a>) &#8211; the node that is received the messages (<cite>node.batching_round</cite> gives the current round)</li>
+<li><strong>real_messages</strong> (list of <a class="reference internal" href="apart.core.messages.html#apart.core.messages.LinkMsg" title="apart.core.messages.LinkMsg"><code class="xref py py-obj docutils literal"><span class="pre">LinkMsg</span></code></a>) &#8211; the real of messages received</li>
+<li><strong>nb_reals</strong> (<em>int</em>) &#8211; number of real messages received</li>
+<li><strong>nb_dummies</strong> (<em>int</em>) &#8211; number of dummy (link) messages received</li>
+<li><strong>nb_e2e_dummies</strong> (<em>int</em>) &#8211; number of end-to-end dummy messages received</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="measures.network_statistics.NetworkStats.log_rt_prop">
+<code class="descname">log_rt_prop</code><span class="sig-paren">(</span><em>node</em>, <em>rt_prop_event</em>, <em>nb_to_log=1</em>, <em>nb_rounds_to_complete=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/network_statistics.html#NetworkStats.log_rt_prop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.network_statistics.NetworkStats.log_rt_prop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function logging information about route proposal.</p>
+<p>Function called by a node (<a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-obj docutils literal"><span class="pre">Node</span></code></a>). Modifies the
+following attributes if they exist:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.nb_route_props_per_node" title="measures.network_statistics.NetworkStats.nb_route_props_per_node"><code class="xref py py-attr docutils literal"><span class="pre">nb_route_props_per_node</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.rt_props_latency" title="measures.network_statistics.NetworkStats.rt_props_latency"><code class="xref py py-attr docutils literal"><span class="pre">rt_props_latency</span></code></a>.</li>
+</ul>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>node</strong> (<a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-obj docutils literal"><span class="pre">Node</span></code></a>) &#8211; the node that is concerned by the route proposal</li>
+<li><strong>rt_prop_event</strong> (str or <a class="reference internal" href="apart.core.protocol_constants.html#apart.core.protocol_constants.RtPolicyReason" title="apart.core.protocol_constants.RtPolicyReason"><code class="xref py py-obj docutils literal"><span class="pre">RtPolicyReason</span></code></a>) &#8211; the event that is to be logged. Can be &#8216;received&#8217;, &#8216;proposed&#8217;, &#8216;rt_prop_event&#8217;, or a <a class="reference internal" href="apart.core.protocol_constants.html#apart.core.protocol_constants.RtPolicyReason" title="apart.core.protocol_constants.RtPolicyReason"><code class="xref py py-obj docutils literal"><span class="pre">RtPolicyReason</span></code></a> value.</li>
+<li><strong>nb_to_log</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; number occurence of the event type to log (Default: 1)</li>
+<li><strong>nb_rounds_to_complete</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; if the event type in <cite>rt_prop_event</cite> is a <a class="reference internal" href="apart.core.protocol_constants.html#apart.core.protocol_constants.RtPolicyReason" title="apart.core.protocol_constants.RtPolicyReason"><code class="xref py py-obj docutils literal"><span class="pre">RtPolicyReason</span></code></a> value, this argument specified the number of rounds that were necessary to complete the route proposal, starting from the initial rtprop message (Default: None)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="measures.network_statistics.NetworkStats.log_sent_batch">
+<code class="descname">log_sent_batch</code><span class="sig-paren">(</span><em>node</em>, <em>batch</em>, <em>nb_reals</em>, <em>nb_dummies</em>, <em>nb_e2e_dummies</em>, <em>remove_real=0</em>, <em>replace_dummy_by_e2e_dummy=0</em>, <em>add_e2e_dummy=0</em>, <em>add_many_dummies=0</em>, <em>default_dummy_broadcast=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/network_statistics.html#NetworkStats.log_sent_batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.network_statistics.NetworkStats.log_sent_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function logging the sending of a batch of messages at the end of a round</p>
+<p>Function called by a node (<a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-obj docutils literal"><span class="pre">Node</span></code></a>). Modifies the
+following attributes if they exist:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.nb_sent_real_msgs_per_node" title="measures.network_statistics.NetworkStats.nb_sent_real_msgs_per_node"><code class="xref py py-attr docutils literal"><span class="pre">nb_sent_real_msgs_per_node</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.nb_end_sent_real_msgs_per_node" title="measures.network_statistics.NetworkStats.nb_end_sent_real_msgs_per_node"><code class="xref py py-attr docutils literal"><span class="pre">nb_end_sent_real_msgs_per_node</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.nb_end_sent_ocom_msgs_per_node" title="measures.network_statistics.NetworkStats.nb_end_sent_ocom_msgs_per_node"><code class="xref py py-attr docutils literal"><span class="pre">nb_end_sent_ocom_msgs_per_node</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.nb_end_sent_ocom_payload_msgs_per_node" title="measures.network_statistics.NetworkStats.nb_end_sent_ocom_payload_msgs_per_node"><code class="xref py py-attr docutils literal"><span class="pre">nb_end_sent_ocom_payload_msgs_per_node</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.sent_link_msgs_per_node_per_round" title="measures.network_statistics.NetworkStats.sent_link_msgs_per_node_per_round"><code class="xref py py-attr docutils literal"><span class="pre">sent_link_msgs_per_node_per_round</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.nb_sent_dummy_link_msgs_per_node" title="measures.network_statistics.NetworkStats.nb_sent_dummy_link_msgs_per_node"><code class="xref py py-attr docutils literal"><span class="pre">nb_sent_dummy_link_msgs_per_node</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.nb_sent_e2e_dummy_msgs" title="measures.network_statistics.NetworkStats.nb_sent_e2e_dummy_msgs"><code class="xref py py-attr docutils literal"><span class="pre">nb_sent_e2e_dummy_msgs</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.real_msg_waiting_time" title="measures.network_statistics.NetworkStats.real_msg_waiting_time"><code class="xref py py-attr docutils literal"><span class="pre">real_msg_waiting_time</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.histogram_real_msg_waiting_time" title="measures.network_statistics.NetworkStats.histogram_real_msg_waiting_time"><code class="xref py py-attr docutils literal"><span class="pre">histogram_real_msg_waiting_time</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.nb_batch_intervention_remove_reals" title="measures.network_statistics.NetworkStats.nb_batch_intervention_remove_reals"><code class="xref py py-attr docutils literal"><span class="pre">nb_batch_intervention_remove_reals</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.nb_batch_intervention_replace_dummy_by_e2e_dummy" title="measures.network_statistics.NetworkStats.nb_batch_intervention_replace_dummy_by_e2e_dummy"><code class="xref py py-attr docutils literal"><span class="pre">nb_batch_intervention_replace_dummy_by_e2e_dummy</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.nb_batch_intervention_add_e2e_dummy" title="measures.network_statistics.NetworkStats.nb_batch_intervention_add_e2e_dummy"><code class="xref py py-attr docutils literal"><span class="pre">nb_batch_intervention_add_e2e_dummy</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.nb_batch_intervention_many_dummies" title="measures.network_statistics.NetworkStats.nb_batch_intervention_many_dummies"><code class="xref py py-attr docutils literal"><span class="pre">nb_batch_intervention_many_dummies</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.nb_batch_intervention_default_dummy_bcast" title="measures.network_statistics.NetworkStats.nb_batch_intervention_default_dummy_bcast"><code class="xref py py-attr docutils literal"><span class="pre">nb_batch_intervention_default_dummy_bcast</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.histogram_nb_real_link_msgs_sent_per_round" title="measures.network_statistics.NetworkStats.histogram_nb_real_link_msgs_sent_per_round"><code class="xref py py-attr docutils literal"><span class="pre">histogram_nb_real_link_msgs_sent_per_round</span></code></a>,</li>
+<li><a class="reference internal" href="#measures.network_statistics.NetworkStats.histogram_nb_sent_link_msgs_per_round_per_neighbor" title="measures.network_statistics.NetworkStats.histogram_nb_sent_link_msgs_per_round_per_neighbor"><code class="xref py py-attr docutils literal"><span class="pre">histogram_nb_sent_link_msgs_per_round_per_neighbor</span></code></a>.</li>
+</ul>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>node</strong> (<a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-obj docutils literal"><span class="pre">Node</span></code></a>) &#8211; the node that is sending the batch (<cite>node.batching_round</cite> gives the current round)</li>
+<li><strong>batch</strong> (list of <a class="reference internal" href="apart.core.messages.html#apart.core.messages.LinkMsg" title="apart.core.messages.LinkMsg"><code class="xref py py-obj docutils literal"><span class="pre">LinkMsg</span></code></a>) &#8211; the batch of message being sent</li>
+<li><strong>nb_reals</strong> (<em>int</em>) &#8211; number of real messages in the batch</li>
+<li><strong>nb_dummies</strong> (<em>int</em>) &#8211; number of dummy (link) messages in the batch</li>
+<li><strong>nb_e2e_dummies</strong> (<em>int</em>) &#8211; number of end-to-end dummy messages in the batch</li>
+<li><strong>remove_real</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; number of real messages that were manually removed from the batch to fulfill the traffic rates constraints (first type of <em>batch intervention</em>)</li>
+<li><strong>replace_dummy_by_e2e_dummy</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; number of times a dummy in the batch was replaced by an end-to-end dummy to fulfill the traffic rates constraints (second type of <em>batch intervention</em>)</li>
+<li><strong>add_e2e_dummy</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; number of end-to-end dummy messages added in the batch to fulfill the traffic rates constraints (third type of <em>batch intervention</em>)</li>
+<li><strong>add_many_dummies</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; number of dummy messages added (because, at the time, no end-to-end dummy could be produced) in order to fulfill the traffic rates constraints (fourth type of <em>batch intervention</em>)</li>
+<li><strong>default_dummy_broadcast</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; equals to 1 if the node resorted to a simple broadcast of one dummy message to each neighbor, because the batch was empty (last type of <em>batch intervention</em>)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="measures.network_statistics.NetworkStats.log_traffic_rate_equilibrium">
+<code class="descname">log_traffic_rate_equilibrium</code><span class="sig-paren">(</span><em>node</em>, <em>equilibrium</em>, <em>lbound_real_msgs</em>, <em>ubound_real_msgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/network_statistics.html#NetworkStats.log_traffic_rate_equilibrium"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.network_statistics.NetworkStats.log_traffic_rate_equilibrium" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function logging the traffic rates counters and equilibirum.</p>
+<p>Function called by a node (<a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-obj docutils literal"><span class="pre">Node</span></code></a>). Modifies the
+<a class="reference internal" href="#measures.network_statistics.NetworkStats.traffic_rate_status" title="measures.network_statistics.NetworkStats.traffic_rate_status"><code class="xref py py-attr docutils literal"><span class="pre">traffic_rate_status</span></code></a> attribute if it exists.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>node</strong> (<a class="reference internal" href="apart.core.node.html#apart.core.node.Node" title="apart.core.node.Node"><code class="xref py py-obj docutils literal"><span class="pre">Node</span></code></a>) &#8211; the node that is calling the function</li>
+<li><strong>equilibrium</strong> (<em>int</em>) &#8211; equilibirum of the node in the current round</li>
+<li><strong>lbound_real_msgs</strong> (<em>int</em>) &#8211; lower bound on real messages of the node in the current round</li>
+<li><strong>ubound_real_msgs</strong> (<em>int</em>) &#8211; upper bound on real messages of the node in the current round</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.end_ocom_phase">
+<code class="descname">end_ocom_phase</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.end_ocom_phase" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; The round number at which the oriented communication phase is finished.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_end_ocom_phase" title="apart.simulation.SimulationParams.log_end_ocom_phase"><code class="xref py py-attr docutils literal"><span class="pre">log_end_ocom_phase</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.end_topo_diss">
+<code class="descname">end_topo_diss</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.end_topo_diss" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; The round number at which the topology is fully disseminated.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_end_topo_diss" title="apart.simulation.SimulationParams.log_end_topo_diss"><code class="xref py py-attr docutils literal"><span class="pre">log_end_topo_diss</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.histogram_nb_real_link_msgs_rcvd_per_round">
+<code class="descname">histogram_nb_real_link_msgs_rcvd_per_round</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.histogram_nb_real_link_msgs_rcvd_per_round" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">collections.defaultdict</span></code> &#8211; Histogram of real link messages received per round.</p>
+<p>Dict triply indexed: dict[n][[node][neighbor] = v, meaning that the
+node &#8220;node&#8221; received n real messages from neighbor &#8220;neighbor&#8221; on v
+occasions during the network run.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_histogram_real_msgs_per_round" title="apart.simulation.SimulationParams.log_histogram_real_msgs_per_round"><code class="xref py py-attr docutils literal"><span class="pre">log_histogram_real_msgs_per_round</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.histogram_nb_real_link_msgs_sent_per_round">
+<code class="descname">histogram_nb_real_link_msgs_sent_per_round</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.histogram_nb_real_link_msgs_sent_per_round" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">collections.defaultdict</span></code> &#8211; Histogram of real link messages sent per round.</p>
+<p>Dict triply indexed: dict[n][[node][neighbor] = v, means that the
+node <em>node</em> sent n real messages to neighbor <em>neighbor</em> on v
+occasions during the network run</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_histogram_real_msgs_per_round" title="apart.simulation.SimulationParams.log_histogram_real_msgs_per_round"><code class="xref py py-attr docutils literal"><span class="pre">log_histogram_real_msgs_per_round</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.histogram_nb_sent_link_msgs_per_round_per_neighbor">
+<code class="descname">histogram_nb_sent_link_msgs_per_round_per_neighbor</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.histogram_nb_sent_link_msgs_per_round_per_neighbor" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">collections.defaultdict</span></code> &#8211; The histogram number of link messages sent to each neighbor at each round. Is expected to be one or two, but not much more</p>
+<p>Dict indexed by the number of link messages sent per round (all
+nodes confunded), and which values are the number of occurences of
+this number. That is, if d[n] = m, this means that on m occasions, a
+node (any one node in the network) sent n link messages during a round.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_sent_link_msgs_per_round" title="apart.simulation.SimulationParams.log_sent_link_msgs_per_round"><code class="xref py py-attr docutils literal"><span class="pre">log_sent_link_msgs_per_round</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.histogram_real_msg_waiting_time">
+<code class="descname">histogram_real_msg_waiting_time</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.histogram_real_msg_waiting_time" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">collections.defaultdict</span></code> &#8211; The histogram of number of rounds a real messages waits in pools.</p>
+<p>Dict indexed by number of rounds, values are number of occurrences.</p>
+<p>Defined only if one of or both
+<a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_real_msgs_waiting_time" title="apart.simulation.SimulationParams.log_real_msgs_waiting_time"><code class="xref py py-attr docutils literal"><span class="pre">log_real_msgs_waiting_time</span></code></a>
+or <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_histogram_real_msgs_waiting_time" title="apart.simulation.SimulationParams.log_histogram_real_msgs_waiting_time"><code class="xref py py-attr docutils literal"><span class="pre">log_histogram_real_msgs_waiting_time</span></code></a>
+are <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.nb_batch_intervention_add_e2e_dummy">
+<code class="descname">nb_batch_intervention_add_e2e_dummy</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.nb_batch_intervention_add_e2e_dummy" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a> &#8211; The number of times each node had to modify the batch, adding an e2e dummy plus link dummies.</p>
+<p>This value is averaged over rounds and nodes.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_frequency_batch_intervention" title="apart.simulation.SimulationParams.log_frequency_batch_intervention"><code class="xref py py-attr docutils literal"><span class="pre">log_frequency_batch_intervention</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.nb_batch_intervention_default_dummy_bcast">
+<code class="descname">nb_batch_intervention_default_dummy_bcast</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.nb_batch_intervention_default_dummy_bcast" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a> &#8211; The number of times each node resorted to the default option of sending one dummy to each neighbor.</p>
+<p>This value is averaged over rounds and nodes.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_frequency_batch_intervention" title="apart.simulation.SimulationParams.log_frequency_batch_intervention"><code class="xref py py-attr docutils literal"><span class="pre">log_frequency_batch_intervention</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.nb_batch_intervention_many_dummies">
+<code class="descname">nb_batch_intervention_many_dummies</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.nb_batch_intervention_many_dummies" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a> &#8211; The number of times each node had to modify the batch by adding many dummies because no e2e dummy was possible.</p>
+<p>This value is averaged over rounds and nodes.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_frequency_batch_intervention" title="apart.simulation.SimulationParams.log_frequency_batch_intervention"><code class="xref py py-attr docutils literal"><span class="pre">log_frequency_batch_intervention</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.nb_batch_intervention_remove_reals">
+<code class="descname">nb_batch_intervention_remove_reals</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.nb_batch_intervention_remove_reals" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a> &#8211; The number of times each node had to modify the batch, by removing real messages.</p>
+<p>This value is averaged over rounds and nodes.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_frequency_batch_intervention" title="apart.simulation.SimulationParams.log_frequency_batch_intervention"><code class="xref py py-attr docutils literal"><span class="pre">log_frequency_batch_intervention</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.nb_batch_intervention_replace_dummy_by_e2e_dummy">
+<code class="descname">nb_batch_intervention_replace_dummy_by_e2e_dummy</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.nb_batch_intervention_replace_dummy_by_e2e_dummy" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a> &#8211; The number of times each node had to modify the batch, by replacing one dummy by an e2e dummy.</p>
+<p>This value is averaged over rounds and nodes.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_frequency_batch_intervention" title="apart.simulation.SimulationParams.log_frequency_batch_intervention"><code class="xref py py-attr docutils literal"><span class="pre">log_frequency_batch_intervention</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.nb_end_rcvd_ocom_msgs_per_node">
+<code class="descname">nb_end_rcvd_ocom_msgs_per_node</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.nb_end_rcvd_ocom_msgs_per_node" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">collections.defaultdict</span></code> &#8211; Number of (real) oriented communication message end-received by each node at each round.</p>
+<p>Dict indexed by nodes, which values are <a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a>
+instances, averaging over rounds.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_real_e2e_msgs" title="apart.simulation.SimulationParams.log_real_e2e_msgs"><code class="xref py py-attr docutils literal"><span class="pre">log_real_e2e_msgs</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.nb_end_rcvd_ocom_payload_msgs_per_node">
+<code class="descname">nb_end_rcvd_ocom_payload_msgs_per_node</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.nb_end_rcvd_ocom_payload_msgs_per_node" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">collections.defaultdict</span></code> &#8211; Number of (real) oriented communication <em>payload</em> message end-received by each node at each round, i.e. without counting ocom init.</p>
+<p>Dict indexed by nodes, which values are <a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a>
+instances, averaging over rounds.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_real_e2e_msgs" title="apart.simulation.SimulationParams.log_real_e2e_msgs"><code class="xref py py-attr docutils literal"><span class="pre">log_real_e2e_msgs</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.nb_end_rcvd_real_msgs_per_node">
+<code class="descname">nb_end_rcvd_real_msgs_per_node</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.nb_end_rcvd_real_msgs_per_node" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">collections.defaultdict</span></code> &#8211; Number of (real) messages end-received by each node at each round.</p>
+<p>Dict indexed by nodes, which values are <a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a>
+instances, averaging over rounds.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_real_e2e_msgs" title="apart.simulation.SimulationParams.log_real_e2e_msgs"><code class="xref py py-attr docutils literal"><span class="pre">log_real_e2e_msgs</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.nb_end_sent_ocom_msgs_per_node">
+<code class="descname">nb_end_sent_ocom_msgs_per_node</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.nb_end_sent_ocom_msgs_per_node" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">collections.defaultdict</span></code> &#8211; Number of (real) oriented communication message end-sent by each node at each round.</p>
+<p>Dict indexed by nodes, which values are <a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a>
+instances, averaging over rounds.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_real_e2e_msgs" title="apart.simulation.SimulationParams.log_real_e2e_msgs"><code class="xref py py-attr docutils literal"><span class="pre">log_real_e2e_msgs</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.nb_end_sent_ocom_payload_msgs_per_node">
+<code class="descname">nb_end_sent_ocom_payload_msgs_per_node</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.nb_end_sent_ocom_payload_msgs_per_node" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">collections.defaultdict</span></code> &#8211; Number of (real) oriented communication <em>payload</em> message end-sent by each node at each round, i.e. without counting ocom init.</p>
+<p>Dict indexed by nodes, which values are <a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a>
+instances, averaging over rounds.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_real_e2e_msgs" title="apart.simulation.SimulationParams.log_real_e2e_msgs"><code class="xref py py-attr docutils literal"><span class="pre">log_real_e2e_msgs</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.nb_end_sent_real_msgs_per_node">
+<code class="descname">nb_end_sent_real_msgs_per_node</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.nb_end_sent_real_msgs_per_node" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">collections.defaultdict</span></code> &#8211; Number of (real) messages end-sent by each node at each round.</p>
+<p>Dict indexed by nodes, which values are <a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a>
+instances, averaging over rounds.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_real_e2e_msgs" title="apart.simulation.SimulationParams.log_real_e2e_msgs"><code class="xref py py-attr docutils literal"><span class="pre">log_real_e2e_msgs</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.nb_rcvd_dummy_link_msgs_per_node">
+<code class="descname">nb_rcvd_dummy_link_msgs_per_node</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.nb_rcvd_dummy_link_msgs_per_node" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">collections.defaultdict</span></code> &#8211; Total number of dummy link messages received by each node at each round.</p>
+<p>Dict indexed by nodes, which values are <a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a>
+instances, averaging over rounds.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_dummy_link_msgs" title="apart.simulation.SimulationParams.log_dummy_link_msgs"><code class="xref py py-attr docutils literal"><span class="pre">log_dummy_link_msgs</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.nb_rcvd_e2e_dummy_msgs">
+<code class="descname">nb_rcvd_e2e_dummy_msgs</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.nb_rcvd_e2e_dummy_msgs" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a> &#8211; Total number of end-to-end dummy message received by each node at each round.</p>
+<p>This value is averaged over rounds and nodes.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_e2e_dummies" title="apart.simulation.SimulationParams.log_e2e_dummies"><code class="xref py py-attr docutils literal"><span class="pre">log_e2e_dummies</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.nb_rcvd_real_msgs_per_node">
+<code class="descname">nb_rcvd_real_msgs_per_node</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.nb_rcvd_real_msgs_per_node" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">collections.defaultdict</span></code> &#8211; Number of real link messages received by each node at each round.</p>
+<p>Dict indexed by nodes, which values are <a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a>
+instances, averaging over rounds.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_real_link_msgs" title="apart.simulation.SimulationParams.log_real_link_msgs"><code class="xref py py-attr docutils literal"><span class="pre">log_real_link_msgs</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.nb_route_props_per_node">
+<code class="descname">nb_route_props_per_node</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.nb_route_props_per_node" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> &#8211; The number of route proposals the node was involved in, with which role, and which outcomes.</p>
+<p>Dict doubly indexed. First by type of <em>route proposal event</em>
+(<cite>&#8216;proposed&#8217;</cite>, <cite>&#8216;answered_as_receiver&#8217;</cite>, plus all
+<a class="reference internal" href="apart.core.protocol_constants.html#apart.core.protocol_constants.RtPolicyReason" title="apart.core.protocol_constants.RtPolicyReason"><code class="xref py py-class docutils literal"><span class="pre">RtPolicyReason</span></code></a>), and then by
+nodes. Values are the number of occurences of the <em>event</em>. For
+instance, d[&#8216;proposed&#8217;][n1] = 5 means that node n1 proposed 5
+routes.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_route_props" title="apart.simulation.SimulationParams.log_route_props"><code class="xref py py-attr docutils literal"><span class="pre">log_route_props</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.nb_sent_dummy_link_msgs_per_node">
+<code class="descname">nb_sent_dummy_link_msgs_per_node</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.nb_sent_dummy_link_msgs_per_node" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">collections.defaultdict</span></code> &#8211; Total number of dummy link messages sent by each node at each round.</p>
+<p>Dict indexed by nodes, which values are <a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a>
+instances, averaging over rounds.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_dummy_link_msgs" title="apart.simulation.SimulationParams.log_dummy_link_msgs"><code class="xref py py-attr docutils literal"><span class="pre">log_dummy_link_msgs</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.nb_sent_e2e_dummy_msgs">
+<code class="descname">nb_sent_e2e_dummy_msgs</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.nb_sent_e2e_dummy_msgs" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a> &#8211; Total number of end-to-end dummy messages sent by each node at each round.</p>
+<p>This value is averaged over rounds and nodes.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_e2e_dummies" title="apart.simulation.SimulationParams.log_e2e_dummies"><code class="xref py py-attr docutils literal"><span class="pre">log_e2e_dummies</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.nb_sent_real_msgs_per_node">
+<code class="descname">nb_sent_real_msgs_per_node</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.nb_sent_real_msgs_per_node" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">collections.defaultdict</span></code> &#8211; Number of real link messages sent by each node at each round.</p>
+<p>Dict indexed by nodes, which values are <a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a>
+instances, averaging over rounds.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_real_link_msgs" title="apart.simulation.SimulationParams.log_real_link_msgs"><code class="xref py py-attr docutils literal"><span class="pre">log_real_link_msgs</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.network_end_time">
+<code class="descname">network_end_time</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.network_end_time" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; The time at which the network run ended, based on a call to <cite>time.time()</cite> (<em>i.e.</em> based on the system time, not SimPy time)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.network_start_time">
+<code class="descname">network_start_time</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.network_start_time" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; The time at which the network run was started, based on a call to <cite>time.time()</cite> (<em>i.e.</em> based on the system time, not SimPy time)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.ocom_latency">
+<code class="descname">ocom_latency</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.ocom_latency" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a> &#8211; The latency, in rounds, between the initialization of an ocom, and the receiving of the last message by the end-receiver.</p>
+<p>Average over all oriented communications in the network.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_ocom_latency" title="apart.simulation.SimulationParams.log_ocom_latency"><code class="xref py py-attr docutils literal"><span class="pre">log_ocom_latency</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.ocom_latency_after_init">
+<code class="descname">ocom_latency_after_init</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.ocom_latency_after_init" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a> &#8211; The latency, in rounds, between the sending of the first payload message of the ocom, and the receiving of the last one</p>
+<p>Average over all oriented communications in the network</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_ocom_latency" title="apart.simulation.SimulationParams.log_ocom_latency"><code class="xref py py-attr docutils literal"><span class="pre">log_ocom_latency</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.ocom_routes">
+<code class="descname">ocom_routes</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.ocom_routes" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> &#8211; Minimal description of all oriented communication routes used in the network.</p>
+<p>The dict is indexed by oriented communication identifier. For each
+such communication, it specifies the end sender and its first hop,
+plus helper and its first hop (<em>i.e.</em> values of the dict are dicts,
+indexed by {&#8216;end_sender&#8217;, &#8216;helper&#8217;, &#8216;end_rcvr&#8217;,
+&#8216;first_hop_end_sender&#8217;}).</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_ocom_routes" title="apart.simulation.SimulationParams.log_ocom_routes"><code class="xref py py-attr docutils literal"><span class="pre">log_ocom_routes</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.rcvd_link_msgs_per_node_per_round">
+<code class="descname">rcvd_link_msgs_per_node_per_round</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.rcvd_link_msgs_per_node_per_round" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">collections.defaultdict</span></code> &#8211; All received link messages  by each node at each round.</p>
+<p>This dict is defined similarly as
+<a class="reference internal" href="#measures.network_statistics.NetworkStats.sent_link_msgs_per_node_per_round" title="measures.network_statistics.NetworkStats.sent_link_msgs_per_node_per_round"><code class="xref py py-attr docutils literal"><span class="pre">sent_link_msgs_per_node_per_round</span></code></a>, for received link
+messages.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_and_store_all_real_msgs" title="apart.simulation.SimulationParams.log_and_store_all_real_msgs"><code class="xref py py-attr docutils literal"><span class="pre">log_and_store_all_real_msgs</span></code></a> is <cite>True</cite>.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Heavy memory consumption</p>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.real_msg_waiting_time">
+<code class="descname">real_msg_waiting_time</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.real_msg_waiting_time" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a> &#8211; The number of rounds real messages spend waiting in pools.</p>
+<p>This value is averaged over all real messages, all nodes, and all rounds.</p>
+<p>Defined only if one of or both
+<a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_real_msgs_waiting_time" title="apart.simulation.SimulationParams.log_real_msgs_waiting_time"><code class="xref py py-attr docutils literal"><span class="pre">log_real_msgs_waiting_time</span></code></a>
+or <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_histogram_real_msgs_waiting_time" title="apart.simulation.SimulationParams.log_histogram_real_msgs_waiting_time"><code class="xref py py-attr docutils literal"><span class="pre">log_histogram_real_msgs_waiting_time</span></code></a>
+are <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.rt_props_latency">
+<code class="descname">rt_props_latency</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.rt_props_latency" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a> &#8211; The latency of route proposals between the initial rt prop message to the acceptation/refusal by the proposee.</p>
+<p>This value is averaged over every route proposal in the network.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_rt_props_latency" title="apart.simulation.SimulationParams.log_rt_props_latency"><code class="xref py py-attr docutils literal"><span class="pre">log_rt_props_latency</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.sent_link_msgs_per_node_per_round">
+<code class="descname">sent_link_msgs_per_node_per_round</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.sent_link_msgs_per_node_per_round" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">collections.defaultdict</span></code> &#8211; All sent link messages by each node at each round.</p>
+<p>The dict is indexed by nodes, its values are dict, which indexes are
+batching rounds, and values are the messages sent by the node in the
+batching round. That is if d[n][r] = [m1, m2, ...], then node n sent
+the real messages m1, m2, ... in round r.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_and_store_all_real_msgs" title="apart.simulation.SimulationParams.log_and_store_all_real_msgs"><code class="xref py py-attr docutils literal"><span class="pre">log_and_store_all_real_msgs</span></code></a> is <cite>True</cite>.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Heavy memory consumption</p>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.NetworkStats.traffic_rate_status">
+<code class="descname">traffic_rate_status</code><em class="property"> = None</em><a class="headerlink" href="#measures.network_statistics.NetworkStats.traffic_rate_status" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> &#8211; The equilibirum, minimum and maximum number of real messages that each node can send each round.</p>
+<p>Dict indexed by {equilibrium, lbround, ubound}, which values are <a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-obj docutils literal"><span class="pre">RunningStat</span></code></a>
+instances, averaging over rounds and nodes.</p>
+<p>Defined only if <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams.log_traffic_rates_equilibrium" title="apart.simulation.SimulationParams.log_traffic_rates_equilibrium"><code class="xref py py-attr docutils literal"><span class="pre">log_traffic_rates_equilibrium</span></code></a> is <cite>True</cite>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="measures.network_statistics.RegularStat">
+<em class="property">class </em><code class="descclassname">measures.network_statistics.</code><code class="descname">RegularStat</code><span class="sig-paren">(</span><em>values</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/network_statistics.html#RegularStat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.network_statistics.RegularStat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#measures.network_statistics.Stat" title="measures.network_statistics.Stat"><code class="xref py py-class docutils literal"><span class="pre">measures.network_statistics.Stat</span></code></a></p>
+<p>Computes statistics in a &#8220;regular manner&#8221; on a supplied list of values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>values</strong> (<em>list of numbers</em>) &#8211; the values on which the statistics must be computed.</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="measures.network_statistics.RegularStat.max">
+<code class="descname">max</code><a class="headerlink" href="#measures.network_statistics.RegularStat.max" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Maximum of all values provided to the class instance</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.RegularStat.mean">
+<code class="descname">mean</code><a class="headerlink" href="#measures.network_statistics.RegularStat.mean" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Mean of all values provided to the class instance</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.RegularStat.min">
+<code class="descname">min</code><a class="headerlink" href="#measures.network_statistics.RegularStat.min" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Minimum of all values provided to the class instance</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.RegularStat.nb_values">
+<code class="descname">nb_values</code><a class="headerlink" href="#measures.network_statistics.RegularStat.nb_values" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; Total number of values provided to the class instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.RegularStat.stdev">
+<code class="descname">stdev</code><a class="headerlink" href="#measures.network_statistics.RegularStat.stdev" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Standard deviation of all values provided to the class instance</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.RegularStat.total">
+<code class="descname">total</code><a class="headerlink" href="#measures.network_statistics.RegularStat.total" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Total sum of all values provided to the class instance</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.RegularStat.variance">
+<code class="descname">variance</code><a class="headerlink" href="#measures.network_statistics.RegularStat.variance" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Variance of all values provided to the class instance</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="measures.network_statistics.RunningStat">
+<em class="property">class </em><code class="descclassname">measures.network_statistics.</code><code class="descname">RunningStat</code><a class="reference internal" href="_modules/measures/network_statistics.html#RunningStat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.network_statistics.RunningStat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#measures.network_statistics.Stat" title="measures.network_statistics.Stat"><code class="xref py py-class docutils literal"><span class="pre">measures.network_statistics.Stat</span></code></a></p>
+<p>Comutes statistics on streaming data.</p>
+<p>Instead of computing directly the average etc. on a list of values, this
+class allows to compute values arriving in stream. This saves a lot a of
+memory when gathering statistics in the network with
+<a class="reference internal" href="#measures.network_statistics.NetworkStats" title="measures.network_statistics.NetworkStats"><code class="xref py py-class docutils literal"><span class="pre">NetworkStats</span></code></a>. Values are given one by one to an instance of
+this class by using the <a class="reference internal" href="#measures.network_statistics.RunningStat.push_value" title="measures.network_statistics.RunningStat.push_value"><code class="xref py py-meth docutils literal"><span class="pre">push_value()</span></code></a> method. The attribtues
+<a class="reference internal" href="#measures.network_statistics.RunningStat.mean" title="measures.network_statistics.RunningStat.mean"><code class="xref py py-attr docutils literal"><span class="pre">mean</span></code></a>, <a class="reference internal" href="#measures.network_statistics.RunningStat.stdev" title="measures.network_statistics.RunningStat.stdev"><code class="xref py py-attr docutils literal"><span class="pre">stdev</span></code></a> can be accessed at any time, even before
+the stream of data is still ongoing.</p>
+<p>Note that, while the average, minimum, and maximum can be easily computed on
+streaming data, the standard deviation and variance are more tricky. The
+implementation of this class is inspired from
+<a class="reference external" href="https://www.johndcook.com/blog/standard_deviation/">https://www.johndcook.com/blog/standard_deviation/</a></p>
+<dl class="method">
+<dt id="measures.network_statistics.RunningStat.push_value">
+<code class="descname">push_value</code><span class="sig-paren">(</span><em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measures/network_statistics.html#RunningStat.push_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.network_statistics.RunningStat.push_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates all statistics (average, standard deviation) according to the specified value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>v</strong> (<em>float</em>) &#8211; the new value of the data stream</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.RunningStat.max">
+<code class="descname">max</code><a class="headerlink" href="#measures.network_statistics.RunningStat.max" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Maximum of all values provided to the class instance</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.RunningStat.mean">
+<code class="descname">mean</code><a class="headerlink" href="#measures.network_statistics.RunningStat.mean" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Mean of all values provided to the class instance</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.RunningStat.min">
+<code class="descname">min</code><a class="headerlink" href="#measures.network_statistics.RunningStat.min" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Minimum of all values provided to the class instance</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.RunningStat.nb_values">
+<code class="descname">nb_values</code><a class="headerlink" href="#measures.network_statistics.RunningStat.nb_values" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; Total number of values provided to the class instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.RunningStat.stdev">
+<code class="descname">stdev</code><a class="headerlink" href="#measures.network_statistics.RunningStat.stdev" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Standard deviation of all values provided to the class instance</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.RunningStat.total">
+<code class="descname">total</code><a class="headerlink" href="#measures.network_statistics.RunningStat.total" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Total sum of all values provided to the class instance</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.RunningStat.variance">
+<code class="descname">variance</code><a class="headerlink" href="#measures.network_statistics.RunningStat.variance" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Variance of all values provided to the class instance</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="measures.network_statistics.Stat">
+<em class="property">class </em><code class="descclassname">measures.network_statistics.</code><code class="descname">Stat</code><a class="reference internal" href="_modules/measures/network_statistics.html#Stat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measures.network_statistics.Stat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">abc.ABC</span></code></p>
+<p>Abstract base class for <a class="reference internal" href="#measures.network_statistics.RegularStat" title="measures.network_statistics.RegularStat"><code class="xref py py-class docutils literal"><span class="pre">RegularStat</span></code></a> and <a class="reference internal" href="#measures.network_statistics.RunningStat" title="measures.network_statistics.RunningStat"><code class="xref py py-class docutils literal"><span class="pre">RunningStat</span></code></a>.</p>
+<p>This class (or more exactly, its derivatives), are meant to provide
+shortcuts to compute means, standard deviation, variances, minimum, and
+maximum values.</p>
+<dl class="attribute">
+<dt id="measures.network_statistics.Stat.max">
+<code class="descname">max</code><a class="headerlink" href="#measures.network_statistics.Stat.max" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Maximum of all values provided to the class instance</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.Stat.mean">
+<code class="descname">mean</code><a class="headerlink" href="#measures.network_statistics.Stat.mean" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Mean of all values provided to the class instance</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.Stat.min">
+<code class="descname">min</code><a class="headerlink" href="#measures.network_statistics.Stat.min" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Minimum of all values provided to the class instance</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.Stat.nb_values">
+<code class="descname">nb_values</code><a class="headerlink" href="#measures.network_statistics.Stat.nb_values" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; Total number of values provided to the class instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.Stat.stdev">
+<code class="descname">stdev</code><a class="headerlink" href="#measures.network_statistics.Stat.stdev" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Standard deviation of all values provided to the class instance</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.Stat.total">
+<code class="descname">total</code><a class="headerlink" href="#measures.network_statistics.Stat.total" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Total sum of all values provided to the class instance</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="measures.network_statistics.Stat.variance">
+<code class="descname">variance</code><a class="headerlink" href="#measures.network_statistics.Stat.variance" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Variance of all values provided to the class instance</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="measures.advanced_stats_helper.html" class="btn btn-neutral float-right" title="measures.advanced_stats_helper – Helper Class for Computing Statistics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="measures.html" class="btn btn-neutral" title="measures — Benchmark &amp; Simulation Framework" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,448 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>measures.file_handling &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="APART  documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">APART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../packages.html">Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>measures.file_handling</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for measures.file_handling</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Author: Antoine Guellier</span>
+<span class="c1"># Copyright (c) 2017 Université de Rennes 1</span>
+<span class="c1"># License: CeCILL. The full license text is available at:</span>
+<span class="c1">#  - http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html</span>
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This module provides helper function to manipulate the files that store</span>
+<span class="sd">serialized measure results and graphs. It allows to check the existence of</span>
+<span class="sd">folders and to harmonize the file names.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">common.custom_logging</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">dill</span> <span class="k">as</span> <span class="nn">pickle</span>
+
+
+<div class="viewcode-block" id="save_measures_results"><a class="viewcode-back" href="../../measures.file_handling.html#measures.file_handling.save_measures_results">[docs]</a><span class="k">def</span> <span class="nf">save_measures_results</span><span class="p">(</span><span class="n">sims_outputs</span><span class="p">,</span> <span class="n">folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This function saves the output produced by measures by pickling the results into a file on the disk.</span>
+<span class="sd">    </span>
+<span class="sd">    The folder and file_name arguments are passed on to</span>
+<span class="sd">    :func:`.prepare_file_name`, with default folder /tmp/protocol_stats/.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        sims_outputs (any): the results of the measures and simulations. Must be serializable with the `:mod:`dill` package.</span>
+<span class="sd">        folder (string, optional): the folder in which to place the binary files of the pickled object (Default: None)</span>
+<span class="sd">        file_name (string, optional): the name of the file to save the data to (Default: None)</span>
+<span class="sd">        overwrite_existing (bool, optional): whether, if the file_name provided already exists in the specified folder, it should be overwritten or not (default: False)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns </span>
+<span class="sd">        sim_outputs</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="n">prepare_file_name</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">default_folder</span><span class="o">=</span><span class="s1">&#39;/tmp/protocol_stats/&#39;</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s2">&quot;.pickle&quot;</span><span class="p">)</span>
+   
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Saving into </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_path</span><span class="p">))</span>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">sims_outputs</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sims_outputs</span></div>
+
+<div class="viewcode-block" id="load_measures_results"><a class="viewcode-back" href="../../measures.file_handling.html#measures.file_handling.load_measures_results">[docs]</a><span class="k">def</span> <span class="nf">load_measures_results</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Load simulation results previously saved (pickled) into a file and returns the contents.</span>
+<span class="sd">    </span>
+<span class="sd">    It is allowed to specify the absolute path, file name included, in the</span>
+<span class="sd">    file_name argument (that is, folder may be an empty string). The converse is</span>
+<span class="sd">    also true: the file name argument can be empty if provided in the folder</span>
+<span class="sd">    one.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        folder (string): the folder in which to search for the binary files of the pickled.</span>
+<span class="sd">        file_name (string): the name of the file to load (typically, a .pickle). </span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        any: the unpickled contents of the file(s) specified </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">complete_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file_name</span><span class="p">))</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">complete_file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">sims_outputs</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sims_outputs</span></div>
+
+<div class="viewcode-block" id="save_graphs_simulation_results"><a class="viewcode-back" href="../../measures.file_handling.html#measures.file_handling.save_graphs_simulation_results">[docs]</a><span class="k">def</span> <span class="nf">save_graphs_simulation_results</span><span class="p">(</span><span class="n">plot_object</span><span class="p">,</span> <span class="n">folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Save a generated graphs in a png file.</span>
+<span class="sd">    </span>
+<span class="sd">    The folder and file_name arguments are passed on to</span>
+<span class="sd">    :func:`.prepare_file_name`, with default folder /tmp/protocol_graphs/.</span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        plot_object: a matplotlib object on which savefig() can be called, and containing the graph to save</span>
+<span class="sd">        folder (string, optional): the folder in which to save the graph (Default: None)</span>
+<span class="sd">        file_name (string, optional: the name of the file to save the graph to (Default: None)</span>
+<span class="sd">        overwrite_existing (bool, optional): whether, if the file_name provided already exists in the specified folder, it should be overwritten or not (default: False)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="n">prepare_file_name</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">default_folder</span><span class="o">=</span><span class="s1">&#39;/tmp/protocol_graphs/&#39;</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Saving graph &#39;</span><span class="si">{}</span><span class="s2">&#39; to &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">file_path</span><span class="p">))</span>
+    <span class="n">plot_object</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span><span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="save_network_state"><a class="viewcode-back" href="../../measures.file_handling.html#measures.file_handling.save_network_state">[docs]</a><span class="k">def</span> <span class="nf">save_network_state</span><span class="p">(</span><span class="n">network_manager</span><span class="p">,</span> <span class="n">folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Pickle and save on disk a :obj:`~apart.core.network.NetworkManager` instance.</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        network_manager (:obj:`~apart.core.network.NetworkManager`): the network manager object, containing all the network state.</span>
+<span class="sd">        folder (string, optional): the folder in which to save the network state (Default: None)</span>
+<span class="sd">        file_name (string, optional: the name of the file to save the network state to (Default: None)</span>
+<span class="sd">        overwrite_existing (bool, optional): whether, if the file_name provided already exists in the specified folder, it should be overwritten or not (default: False)</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        network_manager</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="n">prepare_file_name</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">default_folder</span><span class="o">=</span><span class="s1">&#39;/tmp/protocol_net_states&#39;</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s2">&quot;.pickle&quot;</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">)</span>
+
+    <span class="c1"># Pickle in file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">network_manager</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">network_manager</span></div>
+
+
+
+<div class="viewcode-block" id="format_results_file_name"><a class="viewcode-back" href="../../measures.file_handling.html#measures.file_handling.format_results_file_name">[docs]</a><span class="k">def</span> <span class="nf">format_results_file_name</span><span class="p">(</span><span class="n">measure_title</span><span class="p">,</span> <span class="n">combination_number</span><span class="p">,</span> <span class="n">nb_iters</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Formats the file name for the results of simulations</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        measure_title (string): the name of the measure/experimentations</span>
+<span class="sd">        combination_number (int): the counter of the network simulations (useful when many network simulations are made, with may different parameter combinations)</span>
+<span class="sd">        nb_iters (int): the number of iterations that were run for each combination</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">       string: The file name formatted using the provided arguments.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_combinaison_</span><span class="si">{}</span><span class="s2">_</span><span class="si">{}</span><span class="s2">_iterations.pickle&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">measure_title</span><span class="p">,</span> <span class="n">combination_number</span><span class="p">,</span> <span class="n">nb_iters</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="matchstring_results_file_name"><a class="viewcode-back" href="../../measures.file_handling.html#measures.file_handling.matchstring_results_file_name">[docs]</a><span class="k">def</span> <span class="nf">matchstring_results_file_name</span><span class="p">(</span><span class="n">measure_title</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gives the regex string of the file name for simulation results.</span>
+<span class="sd">    </span>
+<span class="sd">    This function is useful to allow the search of files on the disk, and at the</span>
+<span class="sd">    same time get information on which parameter combination these results refer</span>
+<span class="sd">    to.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        measure_title (string): the name of the measure/experimentations</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        string: The regex string where the combination counter and number of iterations are left as `(\d+)` allowing to catch them in a Python :obj:`match` object. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># This function can be used to match old file naming conventions</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_combinaison_(\d+)_(\d+)_iterations&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">measure_title</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="format_net_states_file_name"><a class="viewcode-back" href="../../measures.file_handling.html#measures.file_handling.format_net_states_file_name">[docs]</a><span class="k">def</span> <span class="nf">format_net_states_file_name</span><span class="p">(</span><span class="n">measure_title</span><span class="p">,</span> <span class="n">combination_number</span><span class="p">,</span> <span class="n">iter_number</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Formats the file name for the saving of network states.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        measure_title (string): the name of the measure/experimentations</span>
+<span class="sd">        combination_number (int): the counter of the network simulations (useful when many network simulations are made, with may different parameter combinations)</span>
+<span class="sd">        iter_number (int): the counter of the specific iteration being saved </span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        string: The file name formatted using the provided arguments.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_netstate_</span><span class="si">{}</span><span class="s2">_iteration_</span><span class="si">{}</span><span class="s2">.pickle&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">measure_title</span><span class="p">,</span> <span class="n">combination_number</span><span class="p">,</span> <span class="n">iter_number</span><span class="p">)</span></div>
+ 
+<div class="viewcode-block" id="matchstring_net_states_file_name"><a class="viewcode-back" href="../../measures.file_handling.html#measures.file_handling.matchstring_net_states_file_name">[docs]</a><span class="k">def</span> <span class="nf">matchstring_net_states_file_name</span><span class="p">(</span><span class="n">measure_title</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gives the regex string of the file name for simulation results.</span>
+<span class="sd">    </span>
+<span class="sd">    This function is analogous to :func:`.matchstring_results_file_name`.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        measure_title (string): the name of the measure/experimentations</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        string: The regex string where the combination counter and iteration counter are left as `(\d+)` allowing to catch them in a Python :obj:`match` object. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_netstate_(\d+)_iteration_(\d+)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">measure_title</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="prepare_file_name"><a class="viewcode-back" href="../../measures.file_handling.html#measures.file_handling.prepare_file_name">[docs]</a><span class="k">def</span> <span class="nf">prepare_file_name</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">default_folder</span><span class="o">=</span><span class="s1">&#39;/tmp/&#39;</span><span class="p">,</span> <span class="n">default_file_name</span><span class="o">=</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s2">&quot;.pickle&quot;</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Processes a file name and folder and outputs a canonic absolute path.</span>
+<span class="sd">    </span>
+<span class="sd">    This function takes an absolute path, under the form of a folder and a file</span>
+<span class="sd">    name (note: the full path can be in one of the two, the other one being an</span>
+<span class="sd">    empty string or None), and processes this path so that: if no file name is</span>
+<span class="sd">    provided, the default file name is used; if no folder is provided, the</span>
+<span class="sd">    default one is used; if the file name does not have an extension (or an</span>
+<span class="sd">    invalid one), append the provided extension to the file name; if the new</span>
+<span class="sd">    file should not overwrite and existing one, then append a random string to</span>
+<span class="sd">    the file name.</span>
+<span class="sd">    </span>
+<span class="sd">    This function is meant to process the file names of files for graphs,</span>
+<span class="sd">    simulation results, and network states alike.</span>
+<span class="sd">    </span>
+<span class="sd">    This function also creates the folder(s) if necessary.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        folder (string): the folder in which the file should be saved.</span>
+<span class="sd">        file_name (string): the name of the file that must be saved.</span>
+<span class="sd">        default_folder (string, option): The default folder, if no folder is provided in argument (Default: /tmp)</span>
+<span class="sd">        default_file_name (string, option): The default file name, if no folder is provided in argument (Default: unknown)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        string: a well formated full absolute path, where it is ensured that the folders in the basename all exist. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">folder</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">file_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">folder</span> <span class="o">=</span> <span class="n">default_folder</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="n">default_file_name</span><span class="o">+</span><span class="n">extension</span>  
+    
+    
+    <span class="k">if</span> <span class="n">file_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="n">default_file_name</span><span class="o">+</span><span class="n">extension</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">extension</span><span class="p">):</span>
+        <span class="n">file_name</span> <span class="o">+=</span> <span class="n">extension</span>  
+
+    <span class="n">folder</span><span class="p">,</span> <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file_name</span><span class="p">))</span>
+
+    <span class="c1"># If the folder does not exist, create it</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o775</span><span class="p">)</span>
+    
+    <span class="n">complete_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file_name</span><span class="p">))</span>
+    
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">overwrite_existing</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">complete_file_path</span><span class="p">):</span>
+        <span class="n">complete_file_path</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">))</span><span class="o">+</span><span class="n">extension</span>
+    
+    <span class="k">return</span> <span class="n">complete_file_path</span></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

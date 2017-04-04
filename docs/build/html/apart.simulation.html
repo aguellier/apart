@@ -1,0 +1,534 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>apart.simulation — Running simulations &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="APART  documentation" href="index.html"/>
+        <link rel="up" title="apart – Protocol Implementation" href="apart.html"/>
+        <link rel="next" title="apart.core — Protocol’s Core Components" href="apart.core.html"/>
+        <link rel="prev" title="apart.crypto — Cryptography" href="apart.crypto.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">APART</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="packages.html">Packages</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="apart.crypto.html"><code class="docutils literal"><span class="pre">apart.crypto</span></code> &#8212; Cryptography</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><code class="docutils literal"><span class="pre">apart.simulation</span></code> &#8212; Running simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="apart.core.html"><code class="docutils literal"><span class="pre">apart.core</span></code> &#8212; Protocol&#8217;s Core Components</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html"><code class="docutils literal"><span class="pre">common</span></code> &#8212; Helper Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="measures.html"><code class="docutils literal"><span class="pre">measures</span></code> &#8212; Benchmark &amp; Simulation Framework</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="packages.html">Packages</a> &raquo;</li>
+        
+          <li><a href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a> &raquo;</li>
+        
+      <li><code class="docutils literal"><span class="pre">apart.simulation</span></code> &#8212; Running simulations</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/apart.simulation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-apart.simulation">
+<span id="apart-simulation-running-simulations"></span><h1><code class="docutils literal"><span class="pre">apart.simulation</span></code> &#8212; Running simulations<a class="headerlink" href="#module-apart.simulation" title="Permalink to this headline">¶</a></h1>
+<p>This module defines the material to run network simulations.</p>
+<p>It makes use of the elements defined in modules <a class="reference internal" href="apart.core.network.html#module-apart.core.network" title="apart.core.network"><code class="xref py py-mod docutils literal"><span class="pre">network</span></code></a> and
+<a class="reference internal" href="apart.core.node.html#module-apart.core.node" title="apart.core.node"><code class="xref py py-mod docutils literal"><span class="pre">node</span></code></a>. This module defines <a class="reference internal" href="#apart.simulation.SimulationParams" title="apart.simulation.SimulationParams"><code class="xref py py-class docutils literal"><span class="pre">SimulationParams</span></code></a>, the
+class that regroups all simulation parameters, and the module function
+<a class="reference internal" href="#apart.simulation.run_simulation" title="apart.simulation.run_simulation"><code class="xref py py-func docutils literal"><span class="pre">run_simulation()</span></code></a> that effectively runs a simulation.</p>
+<dl class="class">
+<dt id="apart.simulation.SimulationParams">
+<em class="property">class </em><code class="descclassname">apart.simulation.</code><code class="descname">SimulationParams</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/simulation.html#SimulationParams"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.simulation.SimulationParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class grouping all the parameters of the simulation</p>
+<p>When running a simulation, an instance of this class is used to specify the simulation parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>**kwargs</strong> &#8211; keyword arguments corresponding to the simulation parameters</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The value of (most of) the booleans in this class have an incidence on
+the <em>attributes</em> that the instance of
+<a class="reference internal" href="measures.network_statistics.html#measures.network_statistics.NetworkStats" title="measures.network_statistics.NetworkStats"><code class="xref py py-obj docutils literal"><span class="pre">NetworkStats</span></code></a>
+will have after the network run. For instance, if
+<a class="reference internal" href="#apart.simulation.SimulationParams.log_route_props" title="apart.simulation.SimulationParams.log_route_props"><code class="xref py py-attr docutils literal"><span class="pre">log_route_props</span></code></a> is <cite>True</cite>, then
+<a class="reference internal" href="measures.network_statistics.html#measures.network_statistics.NetworkStats" title="measures.network_statistics.NetworkStats"><code class="xref py py-obj docutils literal"><span class="pre">NetworkStats</span></code></a>
+will have the attribute
+<a class="reference internal" href="measures.network_statistics.html#measures.network_statistics.NetworkStats.nb_route_props_per_node" title="measures.network_statistics.NetworkStats.nb_route_props_per_node"><code class="xref py py-obj docutils literal"><span class="pre">nb_route_props_per_node</span></code></a>.
+Otherwise, accessing this attribute will trigger an
+<code class="xref py py-exc docutils literal"><span class="pre">AttributeError</span></code>.</p>
+</div>
+<dl class="method">
+<dt id="apart.simulation.SimulationParams.update_params">
+<code class="descname">update_params</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/simulation.html#SimulationParams.update_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.simulation.SimulationParams.update_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accepts keyword arguments, corresponding to the simulation parameters, and updates the instances&#8217;  attributes</p>
+<p>Only keyword arguments that match a valid attribute of the class are
+taken into accounts. Others are simply ignored silently.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.automatic_oriented_comm_phase">
+<code class="descname">automatic_oriented_comm_phase</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.automatic_oriented_comm_phase" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; Whether the oriented communication phase should be triggered automatically by the network manager or not</p>
+<p>Default: <cite>False</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.draw_routes">
+<code class="descname">draw_routes</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.draw_routes" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>list of 2-tuples</em> &#8211; Routes to draw at the end of the simulation.</p>
+<p>This parameter is specified under the form of a list of 2-tuples (n1,
+n2), asking to draw the route between node n1 and node n2.</p>
+<p>Default: <cite>None</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.draw_topology_graph">
+<code class="descname">draw_topology_graph</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.draw_topology_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; Should the network topology graph be displayed at the beginning of the simulation</p>
+<p>Default: <cite>False</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.log_and_store_all_real_msgs">
+<code class="descname">log_and_store_all_real_msgs</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.log_and_store_all_real_msgs" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; Whether the(real) messages going through the network should be recorded or not.</p>
+<p>Default: <cite>False</cite>.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Possibility of very heavy memory consumption.</p>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.log_dummy_link_msgs">
+<code class="descname">log_dummy_link_msgs</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.log_dummy_link_msgs" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; Whether the number of dummy messages sent by nodes at each rounds should be logged or not.</p>
+<p>Default: <cite>False</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.log_e2e_dummies">
+<code class="descname">log_e2e_dummies</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.log_e2e_dummies" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; Whether the number of e2e dummies, and the frequency at which a node must &#8220;intervene&#8221; manually on a batch must be logged or not.</p>
+<p>Default: <cite>False</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.log_end_ocom_phase">
+<code class="descname">log_end_ocom_phase</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.log_end_ocom_phase" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; Whether the round at which the oriented communication terminate should be logged</p>
+<p>Default: <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.log_end_topo_diss">
+<code class="descname">log_end_topo_diss</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.log_end_topo_diss" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; Whether the round at which the topology dissemination terminates should be logged</p>
+<p>Default: <cite>True</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.log_frequency_batch_intervention">
+<code class="descname">log_frequency_batch_intervention</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.log_frequency_batch_intervention" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; Log the number of times that nodes had to manually modify the sampled batch</p>
+<p>Default: <cite>False</cite>.</p>
+<p>The <em>batch interventions</em> are separated according to the nature of the
+intervention: removing real messages, replacing a dummy with an e2e
+dummy, adding an e2e dummy plus dummies, by adding many dummies
+(because no e2e are possible), or resorting to the default dummy
+broadcast.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.log_histogram_real_msgs_per_round">
+<code class="descname">log_histogram_real_msgs_per_round</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.log_histogram_real_msgs_per_round" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; Log the <em>exact discrete probability distribution</em> of the number of messages (real, and dummy separately) sent and received in a round by a node. High memory consumption.</p>
+<p>Default: <cite>False</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.log_histogram_real_msgs_waiting_time">
+<code class="descname">log_histogram_real_msgs_waiting_time</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.log_histogram_real_msgs_waiting_time" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; A more detailed logging than <a class="reference internal" href="#apart.simulation.SimulationParams.log_real_msgs_waiting_time" title="apart.simulation.SimulationParams.log_real_msgs_waiting_time"><code class="xref py py-attr docutils literal"><span class="pre">log_real_msgs_waiting_time</span></code></a>, that does not only give the mean and stdev, but the discrete probability distribution.</p>
+<p>Default: <cite>False</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.log_ocom_latency">
+<code class="descname">log_ocom_latency</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.log_ocom_latency" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; Whether the latency (in rounds) of the oriented communication should be measured and logged or not</p>
+<p>Default: <cite>False</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.log_ocom_routes">
+<code class="descname">log_ocom_routes</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.log_ocom_routes" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; Log all the oriented communication routes used in the network.</p>
+<p>Default: <cite>False</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.log_real_e2e_msgs">
+<code class="descname">log_real_e2e_msgs</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.log_real_e2e_msgs" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; Whether the number of end sent real, and ocom end sent real messages sent by nodes at each rounds should be logged or not. Same for end received msgs.</p>
+<p>Default: <cite>False</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.log_real_link_msgs">
+<code class="descname">log_real_link_msgs</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.log_real_link_msgs" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; Whether the number of real, end sent real, and ocom end sent real messages sent by nodes at each rounds should be logged or not.</p>
+<p>Default: <cite>False</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.log_real_msgs_waiting_time">
+<code class="descname">log_real_msgs_waiting_time</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.log_real_msgs_waiting_time" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; Whether the number of rounds that each real message passes waiting in the node&#8217;s message pool should be recorded.</p>
+<p>Default: <cite>False</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.log_route_props">
+<code class="descname">log_route_props</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.log_route_props" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; Whether the number of route proposition (received, accepted and refused ones) should be counted, and their reason of acceptation/refusal.</p>
+<p>Default: <cite>False</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.log_rt_props_latency">
+<code class="descname">log_rt_props_latency</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.log_rt_props_latency" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; Log the latency between the creation of a route proposal, and its finalization.</p>
+<p>Default: <cite>False</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.log_sent_link_msgs_per_round">
+<code class="descname">log_sent_link_msgs_per_round</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.log_sent_link_msgs_per_round" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; Log a histogram (prob distrib) of the total number of link messages (real or dummies) that a node sends in a round.</p>
+<p>Default: <cite>False</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.log_traffic_rates_equilibrium">
+<code class="descname">log_traffic_rates_equilibrium</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.log_traffic_rates_equilibrium" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; Whether traffic rate equilibrium of nodes should be logged.</p>
+<p>Default: <cite>False</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.logging_level">
+<code class="descname">logging_level</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.logging_level" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-mod docutils literal"><span class="pre">logging</span></code> level &#8211; The logging level of events in the network.</p>
+<p>Default: <cite>logging.INFO</cite>.</p>
+<p>The <code class="docutils literal"><span class="pre">INFO</span></code> level basically gives information on the beginning and end
+of the two main phases of the simulation: topology dissemination and
+oriented communications. The <code class="docutils literal"><span class="pre">DEBUG</span></code> level gives information on the routes
+proposed (and accepted/refused), and on oriented communication messages
+sent. Further levels <code class="docutils literal"><span class="pre">DEBUG2</span></code> and <code class="docutils literal"><span class="pre">DEBUG3</span></code> give more detailed
+information are extremely verbose.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.oriented_communication_sessions">
+<code class="descname">oriented_communication_sessions</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.oriented_communication_sessions" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> &#8211; The oriented communication sessions to run.</p>
+<p>Default: <cite>defaultdict(lambda: (12, 5))</cite>.</p>
+<dl class="docutils">
+<dt>The value of this parameter can be</dt>
+<dd><ul class="first last simple">
+<li>None: let node choose a random number of random communication partners</li>
+<li><cite>dict[s] = list((r, list(data))</cite> indicating that sender s must send the list of data to all receivers r in list</li>
+<li><cite>dict[s] = list((r,n))</cite> indicating that sender s must send the  n random pieces of data to all receivers r in list</li>
+<li><cite>dict[s] = (n_r, n_data [, ndata_2])</cite> indicating that sender s must choose n_r random receivers,
+and send them n_data random messages each. If n_data2 is provided, the sender
+will choose a random number of messages to send in [n_data, n_data2],
+different for each receiver</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.print_nodes_tables">
+<code class="descname">print_nodes_tables</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.print_nodes_tables" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; Should the network manager display the node&#8217;s tables at the end of the topology dissemination ?</p>
+<p>Default: <cite>False</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="apart.simulation.SimulationParams.time_of_simulation">
+<code class="descname">time_of_simulation</code><em class="property"> = None</em><a class="headerlink" href="#apart.simulation.SimulationParams.time_of_simulation" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; Force the stop of the simulation after a certain amount of simulated time.</p>
+<p>Default: <cite>0</cite>, meaning that the simulation should stop <em>by itself</em>.</p>
+<p>The value of this attribute must represents a simulation time in the SimPy simulation.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="apart.simulation.run_simulation">
+<code class="descclassname">apart.simulation.</code><code class="descname">run_simulation</code><span class="sig-paren">(</span><em>sim_params=None</em>, <em>net_params=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/simulation.html#run_simulation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.simulation.run_simulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs the network simulation, and returns the <a class="reference internal" href="apart.core.network.html#apart.core.network.NetworkManager" title="apart.core.network.NetworkManager"><code class="xref py py-obj docutils literal"><span class="pre">NetworkManager</span></code></a> instance, describing the network in its final state.</p>
+<p>This function creates a <a class="reference internal" href="apart.core.network.html#apart.core.network.NetworkManager" title="apart.core.network.NetworkManager"><code class="xref py py-obj docutils literal"><span class="pre">NetworkManager</span></code></a> instance,
+calls <a class="reference internal" href="apart.core.network.html#apart.core.network.NetworkManager.start" title="apart.core.network.NetworkManager.start"><code class="xref py py-meth docutils literal"><span class="pre">start()</span></code></a> on it, and waits for
+the simulation to end. During the simulation, and depending on the loggin
+level parameter (<a class="reference internal" href="#apart.simulation.SimulationParams.logging_level" title="apart.simulation.SimulationParams.logging_level"><code class="xref py py-attr docutils literal"><span class="pre">SimulationParams.logging_level</span></code></a>), outputs various
+information on the events happening in the network.</p>
+<p>Unless they are specified in argument, simulation and network parameters are
+the default defined values in the classes <a class="reference internal" href="#apart.simulation.SimulationParams" title="apart.simulation.SimulationParams"><code class="xref py py-class docutils literal"><span class="pre">SimulationParams</span></code></a> and
+<code class="xref py py-class docutils literal"><span class="pre">Networkparams</span></code>. There are two ways to provide
+custom arguments: by providing custom <a class="reference internal" href="#apart.simulation.SimulationParams" title="apart.simulation.SimulationParams"><code class="xref py py-class docutils literal"><span class="pre">SimulationParams</span></code></a> and
+<code class="xref py py-class docutils literal"><span class="pre">Networkparams</span></code> instances, or by providing the
+parameters in keyword arguments. However, instances have precedence over
+keyword arguments. For instance, if a <cite>sim_params</cite> argument is provided,
+keyword arguments containing simulation parameters are ignored.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sim_params</strong> (<a class="reference internal" href="#apart.simulation.SimulationParams" title="apart.simulation.SimulationParams"><code class="xref py py-obj docutils literal"><span class="pre">SimulationParams</span></code></a>, default) &#8211; specifies specific parameters
+for the simulation, within a custom <a class="reference internal" href="#apart.simulation.SimulationParams" title="apart.simulation.SimulationParams"><code class="xref py py-obj docutils literal"><span class="pre">SimulationParams</span></code></a> instance.
+(Default: None)</li>
+<li><strong>net_params</strong> (<code class="xref py py-obj docutils literal"><span class="pre">Networkparams</span></code>) &#8211; specifies specific
+parameters for the network, within a custom <code class="xref py py-obj docutils literal"><span class="pre">Networkparams</span></code>
+instance. (Default: None)</li>
+<li><strong>**kwargs</strong> (<em>dict</em>) &#8211; specifies simulation or network parameters indistinctly.
+If the <cite>sim_params</cite> parameter is <cite>None</cite>, the simulation parameters are generated as
+<cite>SimulationParams(**kwargs)</cite>. Likewise for the <cite>net_params</cite> argument.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The network manager instance at the end of the network run.
+Note that this object contains in particular a <a class="reference internal" href="apart.core.network.html#apart.core.network.NetworkManager.net_stats" title="apart.core.network.NetworkManager.net_stats"><code class="xref py py-attr docutils literal"><span class="pre">net_stats</span></code></a>
+attribute, which contains valuable information on the simulated network run.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="apart.core.network.html#apart.core.network.NetworkManager" title="apart.core.network.NetworkManager"><code class="xref py py-obj docutils literal"><span class="pre">NetworkManager</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="apart.core.html" class="btn btn-neutral float-right" title="apart.core — Protocol’s Core Components" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="apart.crypto.html" class="btn btn-neutral" title="apart.crypto — Cryptography" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,518 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>measure_all — Perform all three measures at once &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="APART  documentation" href="index.html"/>
+        <link rel="up" title="Examples" href="examples.html"/>
+        <link rel="prev" title="measure_privacy — Measure Privacy" href="examples.measure_privacy.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">APART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packages.html">Packages</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="examples.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="examples.measure_general_efficiency.html"><code class="docutils literal"><span class="pre">measure_general_efficiency</span></code> &#8212; Measure Performances</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.measure_route_prop.html"><code class="docutils literal"><span class="pre">measure_route_prop</span></code> &#8212; Study the route proposal mechanism</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.measure_privacy.html"><code class="docutils literal"><span class="pre">measure_privacy</span></code> &#8212; Measure Privacy</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#"><code class="docutils literal"><span class="pre">measure_all</span></code> &#8212; Perform all three measures at once</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#source-code">Source Code</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="examples.html">Examples</a> &raquo;</li>
+        
+      <li><code class="docutils literal"><span class="pre">measure_all</span></code> &#8212; Perform all three measures at once</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/examples.measure_all.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-measure_all">
+<span id="measure-all-perform-all-three-measures-at-once"></span><h1><code class="docutils literal"><span class="pre">measure_all</span></code> &#8212; Perform all three measures at once<a class="headerlink" href="#module-measure_all" title="Permalink to this headline">¶</a></h1>
+<p>Example module to makes simulations and measures on the APART protocol. This
+module allows to run all three other example measures simultaneously.</p>
+<p>That is, it runs network simulations, and computes all the statistics of modules
+<a class="reference internal" href="examples.measure_general_efficiency.html#module-measure_general_efficiency" title="measure_general_efficiency"><code class="xref py py-mod docutils literal"><span class="pre">measure_general_efficiency</span></code></a>, <a class="reference internal" href="examples.measure_privacy.html#module-measure_privacy" title="measure_privacy"><code class="xref py py-mod docutils literal"><span class="pre">measure_privacy</span></code></a>, and
+<a class="reference internal" href="examples.measure_route_prop.html#module-measure_route_prop" title="measure_route_prop"><code class="xref py py-mod docutils literal"><span class="pre">measure_route_prop</span></code></a>.</p>
+<div class="section" id="source-code">
+<h2>Source Code<a class="headerlink" href="#source-code" title="Permalink to this headline">¶</a></h2>
+<p>Refer to the source code for more detail. It is depicted below, and can be
+downloaded <a class="reference download internal" href="_downloads/measure_all.py" download=""><code class="xref download docutils literal"><span class="pre">here</span></code></a>.</p>
+<p>The code is outlined as follows:</p>
+<ul>
+<li><p class="first">Definitions of constants:</p>
+<blockquote>
+<div><ul class="simple">
+<li>The name of the measure defined in this module
+(<code class="xref py py-attr docutils literal"><span class="pre">MEASURE_TITLE</span></code>).</li>
+<li>The parameters relevant for this measure module
+(<code class="xref py py-attr docutils literal"><span class="pre">MEASURE_PARAMS</span></code>), <em>i.e.</em> network and  simulation parameters
+(see <a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams" title="apart.simulation.SimulationParams"><code class="xref py py-class docutils literal"><span class="pre">SimulationParams</span></code></a> and
+<a class="reference internal" href="apart.core.network.html#apart.core.network.NetworkParams" title="apart.core.network.NetworkParams"><code class="xref py py-class docutils literal"><span class="pre">NetworkParams</span></code></a>). In this module, all the
+parameters of the simulation and of the network can be tuned and their
+impact measured simultaneously.</li>
+<li>Note that no <code class="xref py py-attr docutils literal"><span class="pre">MEASURE_STATS</span></code> constant is defined. It is
+implicitly assumed to be the union of the three modules&#8217;
+<code class="xref py py-attr docutils literal"><span class="pre">MEASURE_STATS</span></code> constant.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">The function <a class="reference internal" href="#module-measure_all" title="measure_all"><code class="xref py py-func docutils literal"><span class="pre">measure_all()</span></code></a>, which sets the simulation and network
+parameters accordingly to their values in each of the three modules. In
+particular, each <code class="xref py py-attr docutils literal"><span class="pre">SimulationParams.log_</span></code> boolean is set to a disjunction
+of its value defined in each of the three module. Then, the function
+<a class="reference internal" href="measures.common_measures.html#measures.common_measures.generic_measure" title="measures.common_measures.generic_measure"><code class="xref py py-func docutils literal"><span class="pre">measures.common_measures.generic_measure()</span></code></a> is called.
+performs checks on the simulation and network parameters.</p>
+</li>
+<li><p class="first">The <code class="xref py py-func docutils literal"><span class="pre">get_sim_params()</span></code> function, returning an instance of
+<a class="reference internal" href="apart.simulation.html#apart.simulation.SimulationParams" title="apart.simulation.SimulationParams"><code class="xref py py-obj docutils literal"><span class="pre">SimulationParams</span></code></a> with custom parameter values.</p>
+</li>
+<li><p class="first">The <code class="xref py py-func docutils literal"><span class="pre">compute_metrics_one_network_run()</span></code> function, which is the callback
+function to provide as <code class="docutils literal"><span class="pre">metric_computer_callback</span></code> to
+<a class="reference internal" href="measures.common_measures.html#measures.common_measures.generic_measure" title="measures.common_measures.generic_measure"><code class="xref py py-func docutils literal"><span class="pre">measures.common_measures.generic_measure()</span></code></a>. Here,this function is
+designed to call the corresponding callback from each of the three modules,
+and merges their output.</p>
+</li>
+<li><p class="first">A <em>main</em> part, allowing to perform measures and/or plot previously acquired
+measure results.</p>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Contrarily to other example modules, this one does not define <em>plotting</em>
+functions. Instead, it directly calls the relevant plotting functions
+from the said modules (see the end of the <em>main</em> part of the code).</p>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Author: Antoine Guellier</span>
+<span class="c1"># Copyright (c) 2017 Université de Rennes 1</span>
+<span class="c1"># License: CeCILL. The full license text is available at:</span>
+<span class="c1">#  - http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html</span>
+
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Example module to makes simulations and measures on the APART protocol. This</span>
+<span class="sd">module allows to run all three other example measures simultaneously.</span>
+
+<span class="sd">That is, it runs network simulations, and computes all the statistics of modules</span>
+<span class="sd">:mod:`~measure_general_efficiency`, :mod:`~measure_privacy`, and</span>
+<span class="sd">:mod:`~measure_route_prop`. </span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span><span class="p">,</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;src&#39;</span><span class="p">)))</span>
+
+<span class="kn">from</span> <span class="nn">apart.core.network</span> <span class="k">import</span> <span class="n">Network</span><span class="p">,</span> <span class="n">NetworkParams</span>
+<span class="kn">from</span> <span class="nn">apart.simulation</span> <span class="k">import</span>  <span class="n">SimulationParams</span>
+<span class="kn">from</span> <span class="nn">common.custom_logging</span> <span class="k">import</span> <span class="o">*</span> 
+<span class="kn">from</span> <span class="nn">common.utilities</span> <span class="k">import</span> <span class="n">print_recursive_structure</span>
+<span class="kn">import</span> <span class="nn">measure_general_efficiency</span> <span class="k">as</span> <span class="nn">measure_general_efficiency</span>
+<span class="kn">import</span> <span class="nn">measure_privacy</span> <span class="k">as</span> <span class="nn">measure_privacy</span>
+<span class="kn">import</span> <span class="nn">measure_route_prop</span> <span class="k">as</span> <span class="nn">measure_route_prop</span>
+<span class="kn">from</span> <span class="nn">measures.file_handling</span> <span class="k">import</span> <span class="n">load_measures_results</span>
+<span class="kn">from</span> <span class="nn">measures.common_measures</span> <span class="k">import</span> <span class="n">MeasureException</span><span class="p">,</span> <span class="n">generic_measure</span><span class="p">,</span> \
+    <span class="n">preprocess_measure_input_params</span><span class="p">,</span> \
+    <span class="n">make_params_combinations</span><span class="p">,</span> <span class="n">merge_measures_outputs_with_prefix</span><span class="p">,</span> \
+    <span class="n">merge_measures_outputs</span>
+
+
+<span class="n">MEASURE_TITLE</span> <span class="o">=</span> <span class="s2">&quot;ALL&quot;</span>
+
+<span class="n">_MEASURE_PARAMS_DEFAULT</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([(</span><span class="s1">&#39;nb_nodes&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="mi">30</span><span class="p">)),</span>
+                                <span class="p">(</span><span class="s1">&#39;corruption_ratio&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="mf">0.33</span><span class="p">)),</span>
+                                <span class="p">(</span><span class="s1">&#39;ocom_sessions&#39;</span><span class="p">,</span> <span class="p">((</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">),</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">))),</span>
+                                <span class="p">(</span><span class="s1">&#39;rtprop_policy_max_routes&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
+                                <span class="p">(</span><span class="s1">&#39;rtprop_policy_p_reaccept&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">)),</span>
+                                <span class="p">(</span><span class="s1">&#39;rtprop_policy_p_replace&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)),</span>
+                                <span class="p">(</span><span class="s1">&#39;batching_t_interval&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span>  <span class="mi">1</span><span class="o">*</span><span class="mi">60</span><span class="o">*</span><span class="mi">1000</span><span class="p">)),</span>
+                                <span class="p">(</span><span class="s1">&#39;batching_nmin&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
+                                <span class="p">(</span><span class="s1">&#39;batching_f&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">)),</span>
+                                <span class="p">(</span><span class="s1">&#39;dummypol_fdum&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">)),</span>
+                                <span class="p">(</span><span class="s1">&#39;dummypol_deltar&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+                                <span class="p">])</span>
+
+<span class="n">MEASURE_PARAMS</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_MEASURE_PARAMS_DEFAULT</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+<span class="n">_MODULES</span> <span class="o">=</span> <span class="p">[</span><span class="n">measure_route_prop</span><span class="p">,</span> <span class="n">measure_general_efficiency</span><span class="p">,</span> <span class="n">measure_privacy</span><span class="p">]</span>
+        
+
+<span class="c1"># Default folder where to save the </span>
+<span class="n">_DEFAULT_SAVING_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;Measures/&#39;</span><span class="p">))</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">_DEFAULT_SAVING_FOLDER</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">_DEFAULT_SAVING_FOLDER</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o775</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">measure_all</span><span class="p">(</span><span class="n">save_results_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_network_states</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">restrict_to_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">force_recomputation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">measure_params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calls :func:`measures.common_measures.generic_measure` after some pre-processing.</span>
+<span class="sd">    </span>
+<span class="sd">    Here, the processing mainly consists in combining all the simulation and</span>
+<span class="sd">    network parameters of all three other example modules</span>
+<span class="sd">    :mod:`~measure_general_efficiency`, :mod:`~measure_privacy`, and</span>
+<span class="sd">    :mod:`~measure_route_prop`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">save_results_to</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">save_results_to</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_DEFAULT_SAVING_FOLDER</span><span class="p">,</span> <span class="s2">&quot;ALL&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Make sure all parameters are well included</span>
+    <span class="n">all_params_iterator</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">mod</span><span class="o">.</span><span class="n">MEASURE_PARAMS</span> <span class="k">for</span> <span class="n">mod</span> <span class="ow">in</span> <span class="n">_MODULES</span><span class="p">))</span>
+    
+    <span class="n">missing_params</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">all_params_iterator</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MEASURE_PARAMS</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">missing_params</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MeasureException</span><span class="p">()</span>
+     
+    <span class="n">preprocess_measure_input_params</span><span class="p">(</span><span class="n">_MEASURE_PARAMS_DEFAULT</span><span class="p">,</span> <span class="n">measure_params</span><span class="p">)</span>
+    
+    <span class="c1"># Custom check for the &#39;ocom_session&#39; parameter</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">measure_params</span><span class="p">[</span><span class="s1">&#39;ocom_sessions&#39;</span><span class="p">])):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">measure_params</span><span class="p">[</span><span class="s1">&#39;ocom_sessions&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">measure_params</span><span class="p">[</span><span class="s1">&#39;ocom_sessions&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="n">measure_params</span><span class="p">[</span><span class="s1">&#39;ocom_sessions&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">measure_params</span><span class="p">[</span><span class="s1">&#39;ocom_sessions&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">defaultdict</span><span class="p">):</span>
+            <span class="n">measure_params</span><span class="p">[</span><span class="s1">&#39;ocom_sessions&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">measure_params</span><span class="p">[</span><span class="s1">&#39;ocom_sessions&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+ 
+    
+    
+    <span class="n">nb_iters</span><span class="o">=</span> <span class="n">measure_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;nb_iters&#39;</span><span class="p">)</span>
+    <span class="n">nb_iters_same_topo_graph</span><span class="o">=</span> <span class="n">measure_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;nb_iters_same_topo_graph&#39;</span><span class="p">)</span>
+    <span class="n">net_params_combinations</span> <span class="o">=</span> <span class="n">make_params_combinations</span><span class="p">(</span><span class="n">nb_iters</span><span class="p">,</span> <span class="n">nb_iters_same_topo_graph</span><span class="p">,</span> <span class="n">MEASURE_PARAMS</span><span class="p">,</span> <span class="n">measure_params</span><span class="p">)</span>
+    
+    <span class="c1"># Get the sim_params of each module</span>
+    <span class="n">measures_sim_params</span> <span class="o">=</span> <span class="p">[</span><span class="n">mod</span><span class="o">.</span><span class="n">get_sim_params</span><span class="p">()</span> <span class="k">for</span> <span class="n">mod</span> <span class="ow">in</span> <span class="n">_MODULES</span><span class="p">]</span>
+    
+    <span class="n">sim_params</span> <span class="o">=</span> <span class="n">SimulationParams</span><span class="p">()</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">logging_level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span>  <span class="c1"># Display only Warnings or errors</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">print_nodes_tables</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># In general, no one will be there to see the stdout or graphs, so don&#39;t draw them</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">draw_topology_graph</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">draw_routes</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">time_of_simulation</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Go until the end of the simulation</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">automatic_oriented_comm_phase</span> <span class="o">=</span> <span class="kc">True</span> 
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">oriented_communication_sessions</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="c1"># Set each simulation parameter to a disjunction of its value in the three</span>
+    <span class="c1"># modules (measure_route_prop, measure_general_efficiency, measure_privay)</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_ocom_latency</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">log_ocom_latency</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">measures_sim_params</span><span class="p">)</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_end_topo_diss</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">log_end_topo_diss</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">measures_sim_params</span><span class="p">)</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_end_ocom_phase</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">log_end_ocom_phase</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">measures_sim_params</span><span class="p">)</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_and_store_all_real_msgs</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">log_and_store_all_real_msgs</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">measures_sim_params</span><span class="p">)</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_dummy_link_msgs</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">log_dummy_link_msgs</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">measures_sim_params</span><span class="p">)</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_real_link_msgs</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">log_real_link_msgs</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">measures_sim_params</span><span class="p">)</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_real_e2e_msgs</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">log_real_e2e_msgs</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">measures_sim_params</span><span class="p">)</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_histogram_real_msgs_per_round</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">log_histogram_real_msgs_per_round</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">measures_sim_params</span><span class="p">)</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_traffic_rates_equilibrium</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">log_traffic_rates_equilibrium</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">measures_sim_params</span><span class="p">)</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_real_msgs_waiting_time</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">log_real_msgs_waiting_time</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">measures_sim_params</span><span class="p">)</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_histogram_real_msgs_waiting_time</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">log_histogram_real_msgs_waiting_time</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">measures_sim_params</span><span class="p">)</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_e2e_dummies</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">log_e2e_dummies</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">measures_sim_params</span><span class="p">)</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_frequency_batch_intervention</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">log_frequency_batch_intervention</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">measures_sim_params</span><span class="p">)</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_route_props</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">log_route_props</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">measures_sim_params</span><span class="p">)</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_sent_link_msgs_per_round</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">log_sent_link_msgs_per_round</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">measures_sim_params</span><span class="p">)</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_rt_props_latency</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">log_rt_props_latency</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">measures_sim_params</span><span class="p">)</span>
+    <span class="n">sim_params</span><span class="o">.</span><span class="n">log_ocom_routes</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">log_ocom_routes</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">measures_sim_params</span><span class="p">)</span>
+
+
+    <span class="k">return</span> <span class="n">generic_measure</span><span class="p">(</span><span class="n">MEASURE_TITLE</span><span class="p">,</span> <span class="n">save_results_to</span><span class="p">,</span> 
+                           <span class="n">net_params_combinations</span><span class="p">,</span> 
+                           <span class="n">metrics_computer_callback</span><span class="o">=</span><span class="n">compute_metrics_one_network_run</span><span class="p">,</span>
+                           <span class="n">sim_params</span><span class="o">=</span><span class="n">sim_params</span><span class="p">,</span>
+<span class="c1">#                            net_params=net_params,</span>
+                           <span class="n">save_network_states</span><span class="o">=</span><span class="n">save_network_states</span><span class="p">,</span>
+                           <span class="n">restrict_to_params</span><span class="o">=</span><span class="n">restrict_to_params</span><span class="p">,</span>
+                           <span class="n">overwrite_existing</span><span class="o">=</span><span class="n">overwrite_existing</span><span class="p">,</span>
+                           <span class="n">force_recomputation</span><span class="o">=</span><span class="n">force_recomputation</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">compute_metrics_one_network_run</span><span class="p">(</span><span class="n">aggregated_metrics</span><span class="p">,</span> <span class="n">net_mngr</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Callback function for this measure module.</span>
+<span class="sd">    </span>
+<span class="sd">    Computes the statistics on the network state at the end of a run, and</span>
+<span class="sd">    aggregates the statistics over several network runs.</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        aggregated_metrics</span>
+<span class="sd">        net_mngr(:obj:`apart.core.networtk.NetworkManager`): the network </span>
+<span class="sd">            manager, containing in particular the network state after the run. </span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict, dict: The resulting statistics</span>
+
+<span class="sd">        The first dict contains the *aggregated statistics. That is, d[k] = v,</span>
+<span class="sd">        where k is the metric measure_name, and v is *aggregated* metric value over all</span>
+<span class="sd">        iterations (of a particular parameters combination) that happened so far</span>
+
+<span class="sd">        The second dict contains the statistics for the one network unr. That</span>
+<span class="sd">        is, dict: d[k] = v, where k is the metric measure_name, and v is the metric</span>
+<span class="sd">        value. This value can be an int, a float, a dict, etc.</span>
+<span class="sd">    &quot;&quot;&quot;</span> 
+    
+    <span class="c1"># This function merely calls the callback of each module (measure_route_prop, measure_general_efficiency, measure_privay)</span>
+    
+    
+    <span class="n">mod_aggregated_metrics</span> <span class="o">=</span> <span class="p">{}</span> 
+    <span class="n">mod_this_iteration_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">for</span> <span class="n">mod</span> <span class="ow">in</span> <span class="n">_MODULES</span><span class="p">:</span>
+        <span class="n">mod_aggregated_metrics</span><span class="p">[</span><span class="n">mod</span><span class="p">],</span> <span class="n">mod_this_iteration_metrics</span><span class="p">[</span><span class="n">mod</span><span class="p">]</span> <span class="o">=</span> <span class="n">mod</span><span class="o">.</span><span class="n">compute_metrics_one_network_run</span><span class="p">(</span><span class="n">aggregated_metrics</span><span class="p">,</span> <span class="n">net_mngr</span><span class="p">)</span>
+        
+        
+    <span class="n">aggregated_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">this_iteration_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">mod</span> <span class="ow">in</span> <span class="n">_MODULES</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mod_aggregated_metrics</span><span class="p">[</span><span class="n">mod</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mod_this_iteration_metrics</span><span class="p">[</span><span class="n">mod</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">mod_this_iteration_metrics</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">MeasureException</span><span class="p">(</span><span class="s2">&quot;Conflict in aggregation of results of all measure modules: &quot;</span>
+                                       <span class="s2">&quot;statistic named &#39;</span><span class="si">{}</span><span class="s2">&#39; seems to be present in at least two modules&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
+            <span class="n">this_iteration_metrics</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+    
+    <span class="k">return</span> <span class="n">aggregated_metrics</span><span class="p">,</span> <span class="n">this_iteration_metrics</span>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_DEFAULT_SAVING_FOLDER</span><span class="p">,</span> <span class="s1">&#39;measure_&#39;</span><span class="o">+</span><span class="n">MEASURE_TITLE</span><span class="p">)</span>
+    
+    <span class="n">do_measures</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">do_plot</span> <span class="o">=</span> <span class="kc">True</span>
+    
+    <span class="k">if</span> <span class="n">do_measures</span><span class="p">:</span>
+        <span class="n">measure_all</span><span class="p">(</span><span class="n">nb_nodes</span><span class="o">=</span><span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span>
+                    <span class="n">nb_iters</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">nb_iters_same_topo_graph</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                    <span class="n">save_results_to</span><span class="o">=</span><span class="n">folder</span><span class="p">,</span>
+                    <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">do_plot</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">load_measures_results</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">MEASURE_TITLE</span><span class="o">+</span><span class="s2">&quot;.pickle&quot;</span><span class="p">)</span>
+        <span class="n">folder_graphs</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="s2">&quot;graphs&quot;</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">mod</span> <span class="ow">in</span> <span class="p">[</span><span class="n">measure_privacy</span><span class="p">,</span> <span class="n">measure_general_efficiency</span><span class="p">,</span> <span class="n">measure_route_prop</span><span class="p">]:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">+</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Plotting graphs for module </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mod</span><span class="o">.</span><span class="n">MEASURE_TITLE</span><span class="p">))</span>
+            <span class="n">folder_graphs</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="s2">&quot;graphs_&quot;</span><span class="o">+</span><span class="n">mod</span><span class="o">.</span><span class="n">MEASURE_TITLE</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">mod</span> <span class="ow">is</span> <span class="n">measure_privacy</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Plotting stat </span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mod</span><span class="o">.</span><span class="n">MEASURE_TITLE</span><span class="p">,</span> <span class="s2">&quot;RECEIVER_ANONYMITY&quot;</span><span class="p">))</span>
+                <span class="n">mod</span><span class="o">.</span><span class="n">plot_RECEIVER_ANONYMITY_vs_theoretical</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">save_to</span><span class="o">=</span><span class="n">folder_graphs</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">mod</span><span class="o">.</span><span class="n">MEASURE_STATS</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Plotting stat </span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mod</span><span class="o">.</span><span class="n">MEASURE_TITLE</span><span class="p">,</span> <span class="n">stat</span><span class="p">))</span>
+                    <span class="n">mod</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;plot&quot;</span><span class="o">+</span><span class="n">stat</span><span class="p">](</span><span class="n">results</span><span class="p">,</span> <span class="n">save_to</span><span class="o">=</span><span class="n">folder_graphs</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    
+    
+   
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="examples.measure_privacy.html" class="btn btn-neutral" title="measure_privacy — Measure Privacy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

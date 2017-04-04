@@ -1,0 +1,725 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>apart.crypto — Cryptography &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="APART  documentation" href="index.html"/>
+        <link rel="up" title="apart – Protocol Implementation" href="apart.html"/>
+        <link rel="next" title="apart.simulation — Running simulations" href="apart.simulation.html"/>
+        <link rel="prev" title="apart – Protocol Implementation" href="apart.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">APART</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="packages.html">Packages</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><code class="docutils literal"><span class="pre">apart.crypto</span></code> &#8212; Cryptography</a></li>
+<li class="toctree-l3"><a class="reference internal" href="apart.simulation.html"><code class="docutils literal"><span class="pre">apart.simulation</span></code> &#8212; Running simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="apart.core.html"><code class="docutils literal"><span class="pre">apart.core</span></code> &#8212; Protocol&#8217;s Core Components</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html"><code class="docutils literal"><span class="pre">common</span></code> &#8212; Helper Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="measures.html"><code class="docutils literal"><span class="pre">measures</span></code> &#8212; Benchmark &amp; Simulation Framework</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="packages.html">Packages</a> &raquo;</li>
+        
+          <li><a href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a> &raquo;</li>
+        
+      <li><code class="docutils literal"><span class="pre">apart.crypto</span></code> &#8212; Cryptography</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/apart.crypto.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-apart.crypto">
+<span id="apart-crypto-cryptography"></span><h1><code class="docutils literal"><span class="pre">apart.crypto</span></code> &#8212; Cryptography<a class="headerlink" href="#module-apart.crypto" title="Permalink to this headline">¶</a></h1>
+<p>This module provides an emulated implementation of the Elgamal scheme, along with its homomohpic operations.</p>
+<p>The implementation is <em>emulated</em>, in the sense that plaintexts are not actually
+encrypted. See the description of class <a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-class docutils literal"><span class="pre">Ctxt</span></code></a>. However, the product of
+public keys, a mechanism used in the protocol, is reflected in the
+implementation.</p>
+<p>It also provides an emulation of the <a class="reference internal" href="#apart.crypto.SHA3_hash" title="apart.crypto.SHA3_hash"><code class="xref py py-func docutils literal"><span class="pre">SHA3_hash()</span></code></a> hash function.</p>
+<p>This module defines the <a class="reference internal" href="#apart.crypto.DecryptionError" title="apart.crypto.DecryptionError"><code class="xref py py-exc docutils literal"><span class="pre">DecryptionError</span></code></a> and <a class="reference internal" href="#apart.crypto.ReencryptionError" title="apart.crypto.ReencryptionError"><code class="xref py py-exc docutils literal"><span class="pre">ReencryptionError</span></code></a> exception.</p>
+<dl class="exception">
+<dt id="apart.crypto.DecryptionError">
+<em class="property">exception </em><code class="descclassname">apart.crypto.</code><code class="descname">DecryptionError</code><a class="reference internal" href="_modules/apart/crypto.html#DecryptionError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.DecryptionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
+<p>Raised when a decryption error occurs, e.g. when trying to decrypt with the wrong secret key.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="apart.crypto.ReencryptionError">
+<em class="property">exception </em><code class="descclassname">apart.crypto.</code><code class="descname">ReencryptionError</code><a class="reference internal" href="_modules/apart/crypto.html#ReencryptionError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.ReencryptionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
+<p>Raised when a re-encryption error occurs, e.g. when trying to re-encrypt with the inadequate public key or encryption of one</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="apart.crypto.Ctxt">
+<em class="property">class </em><code class="descclassname">apart.crypto.</code><code class="descname">Ctxt</code><a class="reference internal" href="_modules/apart/crypto.html#Ctxt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.Ctxt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<p>Class emulating a ciphertext of the Elgamal scheme.</p>
+<p>Ciphertexts and cryptographic operations are not actually implemented. Here,
+a ciphertext is represented by a 2-tuple, containing the plaintext (in
+clear) in the first element, and the (product of) keys in the second
+element. This second element allows to check that e.g. decryption is done
+with the righteous public key (thus avoiding the code of the protocol to
+&#8220;cheat&#8221; and decrypt ciphertext it should not).</p>
+<p>The module constants GROUP_P and GROUP_G of the
+<a class="reference internal" href="apart.core.protocol_constants.html#module-apart.core.protocol_constants" title="apart.core.protocol_constants"><code class="xref py py-mod docutils literal"><span class="pre">protocol_constants</span></code></a> are used for group operations.
+However, it is not a schnorr group that is used, but simply the group Zp*</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="apart.crypto.Elgamal_accumulator_add">
+<code class="descclassname">apart.crypto.</code><code class="descname">Elgamal_accumulator_add</code><span class="sig-paren">(</span><em>caccumulator</em>, <em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/crypto.html#Elgamal_accumulator_add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.Elgamal_accumulator_add" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function abusively implements the homomorphic addition of an element in an Elgamal encrypted accumulator</p>
+<p>This function works on plaintexts that are strings, and performs string
+concatenation to add value <code class="docutils literal"><span class="pre">v</span></code> into the accumulator (a string) encrypted
+into the ciphertext <code class="docutils literal"><span class="pre">caccumulator</span></code>. This is <em>cheating</em>, since, in an
+actual Elgamal implementation, this homomorphic operation would not be
+possible, at least not in this form.(it would require several ciphertexts
+actually...).</p>
+<p>This function goes along with the function <a class="reference internal" href="#apart.crypto.Elgamal_accumulator_check" title="apart.crypto.Elgamal_accumulator_check"><code class="xref py py-func docutils literal"><span class="pre">Elgamal_accumulator_check()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>caccumulator</strong> (<a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a>) &#8211; the ciphertext encrypting an accumulator, respresented here by a string</li>
+<li><strong>v</strong> (<em>string</em>) &#8211; the value to homomorphically add to the encrypted accumulator (by string concatenation)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the encrypted accumulator updated with the new value <code class="docutils literal"><span class="pre">v</span></code></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="apart.crypto.Elgamal_accumulator_check">
+<code class="descclassname">apart.crypto.</code><code class="descname">Elgamal_accumulator_check</code><span class="sig-paren">(</span><em>caccumulator</em>, <em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/crypto.html#Elgamal_accumulator_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.Elgamal_accumulator_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function abusively implements the homomorphic membership test on an Elgamal encrypted accumulator</p>
+<p>This function works on plaintexts that are strings, and performs string
+string lookups to check if <code class="docutils literal"><span class="pre">v</span></code> is contained into the accumulator (a
+string) encrypted into the ciphertext <code class="docutils literal"><span class="pre">caccumulator</span></code>. This is <em>cheating</em>,
+since, in an actual Elgamal implementation, this homomorphic operation would
+not be possible, at least not in this form.(it would require several
+ciphertexts actually...). The result is an encrypted boolean.</p>
+<p>This function goes along with the function <a class="reference internal" href="#apart.crypto.Elgamal_accumulator_add" title="apart.crypto.Elgamal_accumulator_add"><code class="xref py py-func docutils literal"><span class="pre">Elgamal_accumulator_add()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>caccumulator</strong> (<a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a>) &#8211; the ciphertext encrypting an accumulator, respresented here by a string</li>
+<li><strong>v</strong> (<em>string</em>) &#8211; the value which presence must be tested in the encrypted accumulator (by string lookup)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">an encrypted boolean, equal to True if the value <code class="docutils literal"><span class="pre">v</span></code> is in the encrypted accumulator</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="apart.crypto.Elgamal_ctxt_div">
+<code class="descclassname">apart.crypto.</code><code class="descname">Elgamal_ctxt_div</code><span class="sig-paren">(</span><em>c1</em>, <em>c2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/crypto.html#Elgamal_ctxt_div"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.Elgamal_ctxt_div" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emulates the homomorphic division of the Elgamal scheme.</p>
+<p>This function is similar to <a class="reference internal" href="#apart.crypto.Elgamal_ctxt_mult" title="apart.crypto.Elgamal_ctxt_mult"><code class="xref py py-func docutils literal"><span class="pre">Elgamal_ctxt_mult()</span></code></a>, except that the
+plaintext of <code class="docutils literal"><span class="pre">c1</span></code> is multiplied by the group inverse of <code class="docutils literal"><span class="pre">c2</span></code>&#8216;s plaintext.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>c1</strong> (<a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a>) &#8211; the first ciphertext, encrypting a group element</li>
+<li><strong>c2</strong> (<a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a>) &#8211; the second ciphertext, encrypting a group element</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the ciphertext encrypting the product of <code class="docutils literal"><span class="pre">c1</span></code> and <code class="docutils literal"><span class="pre">c2</span></code>&#8216;s plaintexts</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">AssertionError</span></code> &#8211; if <code class="docutils literal"><span class="pre">c1</span></code> and <code class="docutils literal"><span class="pre">c2</span></code> are not encrypted under the same (product of) key(s)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="apart.crypto.Elgamal_ctxt_mult">
+<code class="descclassname">apart.crypto.</code><code class="descname">Elgamal_ctxt_mult</code><span class="sig-paren">(</span><em>c1</em>, <em>c2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/crypto.html#Elgamal_ctxt_mult"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.Elgamal_ctxt_mult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emulates the homomorphic multiplication of the Elgamal scheme.</p>
+<p>Performs an assertion check, to ensure that <code class="docutils literal"><span class="pre">c1</span></code> and <code class="docutils literal"><span class="pre">c2</span></code> are encrypted
+under the same (product of) key(s). If this verification passes, the group
+multiplication modulo GROUP_P of the fist element of both ciphertexts (i;e.
+their plaintext) is manually performed, and a new ciphertext is constructed
+and returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>c1</strong> (<a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a>) &#8211; the first ciphertext, encrypting a group element</li>
+<li><strong>c2</strong> (<a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a>) &#8211; the second ciphertext, also encrypting a group element</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the ciphertext encrypting the product of <code class="docutils literal"><span class="pre">c1</span></code> and <code class="docutils literal"><span class="pre">c2</span></code>&#8216;s plaintexts</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">AssertionError</span></code> &#8211; if <code class="docutils literal"><span class="pre">c1</span></code> and <code class="docutils literal"><span class="pre">c2</span></code> are not encrypted under the same (product of) key(s)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="apart.crypto.Elgamal_dec">
+<code class="descclassname">apart.crypto.</code><code class="descname">Elgamal_dec</code><span class="sig-paren">(</span><em>sk</em>, <em>c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/crypto.html#Elgamal_dec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.Elgamal_dec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emulates the decryption operation of the Elgamal scheme.</p>
+<p>Checks whether the second element of <code class="docutils literal"><span class="pre">c</span></code> is equal to <code class="docutils literal"><span class="pre">sk</span></code>. If so,
+outputs the first element of <code class="docutils literal"><span class="pre">c</span></code> (i.e. the plaintext). Otherwise, raises a
+<a class="reference internal" href="#apart.crypto.DecryptionError" title="apart.crypto.DecryptionError"><code class="xref py py-exc docutils literal"><span class="pre">DecryptionError</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sk</strong> (<em>int</em>) &#8211; the secret key to use in the decryption operation</li>
+<li><strong>c</strong> (<a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a>) &#8211; the ciphertext to decrypt</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the plaintext, that can be of any type</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">any</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#apart.crypto.DecryptionError" title="apart.crypto.DecryptionError"><code class="xref py py-exc docutils literal"><span class="pre">DecryptionError</span></code></a> if the ciphertext <code class="docutils literal"><span class="pre">c</span></code> is not encrypted under <code class="docutils literal"><span class="pre">sk</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="apart.crypto.Elgamal_enc">
+<code class="descclassname">apart.crypto.</code><code class="descname">Elgamal_enc</code><span class="sig-paren">(</span><em>pk</em>, <em>m</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/crypto.html#Elgamal_enc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.Elgamal_enc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emulates the encryption operation of the Elgamal scheme.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pk</strong> (<em>int</em>) &#8211; the public key to use</li>
+<li><strong>m</strong> &#8211; the plaintext to encrypt (can be type of data)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">an (emulated) ciphertext <code class="docutils literal"><span class="pre">Ctxt(m,</span> <span class="pre">pk)</span></code></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="apart.crypto.Elgamal_enc_nopk">
+<code class="descclassname">apart.crypto.</code><code class="descname">Elgamal_enc_nopk</code><span class="sig-paren">(</span><em>cone</em>, <em>m</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/crypto.html#Elgamal_enc_nopk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.Elgamal_enc_nopk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emulates the encryption without public key in the Elgamal scheme.</p>
+<p>This function performs simply returns a ciphertexts contructed with <code class="docutils literal"><span class="pre">m</span></code> in
+first element, and the same second element as <code class="docutils literal"><span class="pre">cone</span></code> Args:. In the
+considered representation of ciphertexts (see <a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-class docutils literal"><span class="pre">Ctxt</span></code></a>, this yields a
+a ciphertext for <code class="docutils literal"><span class="pre">m</span></code> encrypted under the same key as <code class="docutils literal"><span class="pre">cone</span></code>).</p>
+<p>Note: before the encryption, <code class="docutils literal"><span class="pre">cone</span></code> is re-encrypted using <a class="reference internal" href="#apart.crypto.Reenc_one" title="apart.crypto.Reenc_one"><code class="xref py py-func docutils literal"><span class="pre">Reenc_one()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cone</strong> (<a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a>) &#8211; the encryptions of one, to perform the encryption</li>
+<li><strong>m</strong> (<em>any</em>) &#8211; the plaintext to encrypt (can be any data)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the ciphertext encrypting <code class="docutils literal"><span class="pre">m</span></code> under the same key as <code class="docutils literal"><span class="pre">cone</span></code></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="apart.crypto.Elgamal_key_div">
+<code class="descclassname">apart.crypto.</code><code class="descname">Elgamal_key_div</code><span class="sig-paren">(</span><em>sk</em>, <em>c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/crypto.html#Elgamal_key_div"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.Elgamal_key_div" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emulates the homomorphic key multiplication of the Elgamal scheme.</p>
+<p>This function is the inverse of <a class="reference internal" href="#apart.crypto.Elgamal_key_mult" title="apart.crypto.Elgamal_key_mult"><code class="xref py py-func docutils literal"><span class="pre">Elgamal_key_mult()</span></code></a>, and functions in
+the same way. Note that no check is performed: the modular division of the
+keys is performed, even if <code class="docutils literal"><span class="pre">sk</span></code> is not a factor of <code class="docutils literal"><span class="pre">sk'</span></code>, the key under
+which <code class="docutils literal"><span class="pre">c</span></code> is encrypted.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sk</strong> (<em>int</em>) &#8211; a group element</li>
+<li><strong>c</strong> (<a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a>) &#8211; a ciphertext, encrypting any kind of data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the ciphertext encrypting the same plaintext as of <code class="docutils literal"><span class="pre">c</span></code>&#8216;s,
+but under a <code class="docutils literal"><span class="pre">sk'/sk</span></code> (where <code class="docutils literal"><span class="pre">sk'</span></code> is the original key under which <code class="docutils literal"><span class="pre">c</span></code> was encrypted)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="apart.crypto.Elgamal_key_mult">
+<code class="descclassname">apart.crypto.</code><code class="descname">Elgamal_key_mult</code><span class="sig-paren">(</span><em>sk</em>, <em>c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/crypto.html#Elgamal_key_mult"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.Elgamal_key_mult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emulates the homomorphic key multiplication of the Elgamal scheme.</p>
+<p>This function performs the group multiplication modulo GROUP_P of the second
+element of <code class="docutils literal"><span class="pre">c1</span></code> with <code class="docutils literal"><span class="pre">sk</span></code>, creates a ciphertext with the same plaintext
+as <code class="docutils literal"><span class="pre">c</span></code>, but for the new key, and returns it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sk</strong> (<em>int</em>) &#8211; a group element</li>
+<li><strong>c</strong> (<a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a>) &#8211; a ciphertext, encrypting any kind of data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the ciphertext encrypting the same plaintext as of <code class="docutils literal"><span class="pre">c</span></code>&#8216;s,
+but under a <code class="docutils literal"><span class="pre">sk*sk'</span></code> (where <code class="docutils literal"><span class="pre">sk'</span></code> is the original key under which <code class="docutils literal"><span class="pre">c</span></code> was encrypted)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="apart.crypto.Elgamal_keygen">
+<code class="descclassname">apart.crypto.</code><code class="descname">Elgamal_keygen</code><span class="sig-paren">(</span><em>secparam</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/crypto.html#Elgamal_keygen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.Elgamal_keygen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emulates the key generation of the Elgamal scheme.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>secparam</strong> (<em>int</em>) &#8211; this argument is there for compatibility, but is not used.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a key pair. Here, (pk, sk) = (r, r), for r a random group element.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(int, int)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="apart.crypto.Elgamal_plain_mult">
+<code class="descclassname">apart.crypto.</code><code class="descname">Elgamal_plain_mult</code><span class="sig-paren">(</span><em>c</em>, <em>m</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/crypto.html#Elgamal_plain_mult"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.Elgamal_plain_mult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emulates the homomorphic plaintext multiplication of the Elgamal scheme.</p>
+<p>This function performs the group multiplication modulo GROUP_P of the fist
+element of <code class="docutils literal"><span class="pre">c</span></code> with <code class="docutils literal"><span class="pre">m</span></code> creates a new ciphertext for the result (under
+the same key as <code class="docutils literal"><span class="pre">c</span></code>), and returns it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>c</strong> (<a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a>) &#8211; a ciphertext, encrypting a group element</li>
+<li><strong>m</strong> (<em>int</em>) &#8211; a group element</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the ciphertext encrypting the product of <code class="docutils literal"><span class="pre">c</span></code>&#8216;s plaintext and <code class="docutils literal"><span class="pre">m</span></code></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="apart.crypto.Elgamal_scalar_exp">
+<code class="descclassname">apart.crypto.</code><code class="descname">Elgamal_scalar_exp</code><span class="sig-paren">(</span><em>c</em>, <em>e</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/crypto.html#Elgamal_scalar_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.Elgamal_scalar_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emulates the homomorphic scalar exponentiation of the Elgamal scheme.</p>
+<p>This function performs the modular exponentiation modulo GROUP_P of the first
+element of <code class="docutils literal"><span class="pre">c</span></code> with <code class="docutils literal"><span class="pre">e</span></code>, creates a new ciphertext for the result (under
+the same key as <code class="docutils literal"><span class="pre">c</span></code>), and returns it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>c</strong> (<a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a>) &#8211; a ciphertext, encrypting a group element</li>
+<li><strong>e</strong> (<em>int</em>) &#8211; any integer</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the ciphertext encrypting the exponentiation of <code class="docutils literal"><span class="pre">c</span></code>&#8216;s plaintext by <code class="docutils literal"><span class="pre">e</span></code></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="apart.crypto.Reenc_nopk">
+<code class="descclassname">apart.crypto.</code><code class="descname">Reenc_nopk</code><span class="sig-paren">(</span><em>cone</em>, <em>c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/crypto.html#Reenc_nopk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.Reenc_nopk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emulates the re-encryption <strong>without</strong> public key in the Elgamal scheme.</p>
+<p>This function checks if <code class="docutils literal"><span class="pre">c</span></code> and <code class="docutils literal"><span class="pre">cone</span></code> are indeed encrypted under the
+same public key, then re-encrypts <code class="docutils literal"><span class="pre">cone</span></code> by calling <a class="reference internal" href="#apart.crypto.Reenc_one" title="apart.crypto.Reenc_one"><code class="xref py py-func docutils literal"><span class="pre">Reenc_one()</span></code></a>,
+and simply returns <code class="docutils literal"><span class="pre">c</span></code> unmodified. In the considered representation of
+ciphertexts (see <a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-class docutils literal"><span class="pre">Ctxt</span></code></a>), this is what re-encryption boils down to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cone</strong> (<a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a>) &#8211; an encryption of one, to perform the re-encryption</li>
+<li><strong>c</strong> (<a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a>) &#8211; the ciphertext to re-encrypt</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a re-encryption of <code class="docutils literal"><span class="pre">c</span></code></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#apart.crypto.ReencryptionError" title="apart.crypto.ReencryptionError"><code class="xref py py-exc docutils literal"><span class="pre">ReencryptionError</span></code></a> &#8211; if <code class="docutils literal"><span class="pre">c</span></code> and <code class="docutils literal"><span class="pre">cone</span></code> are not encrypted under the same public key</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="apart.crypto.Reenc_one">
+<code class="descclassname">apart.crypto.</code><code class="descname">Reenc_one</code><span class="sig-paren">(</span><em>cone</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/crypto.html#Reenc_one"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.Reenc_one" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emulates the re-encryption of an encryption of one in the Elgamal scheme.</p>
+<p>This function simply returns <code class="docutils literal"><span class="pre">cone</span></code> unmodified. In the considered representation of
+ciphertexts (see <a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-class docutils literal"><span class="pre">Ctxt</span></code></a>), this is what re-encryption boils down to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cone</strong> (<a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a>) &#8211; an encryption of one to reencrypt</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a re-encryption of <code class="docutils literal"><span class="pre">cone</span></code></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="apart.crypto.Reenc_pk">
+<code class="descclassname">apart.crypto.</code><code class="descname">Reenc_pk</code><span class="sig-paren">(</span><em>pk</em>, <em>c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/crypto.html#Reenc_pk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.Reenc_pk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emulates the re-encryption <strong>with</strong> public key in the Elgamal scheme.</p>
+<p>This function checks if <code class="docutils literal"><span class="pre">c</span></code> is indeed encrypted under <code class="docutils literal"><span class="pre">pk</span></code>, and simply
+returns <code class="docutils literal"><span class="pre">c</span></code> unmodified. In the considered representation of ciphertexts
+(see <a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-class docutils literal"><span class="pre">Ctxt</span></code></a>), this is what re-encryption boils down to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pk</strong> (<em>int</em>) &#8211; a public key (a group element)</li>
+<li><strong>c</strong> (<a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a>) &#8211; the ciphertext to re-encrypt</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a re-encryption of <code class="docutils literal"><span class="pre">c</span></code></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#apart.crypto.ReencryptionError" title="apart.crypto.ReencryptionError"><code class="xref py py-exc docutils literal"><span class="pre">ReencryptionError</span></code></a> &#8211; if <code class="docutils literal"><span class="pre">c</span></code> is not encrypted under <code class="docutils literal"><span class="pre">pk</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="apart.crypto.SHA3_hash">
+<code class="descclassname">apart.crypto.</code><code class="descname">SHA3_hash</code><span class="sig-paren">(</span><em>m</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/crypto.html#SHA3_hash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.SHA3_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emulates the SHA3 hash function.</p>
+<p>Here, the message <code class="docutils literal"><span class="pre">m</span></code> to be hashed is simply returned unmodified.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>m</strong> &#8211; the message to hash</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the hashed message <code class="docutils literal"><span class="pre">m</span></code></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bitstring</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="apart.crypto.group_inverse">
+<code class="descclassname">apart.crypto.</code><code class="descname">group_inverse</code><span class="sig-paren">(</span><em>e</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/crypto.html#group_inverse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.crypto.group_inverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes a group inverse modulo GROUP_P (constant defined in <a class="reference internal" href="apart.core.protocol_constants.html#module-apart.core.protocol_constants" title="apart.core.protocol_constants"><code class="xref py py-mod docutils literal"><span class="pre">protocol_constants</span></code></a>)</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="apart.simulation.html" class="btn btn-neutral float-right" title="apart.simulation — Running simulations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="apart.html" class="btn btn-neutral" title="apart – Protocol Implementation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

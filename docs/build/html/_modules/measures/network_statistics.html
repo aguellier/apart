@@ -1,0 +1,1134 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>measures.network_statistics &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="APART  documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">APART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../packages.html">Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>measures.network_statistics</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for measures.network_statistics</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Author: Antoine Guellier</span>
+<span class="c1"># Copyright (c) 2017 Université de Rennes 1</span>
+<span class="c1"># License: CeCILL. The full license text is available at:</span>
+<span class="c1">#  - http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html</span>
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This module represents the *hook* of the :mod:`~measures` package into the</span>
+<span class="sd">simulation. Indeed, the class :class:`.NetworkStats` that it provides is used by</span>
+<span class="sd">the network manager and the nodes during the simulation. More accurately, the</span>
+<span class="sd">latter store information in a :class:`.NetworkStats` instance.</span>
+
+<span class="sd">This module also provides two classes to ease the computation of means and</span>
+<span class="sd">standard deviations, :class:`.RunningStat` and :class:`.RegulatStat`.  </span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">statistics</span>
+
+<span class="kn">import</span> <span class="nn">apart</span>
+<span class="kn">from</span> <span class="nn">common.custom_logging</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">apart.core.messages</span> <span class="k">import</span> <span class="n">MsgFlag</span>
+<span class="kn">from</span> <span class="nn">apart.core.protocol_constants</span> <span class="k">import</span> <span class="n">RtPolicyReason</span>
+<span class="kn">import</span> <span class="nn">dill</span> <span class="k">as</span> <span class="nn">pickle</span>
+
+
+<div class="viewcode-block" id="NetworkStats"><a class="viewcode-back" href="../../measures.network_statistics.html#measures.network_statistics.NetworkStats">[docs]</a><span class="k">class</span> <span class="nc">NetworkStats</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">net_manager</span><span class="p">,</span> <span class="n">nb_nodes</span><span class="p">,</span> <span class="n">sim_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;An instance of this class gathers all statistics and information about a given network run.</span>
+<span class="sd">        </span>
+<span class="sd">        Each simulation/network run is associated with one instance of this</span>
+<span class="sd">        class. More accurately, a :obj:`~apart.core.network.NetworkManager`</span>
+<span class="sd">        always has a :obj:`.NetworkStats` instance as attribute, that it gives</span>
+<span class="sd">        to the network and to nodes so that the latter fills it up with</span>
+<span class="sd">        information and statistics about the network run.</span>
+<span class="sd">        </span>
+<span class="sd">        .. note:: This class defines attributes dynamically, depending one the values of</span>
+<span class="sd">                the booleans in the :obj:`~apart.simulation.SimulationParams` instance</span>
+<span class="sd">                related to the network run. For instance, if</span>
+<span class="sd">                :attr:`~apart.simulation.SimulationParams.log_route_props` is `True`,</span>
+<span class="sd">                then :obj:`~measures..network_statistics.NetworkStats`</span>
+<span class="sd">                will have the attribute </span>
+<span class="sd">                :obj:`~measures.network_satistics.NetworkStats.nb_route_props_per_node`. </span>
+<span class="sd">                Otherwise, accessing this attribute will trigger an :exc:`AttributeError`.</span>
+<span class="sd">    </span>
+<span class="sd">        In practice, this class contains attributes that are filled up by the</span>
+<span class="sd">        network manager, the network, and nodes. These includes, *e.g.* the</span>
+<span class="sd">        number of messages sent/received by nodes, the number of route</span>
+<span class="sd">        proposals, the total delay of oriented communications, etc. To avoid too</span>
+<span class="sd">        heavy memory consumption, these pieces of information are often gathered</span>
+<span class="sd">        and average *on the fly*, using a :obj:`.RunningStat` instance. Average</span>
+<span class="sd">        often happens on nodes on the network, on on rounds. See each attribute</span>
+<span class="sd">        for details.</span>
+<span class="sd">        </span>
+<span class="sd">        The methods of these class are the entry points for the network and the</span>
+<span class="sd">        nodes to input information about the network into a :obj:`.NetworkStats`</span>
+<span class="sd">        instance. The functions only logs information in existing attributes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_net_manager</span> <span class="o">=</span> <span class="n">net_manager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">network_start_time</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="sd">&quot;&quot;&quot;float: The time at which the network run was started, based on a call to `time.time()` (*i.e.* based on the system time, not SimPy time)&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">network_end_time</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="sd">&quot;&quot;&quot;float: The time at which the network run ended, based on a call to `time.time()` (*i.e.* based on the system time, not SimPy time)&quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="n">sim_params</span><span class="o">.</span><span class="n">log_ocom_latency</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ocom_latency</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`.RunningStat`: The latency, in rounds, between the initialization of an ocom, and the receiving of the last message by the end-receiver. </span>
+<span class="sd">            </span>
+<span class="sd">            Average over all oriented communications in the network.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_ocom_latency` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ocom_latency_after_init</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`.RunningStat`: The latency, in rounds, between the sending of the first payload message of the ocom, and the receiving of the last one </span>
+<span class="sd">            </span>
+<span class="sd">            Average over all oriented communications in the network</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_ocom_latency` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">sim_params</span><span class="o">.</span><span class="n">log_end_topo_diss</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_topo_diss</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  
+            <span class="sd">&quot;&quot;&quot;int: The round number at which the topology is fully disseminated.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_end_topo_diss` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            
+        <span class="k">if</span> <span class="n">sim_params</span><span class="o">.</span><span class="n">log_end_ocom_phase</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_ocom_phase</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  
+            <span class="sd">&quot;&quot;&quot;int: The round number at which the oriented communication phase is finished.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_end_ocom_phase` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+        
+                
+        <span class="k">if</span> <span class="n">sim_params</span><span class="o">.</span><span class="n">log_and_store_all_real_msgs</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">sent_link_msgs_per_node_per_round</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">))</span> <span class="c1"># OK</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`collections.defaultdict`: All sent link messages by each node at each round.</span>
+<span class="sd">            </span>
+<span class="sd">            The dict is indexed by nodes, its values are dict, which indexes are</span>
+<span class="sd">            batching rounds, and values are the messages sent by the node in the</span>
+<span class="sd">            batching round. That is if d[n][r] = [m1, m2, ...], then node n sent</span>
+<span class="sd">            the real messages m1, m2, ... in round r.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_and_store_all_real_msgs` is `True`.</span>
+<span class="sd">            </span>
+<span class="sd">            .. warning:: Heavy memory consumption</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rcvd_link_msgs_per_node_per_round</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">))</span> <span class="c1"># OK</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`collections.defaultdict`: All received link messages  by each node at each round.</span>
+<span class="sd">            </span>
+<span class="sd">            This dict is defined similarly as</span>
+<span class="sd">            :attr:`.sent_link_msgs_per_node_per_round`, for received link</span>
+<span class="sd">            messages.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_and_store_all_real_msgs` is `True`.</span>
+<span class="sd">            </span>
+<span class="sd">            .. warning:: Heavy memory consumption</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            
+        <span class="k">if</span> <span class="n">sim_params</span><span class="o">.</span><span class="n">log_sent_link_msgs_per_round</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">histogram_nb_sent_link_msgs_per_round_per_neighbor</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`collections.defaultdict`: The histogram number of link messages sent to each neighbor at each round. Is expected to be one or two, but not much more</span>
+<span class="sd">            </span>
+<span class="sd">            Dict indexed by the number of link messages sent per round (all</span>
+<span class="sd">            nodes confunded), and which values are the number of occurences of</span>
+<span class="sd">            this number. That is, if d[n] = m, this means that on m occasions, a</span>
+<span class="sd">            node (any one node in the network) sent n link messages during a round.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_sent_link_msgs_per_round` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="n">sim_params</span><span class="o">.</span><span class="n">log_real_link_msgs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_sent_real_msgs_per_node</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">RunningStat</span><span class="p">)</span> 
+            <span class="sd">&quot;&quot;&quot;:obj:`collections.defaultdict`: Number of real link messages sent by each node at each round. </span>
+<span class="sd">            </span>
+<span class="sd">            Dict indexed by nodes, which values are :obj:`.RunningStat`</span>
+<span class="sd">            instances, averaging over rounds.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_real_link_msgs` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_rcvd_real_msgs_per_node</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">RunningStat</span><span class="p">)</span> 
+            <span class="sd">&quot;&quot;&quot;:obj:`collections.defaultdict`: Number of real link messages received by each node at each round.</span>
+<span class="sd">            </span>
+<span class="sd">            Dict indexed by nodes, which values are :obj:`.RunningStat`</span>
+<span class="sd">            instances, averaging over rounds.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_real_link_msgs` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">sim_params</span><span class="o">.</span><span class="n">log_real_e2e_msgs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_end_sent_real_msgs_per_node</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">RunningStat</span><span class="p">)</span> <span class="c1"># OK</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`collections.defaultdict`: Number of (real) messages end-sent by each node at each round.</span>
+<span class="sd">            </span>
+<span class="sd">            Dict indexed by nodes, which values are :obj:`.RunningStat`</span>
+<span class="sd">            instances, averaging over rounds.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_real_e2e_msgs` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_end_rcvd_real_msgs_per_node</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">RunningStat</span><span class="p">)</span> <span class="c1"># OK</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`collections.defaultdict`: Number of (real) messages end-received by each node at each round.</span>
+<span class="sd">            </span>
+<span class="sd">            Dict indexed by nodes, which values are :obj:`.RunningStat`</span>
+<span class="sd">            instances, averaging over rounds.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_real_e2e_msgs` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_end_sent_ocom_msgs_per_node</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">RunningStat</span><span class="p">)</span> <span class="c1"># OK</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`collections.defaultdict`: Number of (real) oriented communication message end-sent by each node at each round. </span>
+<span class="sd">            </span>
+<span class="sd">            Dict indexed by nodes, which values are :obj:`.RunningStat`</span>
+<span class="sd">            instances, averaging over rounds.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_real_e2e_msgs` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_end_rcvd_ocom_msgs_per_node</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">RunningStat</span><span class="p">)</span> <span class="c1"># OK</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`collections.defaultdict`: Number of (real) oriented communication message end-received by each node at each round.</span>
+<span class="sd">            </span>
+<span class="sd">            Dict indexed by nodes, which values are :obj:`.RunningStat`</span>
+<span class="sd">            instances, averaging over rounds.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_real_e2e_msgs` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+        
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_end_sent_ocom_payload_msgs_per_node</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">RunningStat</span><span class="p">)</span> <span class="c1"># OK</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`collections.defaultdict`: Number of (real) oriented communication *payload* message end-sent by each node at each round, i.e. without counting ocom init.</span>
+<span class="sd">            </span>
+<span class="sd">            Dict indexed by nodes, which values are :obj:`.RunningStat`</span>
+<span class="sd">            instances, averaging over rounds.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_real_e2e_msgs` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_end_rcvd_ocom_payload_msgs_per_node</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">RunningStat</span><span class="p">)</span> <span class="c1"># OK</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`collections.defaultdict`: Number of (real) oriented communication *payload* message end-received by each node at each round, i.e. without counting ocom init. </span>
+<span class="sd">            </span>
+<span class="sd">            Dict indexed by nodes, which values are :obj:`.RunningStat`</span>
+<span class="sd">            instances, averaging over rounds.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_real_e2e_msgs` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+        
+            
+        <span class="k">if</span> <span class="n">sim_params</span><span class="o">.</span><span class="n">log_traffic_rates_equilibrium</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traffic_rate_status</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;equilibrium&#39;</span><span class="p">:</span> <span class="n">RunningStat</span><span class="p">(),</span> 
+                                                       <span class="s1">&#39;lbound&#39;</span><span class="p">:</span> <span class="n">RunningStat</span><span class="p">(),</span>
+                                                       <span class="s1">&#39;ubound&#39;</span><span class="p">:</span> <span class="n">RunningStat</span><span class="p">()}</span><span class="c1"># OK</span>
+            <span class="sd">&quot;&quot;&quot;dict: The equilibirum, minimum and maximum number of real messages that each node can send each round. </span>
+<span class="sd">            </span>
+<span class="sd">            Dict indexed by {equilibrium, lbround, ubound}, which values are :obj:`.RunningStat`</span>
+<span class="sd">            instances, averaging over rounds and nodes.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_traffic_rates_equilibrium` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="n">sim_params</span><span class="o">.</span><span class="n">log_real_msgs_waiting_time</span> <span class="ow">or</span> <span class="n">sim_params</span><span class="o">.</span><span class="n">log_histogram_real_msgs_waiting_time</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_real_msg_round_timestamp</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="sd">&quot;&quot;&quot;dict: Auxiliary structure to store the round in which a round enters a node&#39;s pools. Values from this dict are ``pop()`-ed to compute the delta of rounds afterwards.&quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">real_msg_waiting_time</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`.RunningStat`: The number of rounds real messages spend waiting in pools.</span>
+<span class="sd">            </span>
+<span class="sd">            This value is averaged over all real messages, all nodes, and all rounds.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if one of or both</span>
+<span class="sd">            :attr:`~apart.simulation.SimulationParams.log_real_msgs_waiting_time` </span>
+<span class="sd">            or :attr:`~apart.simulation.SimulationParams.log_histogram_real_msgs_waiting_time` </span>
+<span class="sd">            are `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">histogram_real_msg_waiting_time</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`collections.defaultdict`: The histogram of number of rounds a real messages waits in pools. </span>
+<span class="sd">            </span>
+<span class="sd">            Dict indexed by number of rounds, values are number of occurrences.</span>
+<span class="sd">        </span>
+<span class="sd">            Defined only if one of or both</span>
+<span class="sd">            :attr:`~apart.simulation.SimulationParams.log_real_msgs_waiting_time` </span>
+<span class="sd">            or :attr:`~apart.simulation.SimulationParams.log_histogram_real_msgs_waiting_time` </span>
+<span class="sd">            are `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            
+        
+        
+        
+        <span class="k">if</span> <span class="n">sim_params</span><span class="o">.</span><span class="n">log_dummy_link_msgs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_sent_dummy_link_msgs_per_node</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">RunningStat</span><span class="p">)</span> <span class="c1"># OK</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`collections.defaultdict`: Total number of dummy link messages sent by each node at each round. </span>
+<span class="sd">            </span>
+<span class="sd">            Dict indexed by nodes, which values are :obj:`.RunningStat`</span>
+<span class="sd">            instances, averaging over rounds.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_dummy_link_msgs` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_rcvd_dummy_link_msgs_per_node</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">RunningStat</span><span class="p">)</span> <span class="c1"># OK</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`collections.defaultdict`: Total number of dummy link messages received by each node at each round. </span>
+
+<span class="sd">            Dict indexed by nodes, which values are :obj:`.RunningStat`</span>
+<span class="sd">            instances, averaging over rounds.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_dummy_link_msgs` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            
+          
+
+        <span class="k">if</span> <span class="n">sim_params</span><span class="o">.</span><span class="n">log_e2e_dummies</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_sent_e2e_dummy_msgs</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span> <span class="c1"># OK</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`.RunningStat`: Total number of end-to-end dummy messages sent by each node at each round.</span>
+<span class="sd">            </span>
+<span class="sd">            This value is averaged over rounds and nodes.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_e2e_dummies` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_rcvd_e2e_dummy_msgs</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span> <span class="c1"># OK</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`.RunningStat`: Total number of end-to-end dummy message received by each node at each round.</span>
+<span class="sd">            </span>
+<span class="sd">            This value is averaged over rounds and nodes.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_e2e_dummies` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            
+        <span class="k">if</span> <span class="n">sim_params</span><span class="o">.</span><span class="n">log_frequency_batch_intervention</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_batch_intervention_remove_reals</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`.RunningStat`: The number of times each node had to modify the batch, by removing real messages.</span>
+<span class="sd">            </span>
+<span class="sd">            This value is averaged over rounds and nodes.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_frequency_batch_intervention` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_batch_intervention_replace_dummy_by_e2e_dummy</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`.RunningStat`: The number of times each node had to modify the batch, by replacing one dummy by an e2e dummy.</span>
+<span class="sd">            </span>
+<span class="sd">            This value is averaged over rounds and nodes.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_frequency_batch_intervention` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_batch_intervention_add_e2e_dummy</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`.RunningStat`: The number of times each node had to modify the batch, adding an e2e dummy plus link dummies.</span>
+<span class="sd">            </span>
+<span class="sd">            This value is averaged over rounds and nodes.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_frequency_batch_intervention` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>  
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_batch_intervention_many_dummies</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`.RunningStat`: The number of times each node had to modify the batch by adding many dummies because no e2e dummy was possible.</span>
+<span class="sd">            </span>
+<span class="sd">            This value is averaged over rounds and nodes.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_frequency_batch_intervention` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_batch_intervention_default_dummy_bcast</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`.RunningStat`: The number of times each node resorted to the default option of sending one dummy to each neighbor.</span>
+<span class="sd">            </span>
+<span class="sd">            This value is averaged over rounds and nodes.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_frequency_batch_intervention` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+        
+
+        <span class="k">if</span> <span class="n">sim_params</span><span class="o">.</span><span class="n">log_route_props</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_route_props_per_node</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">reason</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">0</span><span class="p">))</span> <span class="k">for</span> <span class="n">reason</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">([</span><span class="s1">&#39;proposed&#39;</span><span class="p">,</span> <span class="s1">&#39;answered_as_receiver&#39;</span><span class="p">],</span> <span class="n">RtPolicyReason</span><span class="p">))</span>
+            <span class="sd">&quot;&quot;&quot;dict: The number of route proposals the node was involved in, with which role, and which outcomes. </span>
+<span class="sd">            </span>
+<span class="sd">            Dict doubly indexed. First by type of *route proposal event*</span>
+<span class="sd">            (`&#39;proposed&#39;`, `&#39;answered_as_receiver&#39;`, plus all</span>
+<span class="sd">            :class:`~apart.core.protocol_constants.RtPolicyReason`), and then by</span>
+<span class="sd">            nodes. Values are the number of occurences of the *event*. For</span>
+<span class="sd">            instance, d[&#39;proposed&#39;][n1] = 5 means that node n1 proposed 5</span>
+<span class="sd">            routes.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_route_props` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            
+        <span class="k">if</span> <span class="n">sim_params</span><span class="o">.</span><span class="n">log_rt_props_latency</span><span class="p">:</span>
+            <span class="c1"># The latency of route proposition, between the initial rt prop</span>
+            <span class="c1"># message to the acceptation/refusal by the proposee</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rt_props_latency</span> <span class="o">=</span> <span class="n">RunningStat</span><span class="p">()</span> <span class="c1"># OK</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`.RunningStat`: The latency of route proposals between the initial rt prop message to the acceptation/refusal by the proposee.</span>
+<span class="sd">            </span>
+<span class="sd">            This value is averaged over every route proposal in the network. </span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_rt_props_latency` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            
+        <span class="k">if</span> <span class="n">sim_params</span><span class="o">.</span><span class="n">log_histogram_real_msgs_per_round</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">histogram_nb_real_link_msgs_sent_per_round</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">0</span><span class="p">)))</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`collections.defaultdict`: Histogram of real link messages sent per round. </span>
+<span class="sd">            </span>
+<span class="sd">            Dict triply indexed: dict[n][[node][neighbor] = v, means that the</span>
+<span class="sd">            node *node* sent n real messages to neighbor *neighbor* on v</span>
+<span class="sd">            occasions during the network run</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_histogram_real_msgs_per_round` is `True`.            </span>
+<span class="sd">            &quot;&quot;&quot;</span>  
+            <span class="bp">self</span><span class="o">.</span><span class="n">histogram_nb_real_link_msgs_rcvd_per_round</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">0</span><span class="p">)))</span>
+            <span class="sd">&quot;&quot;&quot;:obj:`collections.defaultdict`: Histogram of real link messages received per round. </span>
+<span class="sd">            </span>
+<span class="sd">            Dict triply indexed: dict[n][[node][neighbor] = v, meaning that the</span>
+<span class="sd">            node &quot;node&quot; received n real messages from neighbor &quot;neighbor&quot; on v</span>
+<span class="sd">            occasions during the network run.</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_histogram_real_msgs_per_round` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">sim_params</span><span class="o">.</span><span class="n">log_ocom_routes</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ocom_routes</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="sd">&quot;&quot;&quot;dict: Minimal description of all oriented communication routes used in the network.</span>
+<span class="sd">            </span>
+<span class="sd">            The dict is indexed by oriented communication identifier. For each</span>
+<span class="sd">            such communication, it specifies the end sender and its first hop,</span>
+<span class="sd">            plus helper and its first hop (*i.e.* values of the dict are dicts,</span>
+<span class="sd">            indexed by {&#39;end_sender&#39;, &#39;helper&#39;, &#39;end_rcvr&#39;,</span>
+<span class="sd">            &#39;first_hop_end_sender&#39;}).</span>
+<span class="sd">            </span>
+<span class="sd">            Defined only if :attr:`~apart.simulation.SimulationParams.log_ocom_routes` is `True`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+        
+        
+<div class="viewcode-block" id="NetworkStats.log_end_topo_diss"><a class="viewcode-back" href="../../measures.network_statistics.html#measures.network_statistics.NetworkStats.log_end_topo_diss">[docs]</a>    <span class="k">def</span> <span class="nf">log_end_topo_diss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">round</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Function logging the end of the topology dissemination phase.</span>
+<span class="sd">        </span>
+<span class="sd">        Function called by the network manager</span>
+<span class="sd">        (:obj:`~apart.core.network.NetworkManager`). Modifies attribute</span>
+<span class="sd">        :attr:`.end_topo_diss` if it exists.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            round (int): the round number at which the topology dissemination finished.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_topo_diss</span> <span class="o">=</span> <span class="nb">round</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+        
+<div class="viewcode-block" id="NetworkStats.log_end_ocom_phase"><a class="viewcode-back" href="../../measures.network_statistics.html#measures.network_statistics.NetworkStats.log_end_ocom_phase">[docs]</a>    <span class="k">def</span> <span class="nf">log_end_ocom_phase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">round</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Function logging the end of the oriented communication phase.</span>
+<span class="sd">        </span>
+<span class="sd">        Function called by the network manager</span>
+<span class="sd">        (:obj:`~apart.core.network.NetworkManager`). Modifies attribute</span>
+<span class="sd">        :attr:`.end_ocom_phase` if it exists.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            round (int): the round number at which the oriented communications finished.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_ocom_phase</span> <span class="o">=</span> <span class="nb">round</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+    
+<div class="viewcode-block" id="NetworkStats.log_msg_placed_in_pool"><a class="viewcode-back" href="../../measures.network_statistics.html#measures.network_statistics.NetworkStats.log_msg_placed_in_pool">[docs]</a>    <span class="k">def</span> <span class="nf">log_msg_placed_in_pool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">neighbor</span><span class="p">,</span> <span class="n">msgs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Function logging the insertion of a message in the pools.</span>
+<span class="sd">        </span>
+<span class="sd">        Function called by a node (:obj:`~apart.core.node.Node`).Modifies only</span>
+<span class="sd">        protected/private attributes.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            node (:obj:`~apart.core.node.Node`): the node that is inserting the message in its pools.</span>
+<span class="sd">            neighbor (int): the index of the node&#39;s neighbor, specifying in which pool the message is inserted</span>
+<span class="sd">            msg (:obj:`~apart.core.messages.LinkMsg`): the message inserted in the pool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">msgs</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_real_msg_round_timestamp</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">batching_round</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+        
+<div class="viewcode-block" id="NetworkStats.log_sent_batch"><a class="viewcode-back" href="../../measures.network_statistics.html#measures.network_statistics.NetworkStats.log_sent_batch">[docs]</a>    <span class="k">def</span> <span class="nf">log_sent_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">nb_reals</span><span class="p">,</span> <span class="n">nb_dummies</span><span class="p">,</span> <span class="n">nb_e2e_dummies</span><span class="p">,</span> <span class="n">remove_real</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">replace_dummy_by_e2e_dummy</span><span class="o">=</span><span class="mi">0</span> <span class="p">,</span><span class="n">add_e2e_dummy</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">add_many_dummies</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">default_dummy_broadcast</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Function logging the sending of a batch of messages at the end of a round</span>
+<span class="sd">        </span>
+<span class="sd">        Function called by a node (:obj:`~apart.core.node.Node`). Modifies the</span>
+<span class="sd">        following attributes if they exist: </span>
+<span class="sd">        </span>
+<span class="sd">            * :attr:`.nb_sent_real_msgs_per_node`,</span>
+<span class="sd">            * :attr:`.nb_end_sent_real_msgs_per_node`,</span>
+<span class="sd">            * :attr:`.nb_end_sent_ocom_msgs_per_node`,</span>
+<span class="sd">            * :attr:`.nb_end_sent_ocom_payload_msgs_per_node`,</span>
+<span class="sd">            * :attr:`.sent_link_msgs_per_node_per_round`,</span>
+<span class="sd">            * :attr:`.nb_sent_dummy_link_msgs_per_node`,</span>
+<span class="sd">            * :attr:`.nb_sent_e2e_dummy_msgs`,</span>
+<span class="sd">            * :attr:`.real_msg_waiting_time`,</span>
+<span class="sd">            * :attr:`.histogram_real_msg_waiting_time`,</span>
+<span class="sd">            * :attr:`.nb_batch_intervention_remove_reals`,</span>
+<span class="sd">            * :attr:`.nb_batch_intervention_replace_dummy_by_e2e_dummy`,</span>
+<span class="sd">            * :attr:`.nb_batch_intervention_add_e2e_dummy`,</span>
+<span class="sd">            * :attr:`.nb_batch_intervention_many_dummies`,</span>
+<span class="sd">            * :attr:`.nb_batch_intervention_default_dummy_bcast`,</span>
+<span class="sd">            * :attr:`.histogram_nb_real_link_msgs_sent_per_round`,</span>
+<span class="sd">            * :attr:`.histogram_nb_sent_link_msgs_per_round_per_neighbor`.</span>
+<span class="sd">                </span>
+<span class="sd">        Args:</span>
+<span class="sd">            node (:obj:`~apart.core.node.Node`): the node that is sending the batch (`node.batching_round` gives the current round)</span>
+<span class="sd">            batch (list of :obj:`~apart.core.messages.LinkMsg`): the batch of message being sent</span>
+<span class="sd">            nb_reals (int): number of real messages in the batch </span>
+<span class="sd">            nb_dummies (int): number of dummy (link) messages in the batch</span>
+<span class="sd">            nb_e2e_dummies (int): number of end-to-end dummy messages in the batch</span>
+<span class="sd">            remove_real (int, optional): number of real messages that were manually removed from the batch to fulfill the traffic rates constraints (first type of *batch intervention*)</span>
+<span class="sd">            replace_dummy_by_e2e_dummy (int, optional): number of times a dummy in the batch was replaced by an end-to-end dummy to fulfill the traffic rates constraints (second type of *batch intervention*)</span>
+<span class="sd">            add_e2e_dummy (int, optional): number of end-to-end dummy messages added in the batch to fulfill the traffic rates constraints (third type of *batch intervention*) </span>
+<span class="sd">            add_many_dummies (int, optional): number of dummy messages added (because, at the time, no end-to-end dummy could be produced) in order to fulfill the traffic rates constraints (fourth type of *batch intervention*) </span>
+<span class="sd">            default_dummy_broadcast (int, optional): equals to 1 if the node resorted to a simple broadcast of one dummy message to each neighbor, because the batch was empty (last type of *batch intervention*)</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_sent_real_msgs_per_node</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">nb_reals</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">nb_end_sent</span> <span class="o">=</span> <span class="n">nb_ocom_end_sent</span> <span class="o">=</span> <span class="n">nb_ocom_end_sent_payload</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="p">(</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">batch</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">flag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">MsgFlag</span><span class="o">.</span><span class="n">DUMMY</span><span class="p">):</span>
+                <span class="n">is_end_sent</span> <span class="o">=</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">additional_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;end_sender&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+                <span class="n">nb_end_sent</span> <span class="o">+=</span> <span class="n">is_end_sent</span>
+                <span class="n">is_ocom_end_sent</span> <span class="o">=</span> <span class="p">(</span><span class="n">is_end_sent</span> <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">additional_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;is_ocom&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">)</span>
+                <span class="n">nb_ocom_end_sent</span> <span class="o">+=</span> <span class="n">is_ocom_end_sent</span>
+                <span class="n">nb_ocom_end_sent_payload</span> <span class="o">+=</span> <span class="p">(</span><span class="n">is_ocom_end_sent</span> 
+                                             <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">additional_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;is_ocom_payload&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span> 
+                                             <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">additional_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ocom_end_sender&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">)</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_end_sent_real_msgs_per_node</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">nb_end_sent</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_net_manager</span><span class="o">.</span><span class="n">network_phase</span> <span class="ow">is</span> <span class="n">apart</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">NetPhase</span><span class="o">.</span><span class="n">OCOM</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nb_end_sent_ocom_msgs_per_node</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">nb_ocom_end_sent</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nb_end_sent_ocom_payload_msgs_per_node</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">nb_ocom_end_sent_payload</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sent_link_msgs_per_node_per_round</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="n">node</span><span class="o">.</span><span class="n">batching_round</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">batch</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">flag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">MsgFlag</span><span class="o">.</span><span class="n">DUMMY</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        
+        <span class="k">try</span><span class="p">:</span>     
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_sent_dummy_link_msgs_per_node</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">nb_dummies</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_sent_e2e_dummy_msgs</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">nb_e2e_dummies</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>  
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="p">(</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">batch</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">flag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">MsgFlag</span><span class="o">.</span><span class="n">DUMMY</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">round_timestamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_real_msg_round_timestamp</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">real_msg_waiting_time</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">batching_round</span><span class="o">-</span><span class="n">round_timestamp</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">histogram_real_msg_waiting_time</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">batching_round</span><span class="o">-</span><span class="n">round_timestamp</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="k">assert</span> <span class="n">m</span><span class="o">.</span><span class="n">additional_info</span><span class="p">[</span><span class="s1">&#39;is_e2e_dummy&#39;</span><span class="p">]</span>
+                    <span class="k">pass</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_batch_intervention_remove_reals</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">remove_real</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_batch_intervention_replace_dummy_by_e2e_dummy</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">replace_dummy_by_e2e_dummy</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_batch_intervention_add_e2e_dummy</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">add_e2e_dummy</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_batch_intervention_many_dummies</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">add_many_dummies</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_batch_intervention_default_dummy_bcast</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">default_dummy_broadcast</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">nb_reals_per_neighbor</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="p">(</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">batch</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">flag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">MsgFlag</span><span class="o">.</span><span class="n">DUMMY</span><span class="p">):</span>
+                <span class="n">nb_reals_per_neighbor</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">sent_to</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">neighbor</span><span class="p">,</span> <span class="n">nb</span> <span class="ow">in</span> <span class="n">nb_reals_per_neighbor</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">histogram_nb_real_link_msgs_sent_per_round</span><span class="p">[</span><span class="n">nb</span><span class="p">][</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="n">neighbor</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">neighbor</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sent_to</span>
+            <span class="n">nb_msgs_one_neighbor</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">sent_to</span> <span class="o">==</span> <span class="n">neighbor</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">histogram_nb_sent_link_msgs_per_round_per_neighbor</span><span class="p">[</span><span class="n">nb_msgs_one_neighbor</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+    
+<div class="viewcode-block" id="NetworkStats.log_round_rcvd_msgs"><a class="viewcode-back" href="../../measures.network_statistics.html#measures.network_statistics.NetworkStats.log_round_rcvd_msgs">[docs]</a>    <span class="k">def</span> <span class="nf">log_round_rcvd_msgs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">real_messages</span><span class="p">,</span> <span class="n">nb_reals</span><span class="p">,</span> <span class="n">nb_dummies</span><span class="p">,</span> <span class="n">nb_e2e_dummies</span><span class="p">):</span>  
+        <span class="sd">&quot;&quot;&quot;Function logging the receiving of messages in a round.</span>
+<span class="sd">        </span>
+<span class="sd">        Function called by a node (:obj:`~apart.core.node.Node`). Modifies the</span>
+<span class="sd">        following attributes if they exist: </span>
+<span class="sd">        </span>
+<span class="sd">            * :attr:`.nb_rcvd_real_msgs_per_node`,</span>
+<span class="sd">            * :attr:`.nb_end_rcvd_real_msgs_per_node`,</span>
+<span class="sd">            * :attr:`.nb_end_rcvd_ocom_msgs_per_node`,</span>
+<span class="sd">            * :attr:`.nb_end_rcvd_ocom_payload_msgs_per_node`,</span>
+<span class="sd">            * :attr:`.rcvd_link_msgs_per_node_per_round`,</span>
+<span class="sd">            * :attr:`.nb_rcvd_dummy_link_msgs_per_node`,</span>
+<span class="sd">            * :attr:`.nb_rcvd_e2e_dummy_msgs`,</span>
+<span class="sd">            * :attr:`.histogram_nb_real_link_msgs_rcvd_per_round`.</span>
+<span class="sd">                </span>
+<span class="sd">        Args:</span>
+<span class="sd">            node (:obj:`~apart.core.node.Node`): the node that is received the messages (`node.batching_round` gives the current round)</span>
+<span class="sd">            real_messages (list of :obj:`~apart.core.messages.LinkMsg`): the real of messages received</span>
+<span class="sd">            nb_reals (int): number of real messages received</span>
+<span class="sd">            nb_dummies (int): number of dummy (link) messages received</span>
+<span class="sd">            nb_e2e_dummies (int): number of end-to-end dummy messages received</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_rcvd_real_msgs_per_node</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">nb_reals</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">nb_end_rcvd</span> <span class="o">=</span> <span class="n">nb_ocom_end_rcvd</span> <span class="o">=</span> <span class="n">nb_ocom_end_rcvd_payload</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">real_messages</span><span class="p">:</span>
+                <span class="n">is_end_rcvd</span> <span class="o">=</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">additional_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;end_rcvr&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+                <span class="n">nb_end_rcvd</span> <span class="o">+=</span> <span class="n">is_end_rcvd</span>
+                <span class="n">is_ocom_end_rcvd</span> <span class="o">=</span> <span class="p">(</span><span class="n">is_end_rcvd</span> <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">additional_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;is_ocom&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">)</span>
+                <span class="n">nb_ocom_end_rcvd</span> <span class="o">+=</span> <span class="n">is_ocom_end_rcvd</span>
+                <span class="n">nb_ocom_end_rcvd_payload</span> <span class="o">+=</span> <span class="p">(</span><span class="n">is_ocom_end_rcvd</span> 
+                                             <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">additional_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;is_ocom_payload&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span> 
+                                             <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">additional_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ocom_end_rcvr&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+                
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_end_rcvd_real_msgs_per_node</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">nb_end_rcvd</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_net_manager</span><span class="o">.</span><span class="n">network_phase</span> <span class="ow">is</span> <span class="n">apart</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">NetPhase</span><span class="o">.</span><span class="n">OCOM</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nb_end_rcvd_ocom_msgs_per_node</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">nb_ocom_end_rcvd</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nb_end_rcvd_ocom_payload_msgs_per_node</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">nb_ocom_end_rcvd_payload</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rcvd_link_msgs_per_node_per_round</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="n">node</span><span class="o">.</span><span class="n">batching_round</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">real_messages</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">flag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">MsgFlag</span><span class="o">.</span><span class="n">DUMMY</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_rcvd_dummy_link_msgs_per_node</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">nb_dummies</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_rcvd_e2e_dummy_msgs</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">nb_e2e_dummies</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>  
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">nb_reals_per_neighbor</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="p">(</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">real_messages</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">flag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">MsgFlag</span><span class="o">.</span><span class="n">DUMMY</span><span class="p">):</span>
+                <span class="n">nb_reals_per_neighbor</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">sent_by</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">neighbor</span><span class="p">,</span> <span class="n">nb</span> <span class="ow">in</span> <span class="n">nb_reals_per_neighbor</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">histogram_nb_real_link_msgs_rcvd_per_round</span><span class="p">[</span><span class="n">nb</span><span class="p">][</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="n">neighbor</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+    
+    
+<div class="viewcode-block" id="NetworkStats.log_rt_prop"><a class="viewcode-back" href="../../measures.network_statistics.html#measures.network_statistics.NetworkStats.log_rt_prop">[docs]</a>    <span class="k">def</span> <span class="nf">log_rt_prop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">rt_prop_event</span><span class="p">,</span> <span class="n">nb_to_log</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_rounds_to_complete</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Function logging information about route proposal.</span>
+<span class="sd">        </span>
+<span class="sd">        Function called by a node (:obj:`~apart.core.node.Node`). Modifies the</span>
+<span class="sd">        following attributes if they exist: </span>
+<span class="sd">        </span>
+<span class="sd">            * :attr:`.nb_route_props_per_node`,</span>
+<span class="sd">            * :attr:`.rt_props_latency`.</span>
+<span class="sd">           </span>
+<span class="sd">        Args:</span>
+<span class="sd">            node (:obj:`~apart.core.node.Node`): the node that is concerned by the route proposal</span>
+<span class="sd">            rt_prop_event (str or :obj:`~apart.core.protocol_constants.RtPolicyReason`): the event that is to be logged. Can be &#39;received&#39;, &#39;proposed&#39;, &#39;rt_prop_event&#39;, or a :obj:`~apart.core.protocol_constants.RtPolicyReason` value.</span>
+<span class="sd">            nb_to_log (int, optional): number occurence of the event type to log (Default: 1)</span>
+<span class="sd">            nb_rounds_to_complete (int, optional): if the event type in `rt_prop_event` is a :obj:`~apart.core.protocol_constants.RtPolicyReason` value, this argument specified the number of rounds that were necessary to complete the route proposal, starting from the initial rtprop message (Default: None)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nb_route_props_per_node</span><span class="p">[</span><span class="n">rt_prop_event</span><span class="p">][</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">+=</span> <span class="n">nb_to_log</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">rt_prop_event</span> <span class="o">!=</span> <span class="s1">&#39;received&#39;</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Can not log route proposition event of type &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rt_prop_event</span><span class="p">))</span>
+                    
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">rt_prop_event</span> <span class="ow">in</span> <span class="n">RtPolicyReason</span><span class="p">:</span> 
+                <span class="c1"># The condition is True only at the end of a route proposition:</span>
+                <span class="c1"># it has been accepted or refused</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rt_props_latency</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">nb_rounds_to_complete</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+        
+<div class="viewcode-block" id="NetworkStats.log_ocom_latency"><a class="viewcode-back" href="../../measures.network_statistics.html#measures.network_statistics.NetworkStats.log_ocom_latency">[docs]</a>    <span class="k">def</span> <span class="nf">log_ocom_latency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">end_sender_id</span><span class="p">,</span> <span class="n">ocom_init_started_at_round</span><span class="p">,</span> <span class="n">first_payload_sent_at_round</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Function logging the latency of an oriented communication.</span>
+<span class="sd">        </span>
+<span class="sd">        Function called by a node (:obj:`~apart.core.node.Node`). Modifies the</span>
+<span class="sd">        following attributes if they exist: </span>
+<span class="sd">        </span>
+<span class="sd">            * :attr:`.ocom_latency`,</span>
+<span class="sd">            * :attr:`.ocom_latency_after_init`.</span>
+<span class="sd">           </span>
+<span class="sd">        Args:</span>
+<span class="sd">            node (:obj:`~apart.core.node.Node`): the node that is concerned by the oriented communication (typically, the end-receiver)</span>
+<span class="sd">            end_sender_id (int): index of the end-sender node</span>
+<span class="sd">            ocom_init_started_at_round (int): the round at which the initialisation of the oriented communication in question was started.</span>
+<span class="sd">            first_payload_sent_at_round (int): the round at which the end-sender started sending payload data in the oriented communication in question.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ocom_latency</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">batching_round</span><span class="o">-</span><span class="n">ocom_init_started_at_round</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ocom_latency_after_init</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">batching_round</span><span class="o">-</span><span class="n">first_payload_sent_at_round</span><span class="p">)</span> 
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+        
+        
+<div class="viewcode-block" id="NetworkStats.log_traffic_rate_equilibrium"><a class="viewcode-back" href="../../measures.network_statistics.html#measures.network_statistics.NetworkStats.log_traffic_rate_equilibrium">[docs]</a>    <span class="k">def</span> <span class="nf">log_traffic_rate_equilibrium</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">equilibrium</span><span class="p">,</span> <span class="n">lbound_real_msgs</span><span class="p">,</span> <span class="n">ubound_real_msgs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Function logging the traffic rates counters and equilibirum.</span>
+<span class="sd">        </span>
+<span class="sd">        Function called by a node (:obj:`~apart.core.node.Node`). Modifies the</span>
+<span class="sd">        :attr:`.traffic_rate_status` attribute if it exists.</span>
+<span class="sd">           </span>
+<span class="sd">        Args:</span>
+<span class="sd">            node (:obj:`~apart.core.node.Node`): the node that is calling the function</span>
+<span class="sd">            equilibrium (int): equilibirum of the node in the current round</span>
+<span class="sd">            lbound_real_msgs (int): lower bound on real messages of the node in the current round</span>
+<span class="sd">            ubound_real_msgs (int): upper bound on real messages of the node in the current round</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traffic_rate_status</span><span class="p">[</span><span class="s1">&#39;equilibrium&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">equilibrium</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traffic_rate_status</span><span class="p">[</span><span class="s1">&#39;lbound&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">lbound_real_msgs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traffic_rate_status</span><span class="p">[</span><span class="s1">&#39;ubound&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">push_value</span><span class="p">(</span><span class="n">ubound_real_msgs</span><span class="p">)</span>
+                                                                        
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+        
+<div class="viewcode-block" id="NetworkStats.log_ocom_route"><a class="viewcode-back" href="../../measures.network_statistics.html#measures.network_statistics.NetworkStats.log_ocom_route">[docs]</a>    <span class="k">def</span> <span class="nf">log_ocom_route</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">ocomid</span><span class="p">,</span> <span class="n">end_sender</span><span class="p">,</span> <span class="n">helper</span><span class="p">,</span> <span class="n">end_rcvr</span><span class="p">,</span> <span class="n">first_hop_end_sender</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">first_hop_helper</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Function logging the oriented communication routes</span>
+<span class="sd">        </span>
+<span class="sd">        Function called by a node (:obj:`~apart.core.node.Node`). Modifies the</span>
+<span class="sd">        :attr:`.ocom_routes` attribute if it exists.</span>
+<span class="sd">           </span>
+<span class="sd">        Args:</span>
+<span class="sd">            node (:obj:`~apart.core.node.Node`): the node that is concerned by the oriented communication</span>
+<span class="sd">            end_sender (int): index of the end-sender of the oriented communication</span>
+<span class="sd">            helper (int): index of the indirection node/helper of the oriented communication</span>
+<span class="sd">            end_rcvr (int): index of the end-receiver of the oriented communication</span>
+<span class="sd">            first_hop_end_sender (int, optional): Index of the first hop node or the route chosen by the end-sender, along with the circuit identifier of the first hop. To be supplied when the  `node` calling the function is the end-sender. (Default: None).</span>
+<span class="sd">            first_hop_helper (int, optional): Index of the first hop node or the route chosen by the idirection node/helper, along with the circuit identifier of the first hop. To be supplied when the  `node` calling the function is the helper. (Default: None).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ocomid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ocom_routes</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ocom_routes</span><span class="p">[</span><span class="n">ocomid</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">first_hop_end_sender</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ocom_routes</span><span class="p">[</span><span class="n">ocomid</span><span class="p">][</span><span class="s1">&#39;end_sender&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_sender</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ocom_routes</span><span class="p">[</span><span class="n">ocomid</span><span class="p">][</span><span class="s1">&#39;helper&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">helper</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ocom_routes</span><span class="p">[</span><span class="n">ocomid</span><span class="p">][</span><span class="s1">&#39;end_rcvr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_rcvr</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ocom_routes</span><span class="p">[</span><span class="n">ocomid</span><span class="p">][</span><span class="s1">&#39;first_hop_end_sender&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">first_hop_end_sender</span>
+            <span class="k">elif</span> <span class="n">first_hop_helper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ocom_routes</span><span class="p">[</span><span class="n">ocomid</span><span class="p">][</span><span class="s1">&#39;end_sender&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">end_sender</span> <span class="ow">and</span> 
+                        <span class="bp">self</span><span class="o">.</span><span class="n">ocom_routes</span><span class="p">[</span><span class="n">ocomid</span><span class="p">][</span><span class="s1">&#39;helper&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">helper</span> <span class="ow">and</span> 
+                        <span class="bp">self</span><span class="o">.</span><span class="n">ocom_routes</span><span class="p">[</span><span class="n">ocomid</span><span class="p">][</span><span class="s1">&#39;end_rcvr&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">end_rcvr</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ocom_routes</span><span class="p">[</span><span class="n">ocomid</span><span class="p">][</span><span class="s1">&#39;first_hop_helper&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">first_hop_helper</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;ocom_routes&#39;&quot;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">e</span></div></div>
+
+
+<div class="viewcode-block" id="Stat"><a class="viewcode-back" href="../../measures.network_statistics.html#measures.network_statistics.Stat">[docs]</a><span class="k">class</span> <span class="nc">Stat</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for :class:`.RegularStat` and :class:`.RunningStat`.</span>
+<span class="sd">    </span>
+<span class="sd">    This class (or more exactly, its derivatives), are meant to provide</span>
+<span class="sd">    shortcuts to compute means, standard deviation, variances, minimum, and</span>
+<span class="sd">    maximum values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractproperty</span>
+    <span class="k">def</span> <span class="nf">nb_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: Total number of values provided to the class instance.&quot;&quot;&quot;</span> 
+        <span class="k">pass</span>
+    
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractproperty</span>
+    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;float: Mean of all values provided to the class instance&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+    
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractproperty</span>
+    <span class="k">def</span> <span class="nf">variance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;float: Variance of all values provided to the class instance&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+    
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractproperty</span>
+    <span class="k">def</span> <span class="nf">stdev</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;float: Standard deviation of all values provided to the class instance&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+        
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractproperty</span>
+    <span class="k">def</span> <span class="nf">min</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;float: Minimum of all values provided to the class instance&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+    
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractproperty</span>
+    <span class="k">def</span> <span class="nf">max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;float: Maximum of all values provided to the class instance&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+    
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractproperty</span>
+    <span class="k">def</span> <span class="nf">total</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;float: Total sum of all values provided to the class instance&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Total </span><span class="si">{}</span><span class="s2">, Mean </span><span class="si">{}</span><span class="s2">, Stdev </span><span class="si">{}</span><span class="s2">, Min </span><span class="si">{}</span><span class="s2">, Max </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stdev</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="RunningStat"><a class="viewcode-back" href="../../measures.network_statistics.html#measures.network_statistics.RunningStat">[docs]</a><span class="k">class</span> <span class="nc">RunningStat</span><span class="p">(</span><span class="n">Stat</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Comutes statistics on streaming data.</span>
+<span class="sd">        </span>
+<span class="sd">        Instead of computing directly the average etc. on a list of values, this</span>
+<span class="sd">        class allows to compute values arriving in stream. This saves a lot a of</span>
+<span class="sd">        memory when gathering statistics in the network with</span>
+<span class="sd">        :class:`.NetworkStats`. Values are given one by one to an instance of</span>
+<span class="sd">        this class by using the :meth:`.push_value` method. The attribtues</span>
+<span class="sd">        :attr:`.mean`, :attr:`.stdev` can be accessed at any time, even before</span>
+<span class="sd">        the stream of data is still ongoing. </span>
+<span class="sd">        </span>
+<span class="sd">        Note that, while the average, minimum, and maximum can be easily computed on</span>
+<span class="sd">        streaming data, the standard deviation and variance are more tricky. The</span>
+<span class="sd">        implementation of this class is inspired from</span>
+<span class="sd">        https://www.johndcook.com/blog/standard_deviation/</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__nb_values</span><span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__old_mean</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__new_mean</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__old_stdev</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__new_stdev</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__min</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__max</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        
+<div class="viewcode-block" id="RunningStat.push_value"><a class="viewcode-back" href="../../measures.network_statistics.html#measures.network_statistics.RunningStat.push_value">[docs]</a>    <span class="k">def</span> <span class="nf">push_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Updates all statistics (average, standard deviation) according to the specified value.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            v (float): the new value of the data stream</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__nb_values</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__nb_values</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__old_mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__new_mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__max</span> <span class="o">=</span> <span class="n">v</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">__new_mean</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__old_stdev</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__new_mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__old_mean</span> <span class="o">+</span> <span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__old_mean</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">__nb_values</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__new_stdev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__old_stdev</span> <span class="o">+</span> <span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__old_mean</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__new_mean</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__old_mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__old_stdev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__new_mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__new_stdev</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">__min</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__min</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__max</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span></div>
+            
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nb_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: Total number of values provided to the class instance.&quot;&quot;&quot;</span> 
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__nb_values</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;float: Mean of all values provided to the class instance&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__new_mean</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">variance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;float: Variance of all values provided to the class instance&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__new_stdev</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__nb_values</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stdev</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;float: Standard deviation of all values provided to the class instance&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variance</span><span class="p">)</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">min</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;float: Minimum of all values provided to the class instance&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__min</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;float: Maximum of all values provided to the class instance&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__max</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">total</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;float: Total sum of all values provided to the class instance&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_values</span></div>
+        
+<div class="viewcode-block" id="RegularStat"><a class="viewcode-back" href="../../measures.network_statistics.html#measures.network_statistics.RegularStat">[docs]</a><span class="k">class</span> <span class="nc">RegularStat</span><span class="p">(</span><span class="n">Stat</span><span class="p">):</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Computes statistics in a &quot;regular manner&quot; on a supplied list of values.</span>
+<span class="sd">    </span>
+<span class="sd">        Args:</span>
+<span class="sd">            values (list of numbers): the values on which the statistics must be computed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__min</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__mean</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__variance</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">variance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">xbar</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__mean</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">statistics</span><span class="o">.</span><span class="n">StatisticsError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__variance</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__min</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__max</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__total</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__mean</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__variance</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nb_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;int: Total number of values provided to the class instance.&quot;&quot;&quot;</span> 
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__nb_values</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;float: Mean of all values provided to the class instance&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mean</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">variance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;float: Variance of all values provided to the class instance&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__variance</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stdev</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;float: Standard deviation of all values provided to the class instance&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variance</span><span class="p">)</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">min</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;float: Minimum of all values provided to the class instance&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__min</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;float: Maximum of all values provided to the class instance&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__max</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">total</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;float: Total sum of all values provided to the class instance&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__total</span></div>
+        
+        
+        
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,480 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>apart.core.tables — Routing Tables &mdash; APART  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="APART  documentation" href="index.html"/>
+        <link rel="up" title="apart.core — Protocol’s Core Components" href="apart.core.html"/>
+        <link rel="next" title="apart.core.messages — Network Messages" href="apart.core.messages.html"/>
+        <link rel="prev" title="apart.core.node — Node Code" href="apart.core.node.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="contents.html" class="icon icon-home"> APART
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">APART</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="packages.html">Packages</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="apart.crypto.html"><code class="docutils literal"><span class="pre">apart.crypto</span></code> &#8212; Cryptography</a></li>
+<li class="toctree-l3"><a class="reference internal" href="apart.simulation.html"><code class="docutils literal"><span class="pre">apart.simulation</span></code> &#8212; Running simulations</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="apart.core.html"><code class="docutils literal"><span class="pre">apart.core</span></code> &#8212; Protocol&#8217;s Core Components</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="apart.core.network.html"><code class="docutils literal"><span class="pre">apart.core.network</span></code> &#8212; Network and Network Manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.node.html"><code class="docutils literal"><span class="pre">apart.core.node</span></code> &#8212; Node Code</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="docutils literal"><span class="pre">apart.core.tables</span></code> &#8212; Routing Tables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.messages.html"><code class="docutils literal"><span class="pre">apart.core.messages</span></code> &#8212; Network Messages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.pools.html"><code class="docutils literal"><span class="pre">apart.core.pools</span></code> &#8212; Message Pools and Batching</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.controlled_traffic_rates.html"><code class="docutils literal"><span class="pre">apart.core.controlled_traffic_rates</span></code> &#8212;- Controlled traffic rates mechanism</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apart.core.protocol_constants.html"><code class="docutils literal"><span class="pre">apart.core.protocol_constants</span></code> &#8212; Misc. Constants</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html"><code class="docutils literal"><span class="pre">common</span></code> &#8212; Helper Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="measures.html"><code class="docutils literal"><span class="pre">measures</span></code> &#8212; Benchmark &amp; Simulation Framework</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="contents.html">APART</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="contents.html">Docs</a> &raquo;</li>
+        
+          <li><a href="packages.html">Packages</a> &raquo;</li>
+        
+          <li><a href="apart.html"><code class="docutils literal"><span class="pre">apart</span></code> &#8211; Protocol Implementation</a> &raquo;</li>
+        
+          <li><a href="apart.core.html"><code class="docutils literal"><span class="pre">apart.core</span></code> &#8212; Protocol&#8217;s Core Components</a> &raquo;</li>
+        
+      <li><code class="docutils literal"><span class="pre">apart.core.tables</span></code> &#8212; Routing Tables</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/apart.core.tables.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-apart.core.tables">
+<span id="apart-core-tables-routing-tables"></span><h1><code class="docutils literal"><span class="pre">apart.core.tables</span></code> &#8212; Routing Tables<a class="headerlink" href="#module-apart.core.tables" title="Permalink to this headline">¶</a></h1>
+<p>This module models the routing tables used by nodes.</p>
+<p>It provides an abstract base class, <a class="reference internal" href="#apart.core.tables.SqliteRoutingTable" title="apart.core.tables.SqliteRoutingTable"><code class="xref py py-class docutils literal"><span class="pre">SqliteRoutingTable</span></code></a>, and two
+concrete classes: <a class="reference internal" href="#apart.core.tables.RoutingTable" title="apart.core.tables.RoutingTable"><code class="xref py py-class docutils literal"><span class="pre">RoutingTable</span></code></a> and <a class="reference internal" href="#apart.core.tables.PrevRoutingTable" title="apart.core.tables.PrevRoutingTable"><code class="xref py py-class docutils literal"><span class="pre">PrevRoutingTable</span></code></a>.
+These two table together form the routing table of the node.</p>
+<p>This module also defines the <a class="reference internal" href="#apart.core.tables.RoutingTableError" title="apart.core.tables.RoutingTableError"><code class="xref py py-exc docutils literal"><span class="pre">RoutingTableError</span></code></a> exception.</p>
+<dl class="exception">
+<dt id="apart.core.tables.RoutingTableError">
+<em class="property">exception </em><code class="descclassname">apart.core.tables.</code><code class="descname">RoutingTableError</code><a class="reference internal" href="_modules/apart/core/tables.html#RoutingTableError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.tables.RoutingTableError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
+<p>Raised when an invalid operation is performed on the routing tables</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="apart.core.tables.PrevRoutingTable">
+<em class="property">class </em><code class="descclassname">apart.core.tables.</code><code class="descname">PrevRoutingTable</code><span class="sig-paren">(</span><em>node</em>, <em>network_uid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/tables.html#PrevRoutingTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.tables.PrevRoutingTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#apart.core.tables.SqliteRoutingTable" title="apart.core.tables.SqliteRoutingTable"><code class="xref py py-class docutils literal"><span class="pre">apart.core.tables.SqliteRoutingTable</span></code></a></p>
+<p>The routing table of nodes that specifies the <em>previous hops</em> associated to each entry of their main routing table.</p>
+<p>Each node has a different instance of this class.</p>
+<p>This table features rows that describe (possibly multiple) previous hops
+associated to each route known by a given node. That is, each row in this
+table refers to a row in the main routing table <a class="reference internal" href="#apart.core.tables.RoutingTable" title="apart.core.tables.RoutingTable"><code class="xref py py-obj docutils literal"><span class="pre">RoutingTable</span></code></a> of the
+node.</p>
+<p>To illustrate the use of this table: when a node receives a message from a
+neighbor node Y and with circuit identifier cid, it makes a lookup in this
+table for (PREV_NODE = Y, PREV_CID = cid), which allows to retrieve the
+ROWID of the associated entry in the main routing table. Consequently, the
+node makes a lookup in the main routing table (and then possibly relays the
+message on the specified next hop).</p>
+<dl class="docutils">
+<dt>Each entry in the table exhibits the following fields:</dt>
+<dd><ul class="first simple">
+<li>ROWID (int): the (unique) identifier of the table entry</li>
+<li>NODE (int): used internally, to differentiate which SQL table entry belongs to which node</li>
+<li>PREV_NODE (int): the index of the previous node on the route  (can be considered as its IP address)</li>
+<li>PREV_CID (int): the circuit identifier of the previous hop</li>
+<li>RT_ROWID (int): the ROWID of the <a class="reference internal" href="#apart.core.tables.RoutingTable" title="apart.core.tables.RoutingTable"><code class="xref py py-obj docutils literal"><span class="pre">RoutingTable</span></code></a> entry that this previous hop relates to</li>
+</ul>
+<p class="last">Each of these fields can be accessed by <code class="xref py py-obj docutils literal"><span class="pre">PrevRoutingTable.FIELD</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="apart.core.tables.RoutingTable">
+<em class="property">class </em><code class="descclassname">apart.core.tables.</code><code class="descname">RoutingTable</code><span class="sig-paren">(</span><em>node</em>, <em>network_uid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/tables.html#RoutingTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.tables.RoutingTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#apart.core.tables.SqliteRoutingTable" title="apart.core.tables.SqliteRoutingTable"><code class="xref py py-class docutils literal"><span class="pre">apart.core.tables.SqliteRoutingTable</span></code></a></p>
+<p>The main routing table of nodes.</p>
+<p>Each node has a different instance of this class.</p>
+<p>This table features rows that describe routes that a given node knows. Each
+entry in the table exhibits the following fields:
+* ROWID (int): the (unique) identifier of the table entry
+* NODE (int): used internally, to differentiate which SQL table entry belongs to which node
+* PSEUDO (int): pseudonym of the end-receiver of the route
+* CONE (<a class="reference internal" href="apart.crypto.html#apart.crypto.Ctxt" title="apart.crypto.Ctxt"><code class="xref py py-obj docutils literal"><span class="pre">Ctxt</span></code></a>): encryption of one used to encrypt/re-encrypt messages on the route
+* NEXT_NODE (int): index of the next node on the route (can be considered as the next hop&#8217;s IP address)
+* NEXT_CID (int): circuit identifier of the next hop
+* REPROPOSED (bool): whether the node relayed this route to its neighbor. Used in the route proposal policy.
+* IN_USE (bool): True if the node uses this route as end-sender, False if it uses it only as relay.
+* TIMESTAMP (int): time at which the routing table entry was created
+* ACTUAL_RCVR (int): index of the end-receiver of the route. used only for debug and statistics purposes.
+* ACTUAL_LENGTH (int): number of hops between the node and the end-receiver of the route. Used only for debug and statistics purposes</p>
+<p>Each of these fields can be accessed by <code class="xref py py-obj docutils literal"><span class="pre">RoutingTable.FIELD</span></code>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="apart.core.tables.SqliteRoutingTable">
+<em class="property">class </em><code class="descclassname">apart.core.tables.</code><code class="descname">SqliteRoutingTable</code><span class="sig-paren">(</span><em>node</em>, <em>network_uid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/tables.html#SqliteRoutingTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.tables.SqliteRoutingTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Abstract base class for routing tables.</p>
+<p>Manages the tables in an in-memory sqlite3 database. Creates one table
+per type of routing table, but all nodes use the same sql database and
+tables.</p>
+<dl class="method">
+<dt id="apart.core.tables.SqliteRoutingTable.insert_entries">
+<code class="descname">insert_entries</code><span class="sig-paren">(</span><em>entries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/tables.html#SqliteRoutingTable.insert_entries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.tables.SqliteRoutingTable.insert_entries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert several routing table entries.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>entries</strong> (<em>list of dict str-&gt;any</em>) &#8211; a list of dict adequate for input to <a class="reference internal" href="#apart.core.tables.SqliteRoutingTable.insert_entry" title="apart.core.tables.SqliteRoutingTable.insert_entry"><code class="xref py py-meth docutils literal"><span class="pre">insert_entry()</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="#apart.core.tables.RoutingTableError" title="apart.core.tables.RoutingTableError"><code class="xref py py-exc docutils literal"><span class="pre">RoutingTableError</span></code></a> &#8211; if at least one of the entries specified in argument does not
+match the fields of the considered table</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.tables.SqliteRoutingTable.insert_entry">
+<code class="descname">insert_entry</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/tables.html#SqliteRoutingTable.insert_entry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.tables.SqliteRoutingTable.insert_entry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert a routing table entry</p>
+<p>The arguments of this function depend on the concrete routing table that
+on which this function is called. This function checks that the
+<code class="docutils literal"><span class="pre">**kwargs</span></code> in argument specifies all the fields of the said routing
+table (in accordance with the static <code class="xref py py-attr docutils literal"><span class="pre">_fields</span></code> member of the class
+that defines the routing table, see <a class="reference internal" href="#apart.core.tables.RoutingTable" title="apart.core.tables.RoutingTable"><code class="xref py py-class docutils literal"><span class="pre">RoutingTable</span></code></a> and
+<a class="reference internal" href="#apart.core.tables.PrevRoutingTable" title="apart.core.tables.PrevRoutingTable"><code class="xref py py-class docutils literal"><span class="pre">PrevRoutingTable</span></code></a> for a description of those fields)).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>**kwargs</strong> (<em>dict str-&gt;any</em>) &#8211; the dict specifying the entry to insert.
+This dict is indexed by the fields of the routing table, and
+<strong>must</strong> specify a value for all of them.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the (unique) id of the new entry</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="#apart.core.tables.RoutingTableError" title="apart.core.tables.RoutingTableError"><code class="xref py py-exc docutils literal"><span class="pre">RoutingTableError</span></code></a> &#8211; if the entry specified in input does not
+match the fields of the considered table</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.tables.SqliteRoutingTable.joint_lookup">
+<code class="descname">joint_lookup</code><span class="sig-paren">(</span><em>other_table</em>, <em>fields=None</em>, <em>join_on=None</em>, <em>constraints=None</em>, <em>constraints_bindings=None</em>, <em>order_by=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/tables.html#SqliteRoutingTable.joint_lookup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.tables.SqliteRoutingTable.joint_lookup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform mode advanced lookups, involving a SQL JOIN</p>
+<p>This function is often used by nodes to perform a lookup on a previous
+hop (in table <a class="reference internal" href="#apart.core.tables.PrevRoutingTable" title="apart.core.tables.PrevRoutingTable"><code class="xref py py-class docutils literal"><span class="pre">PrevRoutingTable</span></code></a>), joined on the corresponding
+entry of the table <a class="reference internal" href="#apart.core.tables.RoutingTable" title="apart.core.tables.RoutingTable"><code class="xref py py-class docutils literal"><span class="pre">RoutingTable</span></code></a>. This avoids doing two SQL
+queries. See <a class="reference internal" href="#apart.core.tables.PrevRoutingTable" title="apart.core.tables.PrevRoutingTable"><code class="xref py py-class docutils literal"><span class="pre">PrevRoutingTable</span></code></a> for more details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>other_table</strong> (<a class="reference internal" href="#apart.core.tables.RoutingTable" title="apart.core.tables.RoutingTable"><code class="xref py py-obj docutils literal"><span class="pre">RoutingTable</span></code></a> or <a class="reference internal" href="#apart.core.tables.PrevRoutingTable" title="apart.core.tables.PrevRoutingTable"><code class="xref py py-obj docutils literal"><span class="pre">PrevRoutingTable</span></code></a>) &#8211; the
+table to join on the first (the first being the one on which
+this function is called)</li>
+<li><strong>fields</strong> (<em>list of string</em><em>, </em><em>optional</em>) &#8211; see <a class="reference internal" href="#apart.core.tables.SqliteRoutingTable.lookup" title="apart.core.tables.SqliteRoutingTable.lookup"><code class="xref py py-meth docutils literal"><span class="pre">lookup()</span></code></a> (Default: None)</li>
+<li><strong>join_on</strong> (<em>2-tuple of str</em><em>, </em><em>optional</em>) &#8211; the field of each of the rwo routing tables on which to perform the join (Default: None)</li>
+<li><strong>constraints</strong> (<em>string</em><em> or </em><em>dict of str-&gt;any</em><em>, </em><em>optional</em>) &#8211; see <a class="reference internal" href="#apart.core.tables.SqliteRoutingTable.lookup" title="apart.core.tables.SqliteRoutingTable.lookup"><code class="xref py py-meth docutils literal"><span class="pre">lookup()</span></code></a> (Default: None)</li>
+<li><strong>constraints_bindings</strong> (<em>list of any</em>) &#8211; see <a class="reference internal" href="#apart.core.tables.SqliteRoutingTable.lookup" title="apart.core.tables.SqliteRoutingTable.lookup"><code class="xref py py-meth docutils literal"><span class="pre">lookup()</span></code></a> (Default: None)</li>
+<li><strong>order_by</strong> (<em>list of str</em>) &#8211; see <a class="reference internal" href="#apart.core.tables.SqliteRoutingTable.lookup" title="apart.core.tables.SqliteRoutingTable.lookup"><code class="xref py py-meth docutils literal"><span class="pre">lookup()</span></code></a> (Default: None)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the list of routing table entries
+returned according to the constraints of the lookup</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(list of <code class="xref py py-obj docutils literal"><span class="pre">sqlite3.Row</span></code>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.tables.SqliteRoutingTable.lookup">
+<code class="descname">lookup</code><span class="sig-paren">(</span><em>fields=None</em>, <em>constraints=None</em>, <em>constraints_bindings=None</em>, <em>order_by=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/tables.html#SqliteRoutingTable.lookup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.tables.SqliteRoutingTable.lookup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup one or several routing table entries</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fields</strong> (<em>list of string</em><em>, </em><em>optional</em>) &#8211; the table fields that must
+be returned by the lookup (Default: None)</li>
+<li><strong>constraints</strong> (<em>string</em><em> or </em><em>dict</em><em>, </em><em>optional</em>) &#8211; the constraints of the lookup. Can
+either be a string containing text suitable for a WHERE SQL
+clause, with &#8216;?&#8217; in place of values; either a dict that maps a
+field to a value. In the latter case, the WHERE clause is
+constructed as a conjunction of the constrain on each field in
+the dict. (Default: None)</li>
+<li><strong>consraints_bindings</strong> (<em>list of any</em>) &#8211; if <code class="docutils literal"><span class="pre">constraints</span></code> is provided as
+a string (a SQL-like WHERE clause), then the values in this
+argument are used as bindings for the &#8216;?&#8217; place holders in <code class="docutils literal"><span class="pre">constraints</span></code></li>
+<li><strong>order_by</strong> (<em>list of str</em>) &#8211; list of fields, specifying the order in</li>
+<li><strong>results should be provided</strong> (<em>which</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the list of routing table entries
+returned according to the constraints of the lookup</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(list of <code class="xref py py-obj docutils literal"><span class="pre">sqlite3.Row</span></code>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.tables.SqliteRoutingTable.remove_entries">
+<code class="descname">remove_entries</code><span class="sig-paren">(</span><em>constraints=None</em>, <em>constraints_bindings=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/tables.html#SqliteRoutingTable.remove_entries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.tables.SqliteRoutingTable.remove_entries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove entries from a routing table that fit into the specified constraints.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>constraints</strong> (<em>string</em><em> or </em><em>dict of str-&gt;any</em><em>, </em><em>optional</em>) &#8211; see <a class="reference internal" href="#apart.core.tables.SqliteRoutingTable.lookup" title="apart.core.tables.SqliteRoutingTable.lookup"><code class="xref py py-meth docutils literal"><span class="pre">lookup()</span></code></a> (Default: None)</li>
+<li><strong>constraints_bindings</strong> (<em>list of any</em>) &#8211; see <a class="reference internal" href="#apart.core.tables.SqliteRoutingTable.lookup" title="apart.core.tables.SqliteRoutingTable.lookup"><code class="xref py py-meth docutils literal"><span class="pre">lookup()</span></code></a> (Default: None)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="apart.core.tables.SqliteRoutingTable.sqlite_db_cursor">
+<em class="property">classmethod </em><code class="descname">sqlite_db_cursor</code><span class="sig-paren">(</span><em>network_uid=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/tables.html#SqliteRoutingTable.sqlite_db_cursor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.tables.SqliteRoutingTable.sqlite_db_cursor" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">sqlite3.Cursor</span></code>: the sqlite3 cursor for the database.</p>
+<p>Used for measure and debug purposes to access the routing tables
+directly, and make more efficient sql queries</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="apart.core.tables.SqliteRoutingTable.update_entries">
+<code class="descname">update_entries</code><span class="sig-paren">(</span><em>update=None</em>, <em>constraints=None</em>, <em>constraints_bindings=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apart/core/tables.html#SqliteRoutingTable.update_entries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apart.core.tables.SqliteRoutingTable.update_entries" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="apart.core.messages.html" class="btn btn-neutral float-right" title="apart.core.messages — Network Messages" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="apart.core.node.html" class="btn btn-neutral" title="apart.core.node — Node Code" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, University of Rennes 1 (author: Antoine Guellier).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
